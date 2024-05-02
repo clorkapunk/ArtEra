@@ -7,7 +7,6 @@ import {Button} from "@rneui/themed";
 
 const PostCreate = ({route}) => {
     const navigation = useNavigation();
-
     const {item} = route.params
 
     return (

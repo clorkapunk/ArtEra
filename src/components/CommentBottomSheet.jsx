@@ -228,7 +228,6 @@ const CommentBottomSheet = forwardRef(({onClose}, ref) => {
     }
     else if (sheetIndex === -1) {
       onClose()
-      onClose()
       setCommentSheetData({
         id: null,
         comments: [],

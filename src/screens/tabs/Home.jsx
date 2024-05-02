@@ -28,7 +28,10 @@ const Home = () => {
     const [isNetworkError, setIsNetworkError] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
     const [endReachedLoading, setEndReachedLoading] = useState(false);
-    const [commentSheetState, setCommentSheetState] = useState(false)
+    const [commentSheetState, setCommentSheetState] = useState({
+        id: null,
+        status: false
+    })
     const commentSheetRef = useRef()
 
 
@@ -114,10 +117,13 @@ const Home = () => {
 
     const _renderitem = ({item}) =>
         <ListItem
-            commentSheetState={commentSheetState}
+            commentSheetState={item.id === commentSheetState.id ? commentSheetState.status : false}
             openCommentSheet={(id) => {
                 commentSheetRef.current?.open(id)
-                setCommentSheetState(true)
+                setCommentSheetState({
+                    id: id,
+                    status: true
+                })
             }}
             item={item}
         />;
@@ -155,9 +161,6 @@ const Home = () => {
                         :
                         <>
                             <View style={{flex: 1, justifyContent: "flex-end"}}>
-                                <Button title={"aaa"} onPress={() => {
-
-                                }}/>
                                 <FlatList
                                     disableVirtualization={true}
                                     initialNumToRender={5}

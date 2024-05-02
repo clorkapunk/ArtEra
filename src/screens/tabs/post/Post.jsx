@@ -81,19 +81,6 @@ const Post = () => {
     }, []);
 
     const [selected, setSelected] = useState(null);
-
-    const photos = [
-        {timestamp: '1711625183732'},
-        {timestamp: '1711625183732'},
-        {timestamp: '1711625183732'},
-        {timestamp: '1711625183732'},
-        {timestamp: '1714625183731'},
-        {timestamp: '1714621183733'},
-        {timestamp: '1714615183735'},
-        {timestamp: '1714125183738'},
-        {timestamp: '1711625183736'},
-    ]
-
     const [groupedPhotos, setGroupedPhotos] = useState([]);
     const [sortType, setSortType] = useState('day')
     const [refreshing, setRefreshing] = useState(false);

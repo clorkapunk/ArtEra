@@ -1,12 +1,10 @@
 import React, {forwardRef, memo, useEffect, useImperativeHandle, useState} from "react";
-import {ActivityIndicator, View, Text, Image, TouchableOpacity, TextInput} from "react-native";
+import {ActivityIndicator, View, Text, Image, TouchableOpacity, TextInput, TouchableNativeFeedback} from "react-native";
 import {FontAwesomeIcon} from "@fortawesome/react-native-fontawesome";
 import {faComment, faHeart, faPaperPlane} from "@fortawesome/free-solid-svg-icons";
 import {
-    getCommentsByPost,
-    getLikesByPost,
-    getPostCommentsAmount,
-    getPostLikesAmount, getReactionsByPost, sendCommentToPost,
+    getReactionsByPost,
+    sendCommentToPost,
     sendLikeToPost,
 } from "../api/ContentAPI";
 import {COLORS} from "../consts/colors";
@@ -54,6 +52,7 @@ const ListItem = ({item, openCommentSheet, commentSheetState}) => {
     }
 
     useEffect(() => {
+        console.log('called', commentSheetState, item.id)
         updateReactionsAmount()
     }, [commentSheetState])
 
@@ -66,22 +65,27 @@ const ListItem = ({item, openCommentSheet, commentSheetState}) => {
                 style={{width: '100%', flex: 1, aspectRatio: 1}}
                 PlaceholderContent={<ActivityIndicator/>}
             />
-            <View className={'flex-row mx-4 my-3'}>
-                <View className='flex-row items-end mr-6'>
-                    <TouchableOpacity onPress={() => setLike()}>
+            <View className={'flex-row my-1'}>
+                <TouchableNativeFeedback
+                    onPress={() => setLike()}
+                >
+                    <View className='px-4 py-2 flex-row items-center justify-end'>
                         <FontAwesomeIcon size={20} icon={faHeart}/>
-                    </TouchableOpacity>
+                        <Text className='text-sm ml-2 text-gray-400'>{reactions.likes}</Text>
+                    </View>
+                </TouchableNativeFeedback>
 
-                    <Text className='text-sm ml-1 text-gray-400'>{reactions.likes}</Text>
-                </View>
-                <View className='flex-row items-end justify-end'>
-                    <TouchableOpacity onPress={() => {
-                        openCommentSheet(item.id)
-                    }}>
-                        <FontAwesomeIcon size={20} icon={faComment}/>
-                    </TouchableOpacity>
-                    <Text className='text-sm ml-1 text-gray-400'>{reactions.comments}</Text>
-                </View>
+
+                <TouchableNativeFeedback onPress={() => {
+                    openCommentSheet(item.id)
+                }}
+                >
+                    <View className='px-4 flex-row items-center justify-end'>
+                        <FontAwesomeIcon style={{marginBottom: 2}} size={20} icon={faComment}/>
+                        <Text className='text-sm ml-2 text-gray-400'>{reactions.comments}</Text>
+                    </View>
+                </TouchableNativeFeedback>
+
             </View>
 
             <Input
@@ -89,15 +93,21 @@ const ListItem = ({item, openCommentSheet, commentSheetState}) => {
                 value={input}
                 placeholder={"Write your comment"}
                 rightIcon={(
-                    <TouchableOpacity onPress={() => {
+                    <TouchableNativeFeedback onPress={() => {
                         sendComment(item.id, input);
                     }}>
-                        <FontAwesomeIcon size={20} icon={faPaperPlane} color={COLORS.primary}/>
-                    </TouchableOpacity>
+                        <View className='p-2'>
+                            <FontAwesomeIcon
+                                size={20}
+                                icon={faPaperPlane}
+                                color={COLORS.primary}/>
+                        </View>
+                    </TouchableNativeFeedback>
                 )}
                 containerStyle={{paddingHorizontal: 0}}
                 inputContainerStyle={{
-                    paddingHorizontal: 20, borderRadius: 8,
+                    paddingLeft: 20, borderRadius: 8,
+                    paddingRight: 10,
                     backgroundColor: "white",
                     borderWidth: 1, borderColor: 'black'
                 }}
@@ -107,7 +117,8 @@ const ListItem = ({item, openCommentSheet, commentSheetState}) => {
                 errorStyle={{margin: 0, height: 0}}
             />
         </View>
-    );
+    )
+        ;
 }
 
 export default memo(ListItem);
