@@ -24,3 +24,8 @@ export const login = async (email, password) => {
   })
   return data.user
 };
+
+export const getUserData = async (userId) => {
+  const { data } = await $host.get("api/users/" + userId)
+  return data
+}

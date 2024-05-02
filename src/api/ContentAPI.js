@@ -3,14 +3,9 @@ import { jwtDecode } from "jwt-decode";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
-export const getPosts = async () => {
-  const { data } = await $host.get("api/posts/");
+export const getPosts = async (page_number) => {
+  const { data } = await $host.get("api/posts/?page=" + page_number);
   return data;
-};
-
-export const getPostCommentsAmount = async (postId) => {
-  const { data } = await $host.get("api/commnets/");
-  return data.length;
 };
 
 export const getCommentsByPost = async (postId) => {
@@ -27,11 +22,6 @@ export const sendCommentToPost = async (postId, text) => {
   return response.status
 };
 
-export const getPostLikesAmount = async (postId) => {
-  const { data } = await $host.get("api/likes/");
-  return data.length
-}
-
 export const sendLikeToPost = async (postId) => {
   let { token } = JSON.parse(await AsyncStorage.getItem("user"))
   const id = jwtDecode(token.substring(2, token.length - 1)).id
@@ -39,4 +29,9 @@ export const sendLikeToPost = async (postId) => {
     owner_id: id, post_id: postId
   });
   return response.status
+}
+
+export const getReactionsByPost = async (postId) => {
+  const response = await $host.get("api/reactions/count/" + postId);
+  return response.data
 }
