@@ -1,4 +1,4 @@
-import React from "react";
+import React, {memo} from "react";
 import { ActivityIndicator, View, Image} from "react-native";
 
 const GridItem = ({item}) => {
@@ -13,4 +13,4 @@ const GridItem = ({item}) => {
   );
 };
 
-export default GridItem;
+export default memo(GridItem);

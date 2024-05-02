@@ -8,14 +8,14 @@ import BottomSheet, {
 import { COLORS } from "../consts/colors";
 import { ActivityIndicator, Image, Text, TouchableNativeFeedback, TouchableOpacity, View } from "react-native";
 import { Portal } from "@gorhom/portal";
-import { useAnimatedReaction, useSharedValue } from "react-native-reanimated";
 import { Input } from "@rneui/themed";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import { getCommentsByPost, sendCommentToPost, sendLikeToPost } from "../api/ContentAPI";
+import {getUserData} from "../api/userAPI";
 
 
-const CommentSheetBackdrop = ({ animatedIndex, animatedPosition, style }) => {
+const CommentSheetBackdrop = memo(({ animatedIndex, animatedPosition, style }) => {
 
 
   // const adjustedAnimatedIndex = useSharedValue(0);
@@ -52,9 +52,9 @@ const CommentSheetBackdrop = ({ animatedIndex, animatedPosition, style }) => {
     </BottomSheetBackdrop>
 
   );
-};
+})
 
-const CommentSheetFooter = ({ animatedFooterPosition, bottomSheetRef, postId, updateComments }) => {
+const CommentSheetFooter = memo(({ animatedFooterPosition, bottomSheetRef, postId, updateComments }) => {
   const [input, setInput] = useState("");
 
 
@@ -101,18 +101,26 @@ const CommentSheetFooter = ({ animatedFooterPosition, bottomSheetRef, postId, up
       />
     </BottomSheetFooter>
   );
-};
+});
 
-const CommentSheetHeader = () => {
+const CommentSheetHeader = memo(() => {
   return (
     <View className="bg-darkgray rounded-t-lg">
       <Text className="text-2xl text-white opacity-80 m-3">Comments</Text>
       <View className="w-fit bg-white h-[0.5px] opacity-80 mx-2" />
     </View>
   );
-};
+})
 
-const Comment = ({ item }) => {
+const Comment = memo(({ item }) => {
+
+  const [user, setUser] = useState({
+    id: null,
+    email: null,
+    username: '',
+    avatar: 'https://m.media-amazon.com/images/S/pv-target-images/16627900db04b76fae3b64266ca161511422059cd24062fb5d900971003a0b70.jpg',
+    user_background: ''
+  })
 
   function parseDate(dateStr) {
     const date = new Date(dateStr);
@@ -142,6 +150,13 @@ const Comment = ({ item }) => {
     }
   }
 
+  useEffect(() => {
+      getUserData(item.owner_id)
+          .then(data => {
+            setUser(data)
+          })
+  }, [])
+
   return (
     <TouchableNativeFeedback
       background={TouchableNativeFeedback.Ripple("white", false)}
@@ -149,20 +164,20 @@ const Comment = ({ item }) => {
       <View className="flex-row px-3 pt-4 pb-1" style={{ flex: 1 }}>
         <View style={{ flex: 1 }} className="mr-3 mt-1">
           <Image
-            className="rounded-full"
+            className="rounded-full "
             style={{ aspectRatio: 1 }}
-            source={{ uri: avatars[0] }}
+            source={{ uri: user.avatar }}
           />
         </View>
         <View style={{ flex: 7 }}>
-          <Text className="text-white opacity-80 text-base">{item.owner_id}</Text>
+          <Text className="text-white opacity-80 text-base">{user.username}</Text>
           <Text className="text-white text-base my-0.5">{item.text}</Text>
           <Text className="text-white text-sm opacity-50">{parseDate(item.published_at)}</Text>
         </View>
       </View>
     </TouchableNativeFeedback>
   );
-};
+})
 
 
 const avatars = [
@@ -174,7 +189,7 @@ const avatars = [
 ];
 
 
-const CommentBottomSheet = forwardRef((params, ref) => {
+const CommentBottomSheet = forwardRef(({onClose}, ref) => {
   const bottomSheetRef = useRef(null);
   const [commentSheetData, setCommentSheetData] = useState({
     id: null,
@@ -210,7 +225,10 @@ const CommentBottomSheet = forwardRef((params, ref) => {
   useEffect(() => {
     if (sheetIndex === 0) {
       updateComments()
-    } else if (sheetIndex === -1) {
+    }
+    else if (sheetIndex === -1) {
+      onClose()
+      onClose()
       setCommentSheetData({
         id: null,
         comments: [],
@@ -264,7 +282,9 @@ const CommentBottomSheet = forwardRef((params, ref) => {
                   style={{ marginBottom: 50 }}
                   data={commentSheetData.comments}
                   keyExtractor={(item, index) => item.id}
-                  renderItem={({ item }) => <Comment item={item} key={item.id} />}
+                  renderItem={({ item }) => <Comment
+                      item={item}
+                  />}
                 />
             }
 

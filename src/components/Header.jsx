@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, {memo, useEffect} from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 import { Button } from "@rneui/themed";
 import { useIsFocused, useNavigation, useRoute } from "@react-navigation/native";
@@ -96,4 +96,4 @@ const Header = ({ title, route }) => {
   );
 };
 
-export default Header;
+export default memo(Header);
