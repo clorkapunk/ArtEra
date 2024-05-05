@@ -9,7 +9,7 @@ export const getPosts = async (page_number) => {
 };
 
 export const getCommentsByPost = async (postId) => {
-  const { data } = await $host.get("api/commnets/");
+  const { data } = await $host.get(`api/commnets/?search=${postId}`);
   return data;
 };
 
@@ -34,4 +34,24 @@ export const sendLikeToPost = async (postId) => {
 export const getReactionsByPost = async (postId) => {
   const response = await $host.get("api/reactions/count/" + postId);
   return response.data
+}
+
+
+export const sendPost = async (formData) => {
+  // let { token } = JSON.parse(await AsyncStorage.getItem("user"))
+  // const id = jwtDecode(token.substring(2, token.length - 1)).id
+  // console.log("form here", formData)
+  const response = await $host.post("api/posts/", formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+      .catch(e => console.log(e.response.data));
+  console.log('data', response.data)
+  return response.status
+}
+
+export const getPostsBySearch = async (searchString, userId, page) => {
+  const {data} = await $host.get(`api/posts/?search=${searchString}&page=${page}&owner=${userId} `)
+  return data
 }
