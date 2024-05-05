@@ -13,6 +13,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import {getPostsBySearch} from "../../api/ContentAPI";
 import MasonryList from "@react-native-seoul/masonry-list";
 import {getUserData} from "../../api/userAPI";
+import SplashScreen from "react-native-splash-screen";
 
 const Profile = () => {
   const [isLoading, setIsLoading] = useState(true);

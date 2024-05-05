@@ -12,6 +12,7 @@ import SignIn from "./src/screens/auth/SignIn";
 import AuthLayout from "./src/screens/auth/AuthLayout";
 import {GestureHandlerRootView} from "react-native-gesture-handler";
 import {PermissionsAndroid, Platform} from "react-native";
+import {SafeAreaProvider, SafeAreaView} from "react-native-safe-area-context";
 
 
 const Stack = createNativeStackNavigator();
@@ -60,7 +61,7 @@ function App(): React.JSX.Element {
     }, [])
 
     return (
-        <>
+        <SafeAreaProvider>
             <GestureHandlerRootView>
                 <NavigationContainer>
                     <Stack.Navigator
@@ -74,7 +75,7 @@ function App(): React.JSX.Element {
                     </Stack.Navigator>
                 </NavigationContainer>
             </GestureHandlerRootView>
-        </>
+        </SafeAreaProvider>
     );
 }
 

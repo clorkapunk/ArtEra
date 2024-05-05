@@ -13,6 +13,7 @@ import {createNativeStackNavigator} from "@react-navigation/native-stack";
 import {PortalProvider} from "@gorhom/portal";
 import PostLayout from "./post/PostLayout";
 import PostScreen from "./PostScreen";
+import {SafeAreaView} from "react-native-safe-area-context";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -65,123 +66,124 @@ const TabsLayout = () => {
     return (
         <>
 
-            <PortalProvider>
-                <Tab.Navigator
-                    screenOptions={{
-                        tabBarShowLabel: false,
-                        tabBarActiveTintColor: "#5BC0BE",
-                        tabBarInactiveTintColor: "#3A506B",
-                        tabBarStyle: {
-                            backgroundColor: "#0B132B",
-                            height: 55,
-                            borderTopWidth: 2,
-                            borderTopColor: "#5BC0BE",
-                        },
-                        freezeOnBlur: true,
-                    }}
-                    initialRouteName="home"
-                >
-                    <Tab.Screen
-                        name="home"
-                        options={{
-                            tabBarIcon: ({color, focused}) => (
-                                <TabIcon
-                                    icon={faHome}
-                                    color={color}
-                                    name="Home"
-                                    focused={focused}
-                                />
-                            ),
-                            header: () => <Header title={"Home"}/>,
+                <PortalProvider>
+                    <Tab.Navigator
+                        screenOptions={{
+                            tabBarShowLabel: false,
+                            tabBarActiveTintColor: "#5BC0BE",
+                            tabBarInactiveTintColor: "#3A506B",
+                            tabBarStyle: {
+                                backgroundColor: "#0B132B",
+                                height: 55,
+                                borderTopWidth: 2,
+                                borderTopColor: "#5BC0BE",
+                            },
+                            freezeOnBlur: true,
                         }}
+                        initialRouteName="home"
                     >
-                        {() => <Home/>}
-                    </Tab.Screen>
+                        <Tab.Screen
+                            name="home"
+                            options={{
+                                tabBarIcon: ({color, focused}) => (
+                                    <TabIcon
+                                        icon={faHome}
+                                        color={color}
+                                        name="Home"
+                                        focused={focused}
+                                    />
+                                ),
+                                header: () => <Header title={"Home"}/>,
+                            }}
+                        >
+                            {() => <Home/>}
+                        </Tab.Screen>
 
-                    <Tab.Screen
-                        name="search"
-                        options={{
-                            tabBarHideOnKeyboard: true,
-                            tabBarIcon: ({color, focused}) => (
-                                <TabIcon
-                                    icon={faSearch}
-                                    color={color}
-                                    name="Search"
-                                    focused={focused}
-                                />
-                            ),
-                            header: () => <Header title={"Search"}/>,
-                        }}
-                    >
-                        {() => <Search/>}
-                    </Tab.Screen>
-
-
-                    <Tab.Screen
-                        name="post-layout"
-                        options={{
-                            headerShown: false,
-                            tabBarHideOnKeyboard: true,
-                            tabBarIcon: ({color, focused}) => (
-                                <TabIcon
-                                    icon={faSquarePlus}
-                                    color={color}
-                                    name="Post"
-                                    focused={focused}
-                                />
-                            ),
-                            header: () => <Header title={"Post"}/>,
-                        }}
-                    >
-                        {() => <PostLayout/>}
-                    </Tab.Screen>
+                        <Tab.Screen
+                            name="search"
+                            options={{
+                                tabBarHideOnKeyboard: true,
+                                tabBarIcon: ({color, focused}) => (
+                                    <TabIcon
+                                        icon={faSearch}
+                                        color={color}
+                                        name="Search"
+                                        focused={focused}
+                                    />
+                                ),
+                                header: () => <Header title={"Search"}/>,
+                            }}
+                        >
+                            {() => <Search/>}
+                        </Tab.Screen>
 
 
-                    <Tab.Screen
-                        name="chat"
-                        options={{
-                            tabBarIcon: ({color, focused}) => (
-                                <TabIcon
-                                    icon={faMessage}
-                                    color={color}
-                                    name="Chat"
-                                    focused={focused}
-                                />
-                            ),
-                            header: () => <Header title={"Chat"}/>,
-                        }}
-                    >
-                        {() => <Chat/>}
-                    </Tab.Screen>
+                        <Tab.Screen
+                            name="post-layout"
+                            options={{
+                                headerShown: false,
+                                tabBarHideOnKeyboard: true,
+                                tabBarIcon: ({color, focused}) => (
+                                    <TabIcon
+                                        icon={faSquarePlus}
+                                        color={color}
+                                        name="Post"
+                                        focused={focused}
+                                    />
+                                ),
+                                header: () => <Header title={"Post"}/>,
+                            }}
+                        >
+                            {() => <PostLayout/>}
+                        </Tab.Screen>
 
-                    <Tab.Screen
-                        name="profile"
-                        options={{
-                            tabBarIcon: ({color, focused}) => (
-                                <TabIcon
-                                    icon={faUser}
-                                    color={color}
-                                    name="Profile"
-                                    focused={focused}
-                                />
-                            ),
-                            header: () => <Header title={"Profile"}/>,
-                        }}
-                    >
-                        {() => <Profile/>}
-                    </Tab.Screen>
-                    <Stack.Screen
-                        name='post-screen'
-                        component={PostScreen}
-                        options={{
-                            headerShown: false,
-                            tabBarItemStyle:{
-                                display: "none"
-                            }
-                        }}
-                    />
-                </Tab.Navigator>
-            </PortalProvider>
+
+                        <Tab.Screen
+                            name="chat"
+                            options={{
+                                tabBarIcon: ({color, focused}) => (
+                                    <TabIcon
+                                        icon={faMessage}
+                                        color={color}
+                                        name="Chat"
+                                        focused={focused}
+                                    />
+                                ),
+                                header: () => <Header title={"Chat"}/>,
+                            }}
+                        >
+                            {() => <Chat/>}
+                        </Tab.Screen>
+
+                        <Tab.Screen
+                            name="profile"
+                            options={{
+                                tabBarIcon: ({color, focused}) => (
+                                    <TabIcon
+                                        icon={faUser}
+                                        color={color}
+                                        name="Profile"
+                                        focused={focused}
+                                    />
+                                ),
+                                header: () => <Header title={"Profile"}/>,
+                            }}
+                        >
+                            {() => <Profile/>}
+                        </Tab.Screen>
+                        <Stack.Screen
+                            name='post-screen'
+                            component={PostScreen}
+                            options={{
+                                headerShown: false,
+                                tabBarItemStyle: {
+                                    display: "none"
+                                }
+                            }}
+                        />
+                    </Tab.Navigator>
+                </PortalProvider>
+
 
         </>
     );

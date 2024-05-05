@@ -15,6 +15,7 @@ import {faEnvelope, faGlobe, faPaperPlane} from "@fortawesome/free-solid-svg-ico
 import ListItem from "../../components/ListItem";
 import CommentBottomSheet from "../../components/CommentBottomSheet";
 import {Button} from "@rneui/themed";
+import SplashScreen from "react-native-splash-screen";
 
 
 const Home = () => {
@@ -36,6 +37,11 @@ const Home = () => {
 
 
     useEffect(() => {
+        InteractionManager.runAfterInteractions(() => {
+            setIsLoading(false);
+            SplashScreen.hide()
+        });
+
         getPosts(1)
             .then(response => {
                 setData(response);
@@ -44,9 +50,7 @@ const Home = () => {
                 setIsNetworkError(false);
             });
 
-        InteractionManager.runAfterInteractions(() => {
-            setIsLoading(false);
-        });
+
     }, []);
 
     const onRefresh = React.useCallback(() => {
