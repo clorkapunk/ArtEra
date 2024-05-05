@@ -1,16 +1,30 @@
-import React, {memo} from "react";
-import { ActivityIndicator, View, Image} from "react-native";
+import React, {memo, useState} from "react";
+import {ActivityIndicator, View, Image, TouchableOpacity} from "react-native";
+import {useNavigation} from "@react-navigation/native";
 
 const GridItem = ({item}) => {
-  return (
-    <View key={item.id} className='flex-col my-3 mx-3' style={{flex: 1, flexGrow: 1}}>
-      <Image
-        source={{ uri: item.img }}
-        style={{width: '100%', flex: 1, aspectRatio: 1}}
-        PlaceholderContent={<ActivityIndicator />}
-      />
-    </View>
-  );
+    const navigation = useNavigation()
+    const [aspectRatio, setAspectRatio] = useState(1)
+
+    Image.getSize(item.picture, (width, height) => {
+        setAspectRatio(width / height)
+    })
+
+    function openPostScreen(){
+        navigation.navigate('post-screen', {item: item})
+    }
+
+    return (
+        <TouchableOpacity onPress={() => openPostScreen()}>
+            <View key={item.id} className='flex-col my-0.5 mx-0.5' style={{flex: 1, flexGrow: 1}}>
+                <Image
+                    source={{uri: item.picture}}
+                    style={{width: '100%', flex: 1, aspectRatio: aspectRatio}}
+                    PlaceholderContent={<ActivityIndicator/>}
+                />
+            </View>
+        </TouchableOpacity>
+    );
 };
 
 export default memo(GridItem);
