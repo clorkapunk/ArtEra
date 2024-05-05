@@ -12,6 +12,7 @@ import Profile from "./Profile";
 import {createNativeStackNavigator} from "@react-navigation/native-stack";
 import {PortalProvider} from "@gorhom/portal";
 import PostLayout from "./post/PostLayout";
+import PostScreen from "./PostScreen";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -77,7 +78,6 @@ const TabsLayout = () => {
                             borderTopColor: "#5BC0BE",
                         },
                         freezeOnBlur: true,
-
                     }}
                     initialRouteName="home"
                 >
@@ -101,6 +101,7 @@ const TabsLayout = () => {
                     <Tab.Screen
                         name="search"
                         options={{
+                            tabBarHideOnKeyboard: true,
                             tabBarIcon: ({color, focused}) => (
                                 <TabIcon
                                     icon={faSearch}
@@ -120,6 +121,7 @@ const TabsLayout = () => {
                         name="post-layout"
                         options={{
                             headerShown: false,
+                            tabBarHideOnKeyboard: true,
                             tabBarIcon: ({color, focused}) => (
                                 <TabIcon
                                     icon={faSquarePlus}
@@ -168,6 +170,16 @@ const TabsLayout = () => {
                     >
                         {() => <Profile/>}
                     </Tab.Screen>
+                    <Stack.Screen
+                        name='post-screen'
+                        component={PostScreen}
+                        options={{
+                            headerShown: false,
+                            tabBarItemStyle:{
+                                display: "none"
+                            }
+                        }}
+                    />
                 </Tab.Navigator>
             </PortalProvider>
 
