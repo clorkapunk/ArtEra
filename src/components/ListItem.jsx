@@ -9,14 +9,27 @@ import {
 } from "../api/ContentAPI";
 import {COLORS} from "../consts/colors";
 import {Input} from "@rneui/themed";
+import {getUserData} from "../api/userAPI";
 
 const ListItem = ({item, openCommentSheet, commentSheetState}) => {
 
+    const [aspectRatio, setAspectRatio] = useState(1)
+    const [owner, setOwner] = useState({
+        id: '',
+        email: '',
+        username: '',
+        avatar: 'https://www.clevelanddentalhc.com/wp-content/uploads/2018/03/sample-avatar.jpg',
+        user_background: 'https://www.clevelanddentalhc.com/wp-content/uploads/2018/03/sample-avatar.jpg'
+    });
     const [reactions, setReactions] = useState({
         likes: 0,
         comments: 0
     })
     const [input, setInput] = useState("");
+
+    Image.getSize(item.picture, (width, height) => {
+        setAspectRatio(width / height)
+    })
 
     function sendComment(postId, text) {
         if (input === "") return;
@@ -49,22 +62,45 @@ const ListItem = ({item, openCommentSheet, commentSheetState}) => {
                     comments: response.comment_count
                 })
             })
+            .catch(e => {
+                setReactions({
+                    likes: 0,
+                    comments: 0
+                })
+            })
     }
 
     useEffect(() => {
-        console.log('called', commentSheetState, item.id)
         updateReactionsAmount()
+        getUserData(item.owner)
+            .then(data => {
+                setOwner(data)
+            })
+            .catch(e => {
+                setOwner({
+                    id: -1,
+                    username: 'sample user',
+                    email: 'sample email',
+                    avatar: 'https://www.clevelanddentalhc.com/wp-content/uploads/2018/03/sample-avatar.jpg',
+                    user_background: 'https://www.clevelanddentalhc.com/wp-content/uploads/2018/03/sample-avatar.jpg'
+                })
+            })
     }, [commentSheetState])
 
 
     return (
         <View key={item.id} className='flex-col m-3'>
-            <Text className='mb-3 text-gray-400 text-lg'>{item.owner}</Text>
+            <Text className='mb-3 text-gray-400 text-lg'>{owner.username}</Text>
             <Image
                 source={{uri: item.picture}}
-                style={{width: '100%', flex: 1, aspectRatio: 1}}
+                style={{width: '100%', flex: 1, aspectRatio: aspectRatio}}
                 PlaceholderContent={<ActivityIndicator/>}
             />
+            <View className='mt-2'>
+                <Text className='text-lg'>{item.title}</Text>
+                <Text className='text-base'>{item.description}</Text>
+            </View>
+
             <View className={'flex-row my-1'}>
                 <TouchableNativeFeedback
                     onPress={() => setLike()}
@@ -117,8 +153,7 @@ const ListItem = ({item, openCommentSheet, commentSheetState}) => {
                 errorStyle={{margin: 0, height: 0}}
             />
         </View>
-    )
-        ;
+    );
 }
 
 export default memo(ListItem);
