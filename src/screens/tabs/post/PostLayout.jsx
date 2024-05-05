@@ -14,6 +14,7 @@ const PostLayout = () => {
     return (
         <>
             <Stack.Navigator
+                initialRouteName='post'
                 screenOptions={{
                     headerShown: true,
                 }}
