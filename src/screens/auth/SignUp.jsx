@@ -40,7 +40,7 @@ const SignUp = () => {
       "",
     )
       .then( async (data) => {
-        await AsyncStorage.setItem('user',  JSON.stringify(data))
+
         setForm({
           email: "",
           password: "",

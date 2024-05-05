@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Text, TextInput, TouchableOpacity, View } from "react-native";
+import {Text, TextInput, ToastAndroid, TouchableOpacity, View} from "react-native";
 import { Input, Button } from "@rneui/themed";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faArrowLeft, faEnvelope, faLock } from "@fortawesome/free-solid-svg-icons";
@@ -46,6 +46,7 @@ const SignIn = () => {
         navigation.navigate("tabs", { screens: "home" });
       })
       .catch(e => {
+        console.log(e.response.data)
         setLoading(false);
       });
 
@@ -98,7 +99,6 @@ const SignIn = () => {
         </TouchableOpacity>
         <Text className="text-3xl mb-2  text-white font-semibold">Log in to your account</Text>
         <Text className="text-lg  text-gray-500 mb-6">Welcome back! Please enter your details.</Text>
-        {/*<Text className='text-white font-semibold text-lg mb-2'>Email</Text>*/}
         <Input
           onChangeText={(value) => onFormChange("email", value)}
           value={form.email}
