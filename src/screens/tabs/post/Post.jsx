@@ -13,6 +13,7 @@ import {useNavigation} from "@react-navigation/native";
 import {CameraRoll} from "@react-native-camera-roll/camera-roll";
 import {Button} from "@rneui/themed";
 import {COLORS} from "../../../consts/colors";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
 const GalleryItem = ({item, isSelected, select}) => {
@@ -143,7 +144,19 @@ const Post = () => {
             return
         }
 
-        navigation.navigate('post-create', {item: selected})
+        async function getId() {
+            let user = JSON.parse(await AsyncStorage.getItem("user"))
+            return user.id
+        }
+
+        getId().then(id => {
+            navigation.navigate('post-create', {
+                item: selected,
+                id: id
+            })
+        })
+
+
     }
 
     const imgUrls = [
