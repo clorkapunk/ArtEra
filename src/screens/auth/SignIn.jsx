@@ -102,6 +102,7 @@ const SignIn = () => {
         <Input
           onChangeText={(value) => onFormChange("email", value)}
           value={form.email}
+          inputMode={'email'}
           leftIcon={<FontAwesomeIcon size={20} icon={faEnvelope} color={COLORS.lightGrey} />}
           placeholder={"Enter your email"}
           label={"Email"}
@@ -121,8 +122,9 @@ const SignIn = () => {
           onChangeText={(value) => onFormChange("password", value)}
           value={form.password}
           leftIcon={<FontAwesomeIcon size={20} icon={faLock} color={COLORS.lightGrey} />}
-          placeholder={"Enter your email"}
+          placeholder={"Enter your password"}
           label={"Password"}
+
           errorMessage={errors.password}
           leftIconContainerStyle={{ padding: 10, paddingRight: 10 }}
           containerStyle={{ paddingHorizontal: 0, marginTop: 5 }}
