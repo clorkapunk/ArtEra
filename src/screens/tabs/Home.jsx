@@ -85,7 +85,7 @@ const Home = () => {
                         count: data.count,
                         results: prevState.results.concat(data.results)
                     }
-                });
+                })
                 setEndReachedLoading(false)
             })
             .catch((e) => {
@@ -152,7 +152,7 @@ const Home = () => {
                                         />
                                     }
                                     onEndReached={() => onEndReached()}
-                                    onEndReachedThreshold={0.5}
+                                    onEndReachedThreshold={0.2}
                                     data={data.results}
                                     renderItem={_renderitem}
                                     keyExtractor={(item, index) => item.id}
