@@ -9,6 +9,7 @@ import {COLORS} from "../../../consts/colors";
 import RNFS, {readFile} from 'react-native-fs'
 import PostPreviewSheet from "../../../components/PostPreviewSheet";
 import {sendPost} from "../../../api/ContentAPI";
+import {SafeAreaView} from "react-native-safe-area-context";
 
 
 const PostCreate = ({route}) => {
@@ -117,8 +118,12 @@ const PostCreate = ({route}) => {
 
     return (
         <>
-            <ScrollView className='px-4 pt-5'>
-                <View className='flex-row justify-between items-center mb-3'>
+            <ScrollView
+
+                stickyHeaderIndices={[0]}
+                stickyHeaderHiddenOnScroll={true}
+            >
+                <SafeAreaView className='flex-row justify-between items-center mb-3 py-2 px-3 bg-white border-b border-black'>
                     <TouchableOpacity
                         className="p-2" onPress={() => navigation.navigate("post")}>
                         <View className='items-center'>
@@ -155,8 +160,9 @@ const PostCreate = ({route}) => {
                         />
                         Edit image
                     </Button>
-                </View>
-                <View className='mb-10'>
+                </SafeAreaView>
+
+                <View className='mb-10 mx-4'>
                     <View className='mb-5 border-2 rounded border-black'>
                         <Image
                             style={{aspectRatio: aspectRatio, width: '100%'}}

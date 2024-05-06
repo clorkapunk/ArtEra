@@ -1,15 +1,84 @@
-import React, {memo, useEffect, useState} from 'react';
-import {ActivityIndicator, FlatList, Image, ScrollView, Text, TouchableNativeFeedback, View} from "react-native";
+import React, {memo, useEffect, useRef, useState} from 'react';
+import {
+    ActivityIndicator,
+    FlatList,
+    Image, InteractionManager,
+    ScrollView,
+    Text, ToastAndroid,
+    TouchableNativeFeedback,
+    TouchableOpacity,
+    View
+} from "react-native";
 import {FontAwesomeIcon} from "@fortawesome/react-native-fontawesome";
-import {faComment, faHeart, faPaperPlane} from "@fortawesome/free-solid-svg-icons";
+import {faArrowLeft, faComment, faHeart, faPaperPlane} from "@fortawesome/free-solid-svg-icons";
 import {Input} from "@rneui/themed";
 import {COLORS} from "../../consts/colors";
 import {getCommentsByPost, getReactionsByPost, sendCommentToPost, sendLikeToPost} from "../../api/ContentAPI";
 import {getUserData} from "../../api/userAPI";
-import {BottomSheetFlatList} from "@gorhom/bottom-sheet/src";
+import {BottomSheetFlatList, BottomSheetFooter} from "@gorhom/bottom-sheet/src";
+import {SafeAreaView} from "react-native-safe-area-context";
+import {useNavigation} from "@react-navigation/native";
+import SplashScreen from "react-native-splash-screen";
+
+const CommentSheetFooter = ({postId, update}) => {
+    const [input, setInput] = useState("");
+    const inputRef = useRef(null);
 
 
-const Comment = memo(({ item }) => {
+    function sendComment(postId, text) {
+        if (input === "") return;
+
+        sendCommentToPost(postId, text)
+            .then(({status, postId}) => {
+            setInput('')
+            update()
+        })
+            .catch(e => {
+                ToastAndroid.show(e.response.data, ToastAndroid.SHORT)
+            })
+    }
+
+
+    return (
+        <View
+            style={{
+                top: 0,
+            }}
+            bottomInset={0}
+
+        >
+            <Input
+                onChangeText={(value) => setInput(value)}
+                ref={inputRef}
+                value={input}
+                onPress={() => {
+                }}
+                onFocus={() => {
+                    // bottomSheetRef.current?.expand()
+
+                }}
+                placeholder={"Write your comment"}
+                rightIcon={(
+                    <TouchableOpacity onPress={() => {
+                        sendComment(postId, input);
+                    }}>
+                        <FontAwesomeIcon size={20} icon={faPaperPlane} color={COLORS.primary}/>
+                    </TouchableOpacity>
+                )}
+                containerStyle={{paddingHorizontal: 0}}
+                inputContainerStyle={{
+                    paddingHorizontal: 20, borderRadius: 0, backgroundColor: "#272728", borderBottomWidth: 0,
+                }}
+                inputStyle={{color: "white"}}
+                labelStyle={{color: "white", marginBottom: 5, fontWeight: "100"}}
+                placeholderTextColor={COLORS.lightGrey}
+                errorStyle={{margin: 0, height: 0}}
+            />
+        </View>
+    );
+}
+
+const Comment = memo(({item}) => {
 
     const [user, setUser] = useState({
         id: null,
@@ -58,15 +127,15 @@ const Comment = memo(({ item }) => {
         <TouchableNativeFeedback
             background={TouchableNativeFeedback.Ripple("white", false)}
             onPress={() => alert("good")}>
-            <View className="flex-row px-3 pt-4 pb-1" style={{ flex: 1 }}>
-                <View style={{ flex: 1 }} className="mr-3 mt-1">
+            <View className="flex-row px-3 pt-4 pb-1" style={{flex: 1}}>
+                <View style={{flex: 1}} className="mr-3 mt-1">
                     <Image
                         className="rounded-full "
-                        style={{ aspectRatio: 1 }}
-                        source={{ uri: user.avatar }}
+                        style={{aspectRatio: 1}}
+                        source={{uri: user.avatar}}
                     />
                 </View>
-                <View style={{ flex: 7 }}>
+                <View style={{flex: 7}}>
                     <Text className="text-black opacity-80 text-base">{user.username}</Text>
                     <Text className="text-black text-base my-0.5">{item.text}</Text>
                     <Text className="text-black text-sm opacity-50">{parseDate(item.published_at)}</Text>
@@ -77,9 +146,10 @@ const Comment = memo(({ item }) => {
 })
 
 const PostScreen = ({route}) => {
-    const {item} = route.params
+    const {item, aspectRatio} = route.params
 
-    const [aspectRatio, setAspectRatio] = useState(1)
+    const [isLoading, setIsLoading] = useState(true);
+    // const [aspectRatio, setAspectRatio] = useState(1)
     const [owner, setOwner] = useState({
         id: '',
         email: '',
@@ -94,22 +164,7 @@ const PostScreen = ({route}) => {
     const [input, setInput] = useState("");
     const [isCommentsLoading, setIsCommentsLoading] = useState(false)
     const [commentsData, setCommentsData] = useState([])
-
-    Image.getSize(item.picture, (width, height) => {
-        setAspectRatio(width / height)
-    })
-
-    function sendComment(postId, text) {
-        if (input === "") return;
-        sendCommentToPost(postId, text)
-            .then(({status, postId}) => {
-                if (status === 201) {
-
-                }
-                setInput("")
-                updateReactionsAmount()
-            });
-    }
+    const navigation = useNavigation()
 
 
     function setLike() {
@@ -119,6 +174,18 @@ const PostScreen = ({route}) => {
 
                 }
                 updateReactionsAmount()
+            })
+    }
+
+    function updateComments() {
+        setIsCommentsLoading(true)
+        getCommentsByPost(item.id)
+            .then(data => {
+                setCommentsData(data)
+                setIsCommentsLoading(false)
+            })
+            .catch(e => {
+                setIsCommentsLoading(false)
             })
     }
 
@@ -139,7 +206,11 @@ const PostScreen = ({route}) => {
     }
 
     useEffect(() => {
-        updateReactionsAmount()
+        InteractionManager.runAfterInteractions(() => {
+            setIsLoading(false);
+        });
+
+
         getUserData(item.owner)
             .then(data => {
                 setOwner(data)
@@ -154,101 +225,111 @@ const PostScreen = ({route}) => {
                 })
             })
 
-        getCommentsByPost(item.id)
-            .then(data => {
-                setCommentsData(data)
-            })
+        updateReactionsAmount()
+        updateComments()
     }, [item])
 
     return (
-        <ScrollView>
-            <View key={item.id} className='flex-col m-3'>
+        <>
+            {
+                isLoading ?
+                    <View>
+                        <ActivityIndicator/>
+                    </View>
+                    :
 
-                <Image
-                    source={{uri: item.picture}}
-                    style={{width: '100%', aspectRatio: aspectRatio}}
-                    PlaceholderContent={<ActivityIndicator/>}
-                />
-                <View className='mt-3'>
-                    <Text className='mb-1 text-gray-400 text-lg'>{owner.username}</Text>
-                    <Text className='text-lg'>{item.title}</Text>
-                    <Text className='text-base'>{item.description}</Text>
-                </View>
+                    <>
+                        <ScrollView
+                            stickyHeaderIndices={[0]}
+                            stickyHeaderHiddenOnScroll={true}
+                        >
+                            <SafeAreaView>
+                                <View className='p-2 flex-1 flex-row border-b border-black bg-white'>
+                                    <TouchableOpacity
+                                        className='flex-grow-0'
+                                        onPress={() => {
+                                            navigation.goBack()
+                                        }}
+                                    >
+                                        <View className='p-1 flex-row items-center'>
+                                            <FontAwesomeIcon
+                                                icon={faArrowLeft}
+                                                size={25}/>
+                                        </View>
+                                    </TouchableOpacity>
+                                    <View className='ml-4'>
+                                        <Text className='text-2xl text-black'>Post</Text>
+                                    </View>
+                                </View>
+                            </SafeAreaView>
 
-                <View className={'flex-row my-1'}>
-                    <TouchableNativeFeedback
-                        onPress={() => setLike()}
-                    >
-                        <View className='px-4 py-2 flex-row items-center justify-end'>
-                            <FontAwesomeIcon size={20} icon={faHeart}/>
-                            <Text className='text-sm ml-2 text-gray-400'>{reactions.likes}</Text>
-                        </View>
-                    </TouchableNativeFeedback>
+                            <View className='border-b border-black'>
+                                <View key={item.id} className='flex-col m-3'>
+                                    <Image
+                                        source={{uri: item.picture}}
+                                        style={{width: '100%', aspectRatio: aspectRatio}}
+                                        PlaceholderContent={<ActivityIndicator/>}
+                                    />
+                                    <View className='mt-3'>
+                                        <Text className='mb-1 text-gray-400 text-lg'>{owner.username}</Text>
+                                        <Text className='text-lg'>{item.title}</Text>
+                                        <Text className='text-base'>{item.description}</Text>
+                                    </View>
+
+                                    <View className={'flex-row my-1'}>
+                                        <TouchableNativeFeedback
+                                            onPress={() => setLike()}
+                                        >
+                                            <View className='px-4 py-2 flex-row items-center justify-end'>
+                                                <FontAwesomeIcon size={20} icon={faHeart}/>
+                                                <Text className='text-sm ml-2 text-gray-400'>{reactions.likes}</Text>
+                                            </View>
+                                        </TouchableNativeFeedback>
 
 
-                    <TouchableNativeFeedback onPress={() => {
-                        openCommentSheet(item.id)
-                    }}
-                    >
-                        <View className='px-4 flex-row items-center justify-end'>
-                            <FontAwesomeIcon style={{marginBottom: 2}} size={20} icon={faComment}/>
-                            <Text className='text-sm ml-2 text-gray-400'>{reactions.comments}</Text>
-                        </View>
-                    </TouchableNativeFeedback>
+                                        <View className='px-4 flex-row items-center justify-end'>
+                                            <FontAwesomeIcon style={{marginBottom: 2}} size={20} icon={faComment}/>
+                                            <Text className='text-sm ml-2 text-gray-400'>{reactions.comments}</Text>
+                                        </View>
 
-                </View>
 
-                <Input
-                    onChangeText={(value) => setInput(value)}
-                    value={input}
-                    placeholder={"Write your comment"}
-                    rightIcon={(
-                        <TouchableNativeFeedback onPress={() => {
-                            sendComment(item.id, input);
-                        }}>
-                            <View className='p-2'>
-                                <FontAwesomeIcon
-                                    size={20}
-                                    icon={faPaperPlane}
-                                    color={COLORS.primary}/>
+                                    </View>
+                                </View>
                             </View>
-                        </TouchableNativeFeedback>
-                    )}
-                    containerStyle={{paddingHorizontal: 0}}
-                    inputContainerStyle={{
-                        paddingLeft: 20, borderRadius: 8,
-                        paddingRight: 10,
-                        backgroundColor: "white",
-                        borderWidth: 1, borderColor: 'black'
-                    }}
-                    inputStyle={{color: "black"}}
-                    labelStyle={{color: "white", marginBottom: 5, fontWeight: "100"}}
-                    placeholderTextColor={COLORS.lightGrey}
-                    errorStyle={{margin: 0, height: 0}}
-                />
-            </View>
 
-            <View className="" style={{ flex: 1 }}>
-                {
-                    isCommentsLoading ?
-                        <ActivityIndicator
-                            className="mt-10" size={50} />
-                        :
-                        <FlatList
-                            style={{ marginBottom: 50 }}
-                            data={commentsData}
-                            keyExtractor={(item, index) => item.id}
-                            renderItem={({ item }) => <Comment
-                                key={item.id}
-                                item={item}
-                            />}
+                            <View className="bg-teal-200" style={{flex: 1}}>
+                                {
+                                    isCommentsLoading ?
+                                        <ActivityIndicator
+                                            className="mt-10" size={50}/>
+                                        :
+                                        <FlatList
+                                            scrollEnabled={false}
+                                            style={{marginBottom: 10}}
+                                            data={commentsData}
+                                            keyExtractor={(item, index) => index}
+                                            renderItem={({item}) => <Comment
+                                                key={item.id}
+                                                item={item}
+                                            />}
+                                        />
+                                }
+
+                            </View>
+
+                        </ScrollView>
+
+                        <CommentSheetFooter
+                            postId={item.id}
+                            update={() => {
+                                updateComments()
+                                updateReactionsAmount()
+                            }}
                         />
-                }
-
-            </View>
-
-        </ScrollView>
+                    </>
+            }
+        </>
     );
 };
 
-export default PostScreen;
+export default memo(PostScreen);
