@@ -7,7 +7,8 @@ import {
     RefreshControl,
     Text, ToastAndroid,
     TouchableOpacity,
-    View
+    View,
+    ScrollView
 } from "react-native";
 import {useNavigation} from "@react-navigation/native";
 import {CameraRoll} from "@react-native-camera-roll/camera-roll";
@@ -178,6 +179,28 @@ const Post = () => {
         });
     }
 
+    const header = () => {
+        return (
+            <View className='flex-row justify-center'>
+                <Button
+                    containerStyle={{flex: 1}}
+                    buttonStyle={{backgroundColor: sortType === 'day' ? COLORS.primary : 'gray'}}
+                    onPress={() => setSortType('day')}
+                    title={'day'}/>
+                <Button
+                    containerStyle={{flex: 1}}
+                    buttonStyle={{backgroundColor: sortType === 'month' ? COLORS.primary : 'gray'}}
+                    onPress={() => setSortType('month')}
+                    title={'month'}/>
+                <Button
+                    containerStyle={{flex: 1}}
+                    buttonStyle={{backgroundColor: sortType === 'year' ? COLORS.primary : 'gray'}}
+                    onPress={() => setSortType('year')}
+                    title={'year'}/>
+            </View>
+        )
+    }
+
 
     return (
         <>
@@ -188,8 +211,10 @@ const Post = () => {
                     </View>
                     :
                     <View className={"flex-1"}>
-                        <View className="flex-1">
+                        <ScrollView className="flex-1">
+                            {header()}
                             <FlatList
+                                scrollEnabled={false}
                                 refreshControl={
                                     <RefreshControl refreshing={refreshing} onRefresh={onRefresh}/>
                                 }
@@ -203,7 +228,7 @@ const Post = () => {
                                 }
                                 keyExtractor={(item, index) => item.date}
                             />
-                        </View>
+                        </ScrollView>
                         <View className={"h-[65px] justify-center px-10"}>
                             <Button
                                 onPress={() =>

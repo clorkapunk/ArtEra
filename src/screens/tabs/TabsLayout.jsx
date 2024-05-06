@@ -85,6 +85,7 @@ const TabsLayout = () => {
                         <Tab.Screen
                             name="home"
                             options={{
+
                                 tabBarIcon: ({color, focused}) => (
                                     <TabIcon
                                         icon={faHome}
@@ -175,6 +176,9 @@ const TabsLayout = () => {
                             name='post-screen'
                             component={PostScreen}
                             options={{
+                                tabBarStyle: {
+                                    display: 'none'
+                                },
                                 headerShown: false,
                                 tabBarItemStyle: {
                                     display: "none"

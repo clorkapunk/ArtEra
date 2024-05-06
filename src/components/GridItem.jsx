@@ -11,7 +11,10 @@ const GridItem = ({item}) => {
     })
 
     function openPostScreen(){
-        navigation.navigate('post-screen', {item: item})
+        navigation.navigate('post-screen', {
+            item: item,
+            aspectRatio: aspectRatio
+        })
     }
 
     return (

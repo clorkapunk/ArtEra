@@ -170,6 +170,9 @@ const Comment = ({item}) => {
             .then(data => {
                 setUser(data)
             })
+            .catch(e => {
+
+            })
     }, [])
 
     return (
@@ -236,13 +239,18 @@ const CommentBottomSheet = forwardRef(({onClose}, ref) => {
     }, []);
 
     function updateComments() {
-        getCommentsByPost(commentSheetData.id).then(data =>
-            setCommentSheetData(prevState => {
-                return {...prevState, comments: data};
-            }),
-        ).finally(() =>
-            setIsCommentsLoading(false),
-        );
+        getCommentsByPost(commentSheetData.id)
+            .then(data =>
+                setCommentSheetData(prevState => {
+                    return {...prevState, comments: data};
+                }),
+            )
+            .finally(() =>
+                setIsCommentsLoading(false),
+            )
+            .catch(e => {
+                setIsCommentsLoading(false)
+            })
     }
 
 
