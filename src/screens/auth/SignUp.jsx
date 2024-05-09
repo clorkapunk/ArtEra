@@ -35,9 +35,7 @@ const SignUp = () => {
     registration(
       form.email,
       form.password,
-      form.username,
-      "",
-      "",
+      form.username
     )
       .then( async (data) => {
 
@@ -46,7 +44,14 @@ const SignUp = () => {
           password: "",
         });
         navigation.navigate("tabs", { screens: "home" });
-      });
+      })
+        .catch(({response}) => {
+          setErrors({
+            "email": response.data.email === undefined ? "" : response.data.email,
+            "username": response.data.username === undefined ? "" : response.data.username,
+            "password": response.data.password === undefined ? "" : response.data.password,
+          })
+        })
   }
 
 

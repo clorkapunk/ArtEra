@@ -10,7 +10,7 @@ import {
     ActivityIndicator,
     Image,
     Keyboard, KeyboardAvoidingView, RefreshControl,
-    Text,
+    Text, ToastAndroid,
     TouchableNativeFeedback,
     TouchableOpacity,
     TouchableWithoutFeedback,
@@ -21,7 +21,8 @@ import {Input} from "@rneui/themed";
 import {FontAwesomeIcon} from "@fortawesome/react-native-fontawesome";
 import {faPaperPlane} from "@fortawesome/free-solid-svg-icons";
 import {getCommentsByPost, getPosts, sendCommentToPost, sendLikeToPost} from "../api/ContentAPI";
-import {getUserData, login} from "../api/userAPI";
+import {getUser, getUserData, login} from "../api/userAPI";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
 const CommentSheetBackdrop = memo(({animatedIndex, animatedPosition, style}) => {
@@ -70,12 +71,21 @@ const CommentSheetFooter = ({animatedFooterPosition, bottomSheetRef, postId, upd
 
     function sendComment(postId, text) {
         if (input === "") return;
-        sendCommentToPost(postId, text).then(({status, postId}) => {
-            if (status === 201) {
+        getUser()
+            .then(user => {
+                sendCommentToPost(postId, user.id, text)
+                    .then(({status, postId}) => {
+                        updateComments()
+                    })
+                    .catch(e => {
+                        ToastAndroid.show("Error", ToastAndroid.SHORT)
+                    })
+            })
+            .catch(e => {
+                ToastAndroid.show("Log in to comment", ToastAndroid.SHORT)
+            })
 
-            }
-            updateComments()
-        });
+
     }
 
 

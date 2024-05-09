@@ -29,7 +29,7 @@ const SignIn = () => {
   }
 
   function onFormSubmit() {
-    // if (!validateForm()) return;
+    if (!validateForm()) return;
     setLoading(true);
 
     login(
@@ -45,8 +45,10 @@ const SignIn = () => {
         setLoading(false);
         navigation.navigate("tabs", { screens: "home" });
       })
-      .catch(e => {
-        console.log(e.response.data)
+      .catch(({response}) => {
+        setErrors({
+          'email': response.data.non_field_errors === undefined ? '' : response.data.non_field_errors
+        })
         setLoading(false);
       });
 
@@ -94,7 +96,7 @@ const SignIn = () => {
       <View className="mt-10">
         <TouchableOpacity className="mb-7" onPress={() => navigation.navigate("tabs", { screens: "home" })}>
           <View>
-            <FontAwesomeIcon defaultProps={{}} icon={faArrowLeft} color={"black"} size={20} />
+            <FontAwesomeIcon defaultProps={{}} icon={faArrowLeft} color={"white"} size={20} />
           </View>
         </TouchableOpacity>
         <Text className="text-3xl mb-2  text-white font-semibold">Log in to your account</Text>
