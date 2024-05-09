@@ -1,6 +1,4 @@
 import { $authHost, $host } from "./index";
-import { jwtDecode } from "jwt-decode";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
 export const getPosts = async (page_number) => {
@@ -8,34 +6,15 @@ export const getPosts = async (page_number) => {
   return data;
 };
 
-export const getCommentsByPost = async (postId) => {
-  const { data } = await $host.get(`api/commnets/?search=${postId}`);
-  return data;
-};
-
-export const sendCommentToPost = async (postId, text) => {
-  let { token } = JSON.parse(await AsyncStorage.getItem("user"))
-  const id = jwtDecode(token.substring(2, token.length - 1)).id
-  const response = await $host.post("api/commnets/", {
-    owner_id: id, post_id: postId, text
-  });
-  return response.status
-};
-
-export const sendLikeToPost = async (postId) => {
-  let { token } = JSON.parse(await AsyncStorage.getItem("user"))
-  const id = jwtDecode(token.substring(2, token.length - 1)).id
-  const response = await $host.post("api/likes/", {
-    owner_id: id, post_id: postId
-  });
-  return response.status
+export const getPostsBySearch = async (searchString, userId, page) => {
+  const {data} = await $host.get(`api/posts/?search=${searchString}&page=${page}&owner=${userId} `)
+  return data
 }
 
-export const getReactionsByPost = async (postId) => {
-  const response = await $host.get("api/reactions/count/" + postId);
-  return response.data
+export const getLikedPosts = async (userId) => {
+  const {data} = await $host.get(`api/reactions/likedposts/${userId}`)
+  return data
 }
-
 
 export const sendPost = async (formData) => {
   // let { token } = JSON.parse(await AsyncStorage.getItem("user"))
@@ -51,7 +30,29 @@ export const sendPost = async (formData) => {
   return response.status
 }
 
-export const getPostsBySearch = async (searchString, userId, page) => {
-  const {data} = await $host.get(`api/posts/?search=${searchString}&page=${page}&owner=${userId} `)
+
+export const getCommentsByPost = async (postId) => {
+  const { data } = await $host.get(`api/commnets/?search=${postId}`);
+  return data;
+};
+
+export const sendCommentToPost = async (postId, userId, text) => {
+  const response = await $host.post("api/commnets/", {
+    owner_id: userId, post_id: postId, text
+  });
+  return response.status
+};
+
+export const sendLikeToPost = async (postId, userId) => {
+  const response = await $host.post("api/reactions/safelike/", {
+    owner_id: userId, post_id: postId
+  });
+  return response.status
+}
+
+export const getReactionsByPost = async (postId, userId) => {
+  const {data} = await $host.get(`api/reactions/count/?post_id=${postId}&owner_id=${userId}`);
   return data
 }
+
+
