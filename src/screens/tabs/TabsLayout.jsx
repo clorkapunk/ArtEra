@@ -6,17 +6,18 @@ import {FontAwesomeIcon} from "@fortawesome/react-native-fontawesome";
 import Header from "../../components/Header";
 import {faHome, faMessage, faSearch, faSquarePlus, faUser} from "@fortawesome/free-solid-svg-icons";
 import Search from "./Search";
-import Post from "./post/Post";
-import Chat from "./Chat";
+import Chat from "./Generator";
 import Profile from "./Profile";
-import {createNativeStackNavigator} from "@react-navigation/native-stack";
 import {PortalProvider} from "@gorhom/portal";
 import PostLayout from "./post/PostLayout";
-import PostScreen from "./PostScreen";
-import {SafeAreaView} from "react-native-safe-area-context";
+import {createDrawerNavigator} from '@react-navigation/drawer';
+import SideMenuLayout from "../../components/SideMenuLayout";
+import MenuDrawer from 'react-native-side-drawer'
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import Generator from "./Generator";
 
 const Tab = createBottomTabNavigator();
-const Stack = createNativeStackNavigator();
+const Drawer = createDrawerNavigator();
 
 const TabIcon = ({icon, color, name, focused}) => {
     return (
@@ -48,6 +49,7 @@ const TabsLayout = () => {
         comments: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
     });
     const snapPoints = useMemo(() => ["75%", "100%"], []);
+    const [sideMenuOpen, setSideMenuOpen] = useState(false);
 
     const handleSheetChanges = useCallback((index) => {
 
@@ -66,6 +68,17 @@ const TabsLayout = () => {
     return (
         <>
 
+            <MenuDrawer
+                open={sideMenuOpen}
+                position={'right'}
+                drawerContent={<SideMenuLayout
+                    onClose={() => setSideMenuOpen(false)}
+                />}
+                drawerPercentage={100}
+                animationTime={250}
+                overlay={true}
+                opacity={0.4}
+            >
                 <PortalProvider>
                     <Tab.Navigator
                         screenOptions={{
@@ -94,7 +107,9 @@ const TabsLayout = () => {
                                         focused={focused}
                                     />
                                 ),
-                                header: () => <Header title={"Home"}/>,
+                                header: () => <Header
+                                    openSideMenu={() => setSideMenuOpen(true)}
+                                    title={"Home"}/>,
                             }}
                         >
                             {() => <Home/>}
@@ -112,7 +127,9 @@ const TabsLayout = () => {
                                         focused={focused}
                                     />
                                 ),
-                                header: () => <Header title={"Search"}/>,
+                                header: () => <Header
+                                    openSideMenu={() => setSideMenuOpen(true)}
+                                    title={"Search"}/>,
                             }}
                         >
                             {() => <Search/>}
@@ -132,7 +149,9 @@ const TabsLayout = () => {
                                         focused={focused}
                                     />
                                 ),
-                                header: () => <Header title={"Post"}/>,
+                                header: () => <Header
+                                    openSideMenu={() => setSideMenuOpen(true)}
+                                    title={"Post"}/>,
                             }}
                         >
                             {() => <PostLayout/>}
@@ -150,15 +169,18 @@ const TabsLayout = () => {
                                         focused={focused}
                                     />
                                 ),
-                                header: () => <Header title={"Chat"}/>,
+                                header: () => <Header
+                                    openSideMenu={() => setSideMenuOpen(true)}
+                                    title={"Generator"}/>,
                             }}
                         >
-                            {() => <Chat/>}
+                            {() => <Generator/>}
                         </Tab.Screen>
 
                         <Tab.Screen
                             name="profile"
                             options={{
+
                                 tabBarIcon: ({color, focused}) => (
                                     <TabIcon
                                         icon={faUser}
@@ -167,28 +189,29 @@ const TabsLayout = () => {
                                         focused={focused}
                                     />
                                 ),
-                                header: () => <Header title={"Profile"}/>,
+                                header: () => <Header
+                                    openSideMenu={() => setSideMenuOpen(true)}
+                                    title={"Profile"}/>,
                             }}
                         >
                             {() => <Profile/>}
                         </Tab.Screen>
-                        <Stack.Screen
-                            name='post-screen'
-                            component={PostScreen}
-                            options={{
-                                tabBarStyle: {
-                                    display: 'none'
-                                },
-                                headerShown: false,
-                                tabBarItemStyle: {
-                                    display: "none"
-                                }
-                            }}
-                        />
+                        {/*<Stack.Screen*/}
+                        {/*    name='post-screen'*/}
+                        {/*    component={PostScreen}*/}
+                        {/*    options={{*/}
+                        {/*        tabBarStyle: {*/}
+                        {/*            display: 'none'*/}
+                        {/*        },*/}
+                        {/*        headerShown: false,*/}
+                        {/*        tabBarItemStyle: {*/}
+                        {/*            display: "none"*/}
+                        {/*        }*/}
+                        {/*    }}*/}
+                        {/*/>*/}
                     </Tab.Navigator>
                 </PortalProvider>
-
-
+            </MenuDrawer>
         </>
     );
 };
