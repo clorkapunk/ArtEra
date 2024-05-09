@@ -1,10 +1,12 @@
 import React, {memo, useState} from "react";
 import {ActivityIndicator, View, Image, TouchableOpacity} from "react-native";
 import {useNavigation} from "@react-navigation/native";
+import Animated from "react-native-reanimated";
 
 const GridItem = ({item}) => {
     const navigation = useNavigation()
     const [aspectRatio, setAspectRatio] = useState(1)
+
 
     Image.getSize(item.picture, (width, height) => {
         setAspectRatio(width / height)
