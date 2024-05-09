@@ -5,18 +5,20 @@ import {createNativeStackNavigator} from "@react-navigation/native-stack";
 import Home from "./src/screens/tabs/Home";
 import Search from "./src/screens/tabs/Search";
 import Post from "./src/screens/tabs/post/Post";
-import Chat from "./src/screens/tabs/Chat";
+import Chat from "./src/screens/tabs/Generator";
 import Profile from "./src/screens/tabs/Profile";
 import TabsLayout from "./src/screens/tabs/TabsLayout";
 import SignIn from "./src/screens/auth/SignIn";
 import AuthLayout from "./src/screens/auth/AuthLayout";
 import {GestureHandlerRootView} from "react-native-gesture-handler";
 import {PermissionsAndroid, Platform} from "react-native";
-import {SafeAreaProvider, SafeAreaView} from "react-native-safe-area-context";
+import {SafeAreaProvider} from "react-native-safe-area-context";
+import PostScreen from "./src/screens/post/PostScreen";
+import {createStackNavigator, TransitionPreset, TransitionPresets} from "@react-navigation/stack";
+import ProfileEdit from "./src/screens/profile-edit/ProfileEdit";
 
 
-const Stack = createNativeStackNavigator();
-const Tab = createBottomTabNavigator();
+const Stack = createStackNavigator();
 
 async function hasAndroidPermission() {
     const getCheckPermissionPromise = async () => {
@@ -66,13 +68,40 @@ function App(): React.JSX.Element {
                 <NavigationContainer>
                     <Stack.Navigator
                         screenOptions={{
-                            headerShown: false
+                            headerShown: false,
                         }}
                         initialRouteName={"tabs"}
                     >
-                        <Stack.Screen name="tabs" component={TabsLayout}/>
-                        <Stack.Screen name="auth" component={AuthLayout}/>
+                        <Stack.Screen
+                            name="tabs"
+                            component={TabsLayout}
+                            options={{
+                                ...TransitionPresets.SlideFromRightIOS
+                            }}
+                        />
+                        <Stack.Screen
+                            name="auth"
+                            component={AuthLayout}
+                            options={{
+                                ...TransitionPresets.SlideFromRightIOS
+                            }}
+                        />
+                        <Stack.Screen
+                            name="post-screen"
+                            component={PostScreen}
+                            options={{
+                                ...TransitionPresets.SlideFromRightIOS
+                            }}
+                        />
+                        <Stack.Screen
+                            name="profile-edit"
+                            component={ProfileEdit}
+                            options={{
+                                ...TransitionPresets.SlideFromRightIOS
+                            }}
+                        />
                     </Stack.Navigator>
+
                 </NavigationContainer>
             </GestureHandlerRootView>
         </SafeAreaProvider>
