@@ -6,7 +6,6 @@ import {useNavigation} from "@react-navigation/native";
 import {Button, Input} from "@rneui/themed";
 import ImagePicker from 'react-native-image-crop-picker';
 import {COLORS} from "../../../consts/colors";
-import RNFS, {readFile} from 'react-native-fs'
 import PostPreviewSheet from "../../../components/PostPreviewSheet";
 import {sendPost} from "../../../api/ContentAPI";
 import {SafeAreaView} from "react-native-safe-area-context";
@@ -14,46 +13,49 @@ import {SafeAreaView} from "react-native-safe-area-context";
 
 const PostCreate = ({route}) => {
     const navigation = useNavigation();
-    const {item, id} = route.params
-    const [aspectRatio, setAspectRatio] = useState(1)
-    const [imageUri, setImageUri] = useState(item.node.image.uri)
-    const [form, setForm] = useState({
-        title: "",
-        description: "",
-    });
+    const {item, user, aspectRatio} = route.params
+    const previewSheetRef = useRef(null);
+    const [postData, setPostData] = useState({
+        title: '',
+        description: '',
+        picture: item.node.image.uri,
+        aspectRatio: aspectRatio,
+        username: user.username,
+        likes: 0,
+        comments: 0,
+        published_at: new Date(),
+    })
 
     const [errors, setErrors] = useState({
         title: "",
         description: "",
     });
-    const [postData, setPostData] = useState({
-        picture: imageUri,
-        title: '',
-        description: '',
-        owner: id,
-        published_at: new Date(),
-    })
 
-    const previewSheetRef = useRef(null);
 
-    function onFormChange(name, value) {
-        setForm({...form, [name]: value});
+
+    function onPostChange(name, value) {
+        setPostData(prevState => {
+            return {
+                ...prevState,
+                [name]: value
+            }
+        });
     }
 
-    function validateForm() {
+    function validatePost() {
         let isValid = true;
         let errorsTemp = {
             title: "",
             description: "",
         };
-        if (form.title === '') {
+        if (postData.title === '') {
             errorsTemp["title"] = "Enter something";
             isValid = false;
         } else {
             errorsTemp["email"] = "";
         }
 
-        if (form.description === '') {
+        if (postData.description === '') {
             errorsTemp["description"] = "Enter something";
             isValid = false;
         } else {
@@ -65,40 +67,21 @@ const PostCreate = ({route}) => {
         return isValid;
     }
 
-
-    useEffect(() => {
-        Image.getSize(item.node.image.uri, (width, height) => {
-            setAspectRatio(width / height)
-        })
-
-    }, [item])
-
     function onShowPreview() {
-        if (!validateForm()) return
-
-        setPostData(prevState => {
-            return {
-                ...prevState,
-                picture: imageUri,
-                title: form.title,
-                description: form.description,
-                published_at: new Date(),
-            }
-        })
+        if (!validatePost()) return
         previewSheetRef.current?.open()
     }
 
-
     function onSendPost() {
-        if (!validateForm()) return
+        if (!validatePost()) return
 
         const formData = new FormData()
-        formData.append('title', form.title)
-        formData.append('description', form.description)
-        formData.append('owner', postData.owner)
+        formData.append('owner', user.id)
+        formData.append('title', postData.title)
+        formData.append('description', postData.description)
         formData.append("picture", {
-            uri:imageUri,
-            name:'userProfile.jpg',
+            uri: postData.picture,
+            name:'post_image.jpg',
             type:'image/jpg'
         })
 
@@ -119,7 +102,6 @@ const PostCreate = ({route}) => {
     return (
         <>
             <ScrollView
-
                 stickyHeaderIndices={[0]}
                 stickyHeaderHiddenOnScroll={true}
             >
@@ -136,8 +118,8 @@ const PostCreate = ({route}) => {
                                 path: item.node.image.uri,
                                 freeStyleCropEnabled: true
                             }).then(image => {
-                                setImageUri(image.path)
-                                setAspectRatio(image.width / image.height)
+                                onPostChange('picture',image.path)
+                                onPostChange("aspectRatio", image.width / image.height)
                             });
                         }}
                         buttonStyle={{
@@ -165,15 +147,15 @@ const PostCreate = ({route}) => {
                 <View className='mb-10 mx-4'>
                     <View className='mb-5 border-2 rounded border-black'>
                         <Image
-                            style={{aspectRatio: aspectRatio, width: '100%'}}
-                            source={{uri: imageUri}}
+                            style={{aspectRatio: postData.aspectRatio, width: '100%'}}
+                            source={{uri: postData.picture}}
                         />
                     </View>
 
 
                     <Input
-                        onChangeText={(val) => onFormChange("title", val)}
-                        value={form.title}
+                        onChangeText={(val) => onPostChange("title", val)}
+                        value={postData.title}
                         placeholder={"Write description of your image"}
                         label={'Title'}
                         errorMessage={errors.title}
@@ -195,8 +177,8 @@ const PostCreate = ({route}) => {
 
                     <Input
                         multiline={true}
-                        onChangeText={(val) => onFormChange("description", val)}
-                        value={form.description}
+                        onChangeText={(val) => onPostChange("description", val)}
+                        value={postData.description}
                         placeholder={"Write description of your image"}
                         label={'Description'}
                         errorMessage={errors.description}

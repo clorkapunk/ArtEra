@@ -1,21 +1,16 @@
-import React, {memo, useCallback, useEffect, useMemo, useRef, useState} from "react";
+import React, {memo, useEffect, useRef, useState} from "react";
 import {
-    ActivityIndicator, Image,
+    ActivityIndicator,
     InteractionManager,
     RefreshControl,
-    ScrollView,
-    Text, TouchableNativeFeedback,
-    TouchableOpacity,
     View,
     FlatList, ToastAndroid
 } from "react-native";
-import {getCommentsByPost, getPosts} from "../../api/ContentAPI";
-import {FontAwesomeIcon} from "@fortawesome/react-native-fontawesome";
-import {faEnvelope, faGlobe, faPaperPlane} from "@fortawesome/free-solid-svg-icons";
+import { getPosts} from "../../api/ContentAPI";
 import ListItem from "../../components/ListItem";
 import CommentBottomSheet from "../../components/CommentBottomSheet";
-import {Button} from "@rneui/themed";
 import SplashScreen from "react-native-splash-screen";
+import ErrorScreens from "../../components/ErrorScreens";
 
 
 const Home = () => {
@@ -27,6 +22,7 @@ const Home = () => {
         results: []
     });
     const [isNetworkError, setIsNetworkError] = useState(false);
+    const [isContentLoading, setIsContentLoading] = useState(false)
     const [refreshing, setRefreshing] = useState(false);
     const [endReachedLoading, setEndReachedLoading] = useState(false);
     const [commentSheetState, setCommentSheetState] = useState({
@@ -36,24 +32,28 @@ const Home = () => {
     const commentSheetRef = useRef()
 
 
+
     useEffect(() => {
         InteractionManager.runAfterInteractions(() => {
             setIsLoading(false);
             SplashScreen.hide()
         });
 
+        setIsContentLoading(true)
         getPosts(1)
             .then(response => {
                 setData(response);
+                setIsContentLoading(false)
             })
             .catch((e) => {
-                setIsNetworkError(false);
+                setIsNetworkError(true);
+                setIsContentLoading(false)
             });
 
 
     }, []);
 
-    const onRefresh = React.useCallback(() => {
+    const onRefresh = () => {
         setRefreshing(true);
         setIsNetworkError(false);
         getPosts(1)
@@ -64,18 +64,16 @@ const Home = () => {
             .catch((e) => {
                 setIsNetworkError(true);
                 setRefreshing(false);
-                // setData(getRandomData());
             });
-    }, []);
+    }
 
     const onEndReached = () => {
         if (data.next === null) {
             ToastAndroid.show("End reached!", ToastAndroid.SHORT)
             return
         }
-        console.log('called for page = ' + data.next)
-        setEndReachedLoading(true)
 
+        setEndReachedLoading(true)
         getPosts(data.next)
             .then(data => {
                 setData(prevState => {
@@ -108,73 +106,62 @@ const Home = () => {
             item={item}
         />;
 
-    // const _renderitem = ({item}) =>
-    //     <Text className='text-center p-20 mb-5 bg-amber-100 text-2xl font-bold'>{item.owner}</Text>;
+    const componentLoaded = () => {
+        if (isLoading) return (
+            <View>
+                <ActivityIndicator/>
+            </View>
+        )
+
+        if(isContentLoading) return (
+            <View className='w-full h-full justify-center items-center'>
+                <ActivityIndicator size={50}/>
+            </View>
+        )
+
+        if (isNetworkError) return (
+            <ErrorScreens type={'network'} refreshing={refreshing} onRefresh={onRefresh}/>
+        )
+
+        return true
+    }
 
     return (
+
         <>
-            {isLoading ?
-                <View>
-                    <ActivityIndicator/>
-                </View>
-                :
-                (
-                    isNetworkError ?
-                        <ScrollView
-                            contentContainerStyle={{flexGrow: 1}}
-                            refreshControl={
-                                <RefreshControl
-                                    refreshing={refreshing}
-                                    onRefresh={onRefresh}/>
-                            }
-                        >
-                            <View className="w-full h-full flex-row justify-center items-center">
-                                <View className="p-10 flex-col justify-center items-center">
-                                    <FontAwesomeIcon icon={faGlobe} size={50} style={{opacity: 0.8}}/>
-                                    <Text className="text-center text-base mt-5">
-                                        Read a book, watch a movie, play board games. A world without the Internet is
-                                        also wonderful!
-                                    </Text>
-                                </View>
-                            </View>
-                        </ScrollView>
-                        :
-                        <>
-                            <View style={{flex: 1, justifyContent: "flex-end"}}>
-                                <FlatList
-                                    disableVirtualization={true}
-                                    initialNumToRender={5}
-                                    refreshControl={
-                                        <RefreshControl
-                                            enabled={true}
-                                            refreshing={refreshing}
-                                            onRefresh={onRefresh}
-                                        />
-                                    }
-                                    onEndReached={() => onEndReached()}
-                                    onEndReachedThreshold={0.2}
-                                    data={data.results}
-                                    renderItem={_renderitem}
-                                    keyExtractor={(item, index) => item.id}
-                                />
-                            </View>
-                            {/*{*/}
-                            {/*    endReachedLoading &&*/}
-                            {/*    <ActivityIndicator size={30} style={{}}/>*/}
-                            {/*}*/}
+            {
+                componentLoaded() !== true ?
+                    componentLoaded()
+                    :
+                    <>
+                        <View style={{flex: 1, justifyContent: "flex-end"}}>
+                            <FlatList
+                                disableVirtualization={true}
+                                initialNumToRender={5}
+                                refreshControl={
+                                    <RefreshControl
+                                        enabled={true}
+                                        refreshing={refreshing}
+                                        onRefresh={onRefresh}
+                                    />
+                                }
+                                onEndReached={() => onEndReached()}
+                                onEndReachedThreshold={0.2}
+                                data={data.results}
+                                renderItem={_renderitem}
+                                keyExtractor={(item, index) => item.id}
+                            />
+                        </View>
 
+                        <CommentBottomSheet
+                            onClose={() => setCommentSheetState(false)}
+                            ref={commentSheetRef}/>
 
-                            <CommentBottomSheet
-                                onClose={() => setCommentSheetState(false)}
-                                ref={commentSheetRef}/>
-                        </>
-
-                )
+                    </>
             }
         </>
 
-    )
-        ;
+    );
 };
 
 export default memo(Home);

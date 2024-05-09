@@ -1,5 +1,14 @@
 import React, {forwardRef, memo, useEffect, useImperativeHandle, useState} from "react";
-import {ActivityIndicator, View, Text, Image, TouchableOpacity, TextInput, TouchableNativeFeedback} from "react-native";
+import {
+    ActivityIndicator,
+    View,
+    Text,
+    Image,
+    TouchableOpacity,
+    TextInput,
+    TouchableNativeFeedback,
+    ToastAndroid
+} from "react-native";
 import {FontAwesomeIcon} from "@fortawesome/react-native-fontawesome";
 import {faComment, faHeart, faPaperPlane} from "@fortawesome/free-solid-svg-icons";
 import {
@@ -9,7 +18,8 @@ import {
 } from "../api/ContentAPI";
 import {COLORS} from "../consts/colors";
 import {Input} from "@rneui/themed";
-import {getUserData} from "../api/userAPI";
+import {getUser, getUserData} from "../api/userAPI";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ListItem = ({item, openCommentSheet, commentSheetState}) => {
 
@@ -23,7 +33,8 @@ const ListItem = ({item, openCommentSheet, commentSheetState}) => {
     });
     const [reactions, setReactions] = useState({
         likes: 0,
-        comments: 0
+        comments: 0,
+        isLiked: false
     })
     const [input, setInput] = useState("");
 
@@ -33,41 +44,76 @@ const ListItem = ({item, openCommentSheet, commentSheetState}) => {
 
     function sendComment(postId, text) {
         if (input === "") return;
-        sendCommentToPost(postId, text)
-            .then(({status, postId}) => {
-                if (status === 201) {
 
-                }
-                setInput("")
-                updateReactionsAmount()
-            });
+        getUser()
+            .then(user => {
+                sendCommentToPost(postId, user.id, text)
+                    .then(() => {
+                        setInput('')
+                        updateReactionsAmount()
+                    })
+                    .catch(e => {
+                        ToastAndroid.show("Error", ToastAndroid.SHORT)
+                    })
+            })
+            .catch(e => {
+                ToastAndroid.show("Log in to comment", ToastAndroid.SHORT)
+            })
     }
 
 
     function setLike() {
-        sendLikeToPost(item.id)
-            .then(status => {
-                if (status === 201) {
-
-                }
-                updateReactionsAmount()
+        getUser()
+            .then(user => {
+                sendLikeToPost(item.id, user.id)
+                    .then(status => {
+                        updateReactionsAmount()
+                    })
             })
+            .catch(e => {
+                ToastAndroid.show("Log in to like", ToastAndroid.SHORT)
+            })
+
     }
 
     function updateReactionsAmount() {
-        getReactionsByPost(item.id)
-            .then(response => {
-                setReactions({
-                    likes: response.like_count,
-                    comments: response.comment_count
-                })
+
+        getUser()
+            .then(user => {
+                getReactionsByPost(item.id, user.id)
+                    .then(response => {
+                        setReactions({
+                            likes: response.like_count,
+                            comments: response.comment_count,
+                            isLiked: response.is_liked
+                        })
+                    })
+                    .catch(e => {
+                        setReactions({
+                            likes: 0,
+                            comments: 0,
+                            isLiked: false
+                        })
+                    })
             })
             .catch(e => {
-                setReactions({
-                    likes: 0,
-                    comments: 0
-                })
+                getReactionsByPost(item.id, '')
+                    .then(response => {
+                        setReactions({
+                            likes: response.like_count,
+                            comments: response.comment_count,
+                            isLiked: response.is_liked
+                        })
+                    })
+                    .catch(e => {
+                        setReactions({
+                            likes: 0,
+                            comments: 0,
+                            isLiked: false
+                        })
+                    })
             })
+
     }
 
     useEffect(() => {
@@ -106,7 +152,11 @@ const ListItem = ({item, openCommentSheet, commentSheetState}) => {
                     onPress={() => setLike()}
                 >
                     <View className='px-4 py-2 flex-row items-center justify-end'>
-                        <FontAwesomeIcon size={20} icon={faHeart}/>
+                        <FontAwesomeIcon
+                            size={20}
+                            icon={faHeart}
+                            color={reactions.isLiked ? 'red' : "black"}
+                        />
                         <Text className='text-sm ml-2 text-gray-400'>{reactions.likes}</Text>
                     </View>
                 </TouchableNativeFeedback>

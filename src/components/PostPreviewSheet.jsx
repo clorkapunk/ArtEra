@@ -16,71 +16,91 @@ const imgUrls = [
     "https://media.macphun.com/img/uploads/customer/how-to/608/15542038745ca344e267fb80.28757312.jpg?q=85&w=1340",
 ];
 
-const sampleListItem = (item) =>
-    <View key={item.id} className='flex-col m-3'>
-        <Text className='mb-3 text-gray-400 text-lg'>Username</Text>
-        <Image
-            source={{uri: item.picture}}
-            style={{width: '100%', flex: 1, aspectRatio: 1}}
-            PlaceholderContent={<ActivityIndicator/>}
-        />
-        <View className={'flex-row my-1'}>
-            <TouchableNativeFeedback>
-                <View className='px-4 py-2 flex-row items-center justify-end'>
-                    <FontAwesomeIcon size={20} icon={faHeart}/>
-                    <Text className='text-sm ml-2 text-gray-400'>10</Text>
-                </View>
-            </TouchableNativeFeedback>
+const sampleListItem = (item) => {
 
+    return (
+        <View key={item.id} className='flex-col m-3'>
+            <Text className='mb-3 text-gray-400 text-lg'>{item.username}</Text>
+            <Image
+                source={{uri: item.picture}}
+                style={{width: '100%', flex: 1, aspectRatio: item.aspectRatio}}
+                PlaceholderContent={<ActivityIndicator/>}
+            />
+            <View className='mt-2'>
+                <Text className='text-lg'>{item.title}</Text>
+                <Text className='text-base'>{item.description}</Text>
+            </View>
 
-            <TouchableNativeFeedback onPress={() => {
-                openCommentSheet(item.id)
-            }}
-            >
-                <View className='px-4 flex-row items-center justify-end'>
-                    <FontAwesomeIcon style={{marginBottom: 2}} size={20} icon={faComment}/>
-                    <Text className='text-sm ml-2 text-gray-400'>10</Text>
-                </View>
-            </TouchableNativeFeedback>
-
-        </View>
-
-        <Input
-            placeholder={"Write your comment"}
-            rightIcon={(
+            <View className={'flex-row my-1'}>
                 <TouchableNativeFeedback>
-                    <View className='p-2'>
-                        <FontAwesomeIcon
-                            size={20}
-                            icon={faPaperPlane}
-                            color={COLORS.primary}/>
+                    <View className='px-4 py-2 flex-row items-center justify-end'>
+                        <FontAwesomeIcon size={20} icon={faHeart}/>
+                        <Text className='text-sm ml-2 text-gray-400'>{item.likes}</Text>
                     </View>
                 </TouchableNativeFeedback>
-            )}
-            containerStyle={{paddingHorizontal: 0}}
-            inputContainerStyle={{
-                paddingLeft: 20, borderRadius: 8,
-                paddingRight: 10,
-                backgroundColor: "white",
-                borderWidth: 1, borderColor: 'black'
-            }}
-            inputStyle={{color: "black"}}
-            labelStyle={{color: "white", marginBottom: 5, fontWeight: "100"}}
-            placeholderTextColor={COLORS.lightGrey}
-            errorStyle={{margin: 0, height: 0}}
-        />
-    </View>
+
+
+                <TouchableNativeFeedback>
+                    <View className='px-4 flex-row items-center justify-end'>
+                        <FontAwesomeIcon style={{marginBottom: 2}} size={20} icon={faComment}/>
+                        <Text className='text-sm ml-2 text-gray-400'>{item.comments}</Text>
+                    </View>
+                </TouchableNativeFeedback>
+
+            </View>
+
+            <Input
+                placeholder={"Write your comment"}
+                rightIcon={(
+                    <TouchableNativeFeedback>
+                        <View className='p-2'>
+                            <FontAwesomeIcon
+                                size={20}
+                                icon={faPaperPlane}
+                                color={COLORS.primary}/>
+                        </View>
+                    </TouchableNativeFeedback>
+                )}
+                containerStyle={{paddingHorizontal: 0}}
+                inputContainerStyle={{
+                    paddingLeft: 20, borderRadius: 8,
+                    paddingRight: 10,
+                    backgroundColor: "white",
+                    borderWidth: 1, borderColor: 'black'
+                }}
+                inputStyle={{color: "black"}}
+                labelStyle={{color: "white", marginBottom: 5, fontWeight: "100"}}
+                placeholderTextColor={COLORS.lightGrey}
+                errorStyle={{margin: 0, height: 0}}
+            />
+        </View>
+    );
+}
+
+const post = {
+    picture: '',
+    aspectRatio: '',
+    username: '',
+    description: '',
+    title: '',
+    likes: '',
+    comments: ''
+}
+
 
 function getRandomData(number) {
     let data = [];
     for (let i = 0; i < number; i++) {
         data.push({
             id: i,
-            owner_id: -1,
+            username: "Username",
             picture: imgUrls[Math.floor(Math.random() * imgUrls.length)],
             description: "Sample amazing description to this post",
             title: "Sample amazing title to this post",
             published_at: new Date(),
+            aspectRatio: 1,
+            likes: 10,
+            comments: 10,
         });
     }
     return data;
@@ -141,7 +161,9 @@ const PostPreviewSheet = forwardRef(({item}, ref) => {
                                     sampleListItem(item)
                                 )
                             }
-                            <ListItem item={sheetData.item}/>
+                            {
+                                sampleListItem(item)
+                            }
                             {
                                 sheetData.before.map(item =>
                                     sampleListItem(item)
