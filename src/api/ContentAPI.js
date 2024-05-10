@@ -1,4 +1,6 @@
-import { $authHost, $host } from "./index";
+import {$generatorHost, $host} from "./index";
+import RNFS from 'react-native-fs';
+import {ToastAndroid} from "react-native";
 
 
 export const getPosts = async (page_number) => {
@@ -55,4 +57,20 @@ export const getReactionsByPost = async (postId, userId) => {
   return data
 }
 
+
+export const getGeneratedImage = async (prompt, steps) => {
+  const {data} = await $generatorHost.post('api/generate_image/', {
+    prompt,
+    steps
+  })
+
+  const file_path = RNFS.DownloadDirectoryPath + `/generated-image-${new Date().getTime()}.jpg`
+
+  RNFS.writeFile(file_path, data, 'base64')
+      .catch((error) => {
+        ToastAndroid.show('Save error', ToastAndroid.SHORT)
+      });
+
+  return file_path
+}
 

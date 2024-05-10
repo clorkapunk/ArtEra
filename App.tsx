@@ -1,14 +1,6 @@
 import React, {useEffect} from "react";
-import {createBottomTabNavigator} from "@react-navigation/bottom-tabs";
 import {NavigationContainer} from "@react-navigation/native";
-import {createNativeStackNavigator} from "@react-navigation/native-stack";
-import Home from "./src/screens/tabs/Home";
-import Search from "./src/screens/tabs/Search";
-import Post from "./src/screens/tabs/post/Post";
-import Chat from "./src/screens/tabs/Generator";
-import Profile from "./src/screens/tabs/Profile";
 import TabsLayout from "./src/screens/tabs/TabsLayout";
-import SignIn from "./src/screens/auth/SignIn";
 import AuthLayout from "./src/screens/auth/AuthLayout";
 import {GestureHandlerRootView} from "react-native-gesture-handler";
 import {PermissionsAndroid, Platform} from "react-native";

@@ -159,13 +159,14 @@ const TabsLayout = () => {
 
 
                         <Tab.Screen
-                            name="chat"
+                            name="generator"
                             options={{
+                                tabBarHideOnKeyboard: true,
                                 tabBarIcon: ({color, focused}) => (
                                     <TabIcon
                                         icon={faMessage}
                                         color={color}
-                                        name="Chat"
+                                        name="Generate"
                                         focused={focused}
                                     />
                                 ),

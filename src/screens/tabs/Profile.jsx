@@ -31,6 +31,7 @@ const Profile = () => {
         avatar: 'https://www.clevelanddentalhc.com/wp-content/uploads/2018/03/sample-avatar.jpg',
         email: "",
     });
+    const [artsCount, setArtsCount] = useState(0)
     const [data, setData] = useState({
         count: null,
         next: null,
@@ -55,15 +56,41 @@ const Profile = () => {
                         setUser(data)
                         setIsUserLoaded(true)
                         setIsContentLoaded(false)
-                        getPostsBySearch('', data.id, 1)
-                            .then(data => {
-                                setData(data)
-                                setIsContentLoaded(true)
-                            })
-                            .catch(e => {
-                                setIsContentLoaded(true)
-                                setIsNetworkError(true)
-                            })
+                        if(tab === 'arts'){
+                            getPostsBySearch('', data.id, 1)
+                                .then(data => {
+                                    setData(data)
+                                    setArtsCount(data.count)
+                                    setIsContentLoaded(true)
+                                })
+                                .catch(e => {
+                                    setIsContentLoaded(true)
+                                    setIsNetworkError(true)
+                                })
+                        }
+                        else if(tab === 'favorites'){
+                            getLikedPosts(user.id)
+                                .then(data => {
+                                    setData({
+                                        count: null,
+                                        next: null,
+                                        previous: null,
+                                        results: data
+                                    })
+                                    setIsContentLoaded(true)
+                                })
+                                .catch(e => {
+                                    setIsNetworkError(true)
+                                    setIsContentLoaded(true)
+                                })
+                            getPostsBySearch('', data.id, 1)
+                                .then(data => {
+                                    setArtsCount(data.count)
+                                })
+                                .catch(e => {
+                                })
+                        }
+
                     })
                     .catch(e => {
                         setIsUserLoaded(true)
@@ -93,18 +120,45 @@ const Profile = () => {
                 getUserData(user.id)
                     .then(data => {
                         setUser(data)
-                        getPostsBySearch('', data.id, 1)
-                            .then(data => {
-                                setData(data)
-                            })
-                            .catch(e => {
-                                setIsNetworkError(true)
-                            })
-
-
+                        setIsContentLoaded(false)
+                        if(tab === 'arts'){
+                            getPostsBySearch('', data.id, 1)
+                                .then(data => {
+                                    setData(data)
+                                    setArtsCount(data.count)
+                                    setIsContentLoaded(true)
+                                })
+                                .catch(e => {
+                                    setIsContentLoaded(true)
+                                    setIsNetworkError(true)
+                                })
+                        }
+                        else if(tab === 'favorites'){
+                            getLikedPosts(user.id)
+                                .then(data => {
+                                    setData({
+                                        count: null,
+                                        next: null,
+                                        previous: null,
+                                        results: data
+                                    })
+                                    setIsContentLoaded(true)
+                                })
+                                .catch(e => {
+                                    setIsNetworkError(true)
+                                    setIsContentLoaded(true)
+                                })
+                            getPostsBySearch('', data.id, 1)
+                                .then(data => {
+                                    setArtsCount(data.count)
+                                })
+                                .catch(e => {
+                                })
+                        }
 
                     })
                     .catch(e => {
+                        setIsUserLoaded(true)
                         setIsNetworkError(true)
                     })
             })
@@ -116,7 +170,7 @@ const Profile = () => {
             return
         }
 
-        setInNetworkError(false)
+        setIsNetworkError(false)
         getPostsBySearch('', '', data.next)
             .then(data => {
                 setData(prevState => {
@@ -129,7 +183,7 @@ const Profile = () => {
                 });
             })
             .catch((e) => {
-                setInNetworkError(true)
+                setIsNetworkError(true)
             });
     }
 
@@ -170,6 +224,10 @@ const Profile = () => {
 
     }
 
+    function isCloseToBottom({layoutMeasurement, contentOffset, contentSize}){
+        return layoutMeasurement.height + contentOffset.y >= contentSize.height - 20;
+    }
+
     const componentLoaded = () => {
         if (isLoading) return (
             <View>
@@ -206,6 +264,11 @@ const Profile = () => {
                     componentLoaded()
                     :
                     <ScrollView
+                        onScroll={({nativeEvent}) => {
+                            if(isCloseToBottom(nativeEvent) && tab === 'arts') {
+                                onEndReached()
+                            }
+                        }}
                         className="flex-1"
                         stickyHeaderIndices={[3]}
                         refreshControl={
@@ -216,7 +279,7 @@ const Profile = () => {
                             />
                         }
                     >
-                        <View style={{height: 150}}>
+                        <View style={{width: '100%', aspectRatio: 16/9}}>
                             <Image
                                 source={{uri: user.user_background}}
                                 style={{flex: 1}}
@@ -253,7 +316,7 @@ const Profile = () => {
                             >
                                 <View className="p-1 rounded">
                                     <Text className={`text-xl font-cgregular underline `}>
-                                        {data.count} arts
+                                        {artsCount} arts
                                     </Text>
                                 </View>
                             </TouchableNativeFeedback>

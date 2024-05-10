@@ -39,22 +39,9 @@ const GalleryItem = ({item, isSelected, select}) => {
 
 const SectionItem = ({group, selected, setSelected}) => {
 
-
-    // const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    // let month = ''
-    // let date = group.date.split(' ')[0]
-    //
-    // if (group.date.split(' ').length > 1) {
-    //     month = months[group.date.split(' ')[1]];
-    //     date += " " + month
-    // }
-    // if (group.date.split(' ').length > 2) {
-    //     date += " " + group.date.split(' ')[2]
-    // }
-
     return (
         <View className='mx-3 my-4'>
-            <Text className='text-2xl font-semibold'>{group.date}</Text>
+            <Text className='text-2xl font-semibold text-black'>{group.date}</Text>
             <View className='flex-row flex-wrap justify-between'>
                 {
                     group.items.map(item => {
@@ -86,7 +73,11 @@ const Post = () => {
     }, []);
 
     const [selected, setSelected] = useState(null);
-    const [rawPhotos, setRawPhotos] = useState([])
+    const [gallery, setGallery] = useState({
+        edges: [],
+        end_cursor: '0',
+        has_next_page: false
+    })
     const [groupedPhotos, setGroupedPhotos] = useState([]);
     const [sortType, setSortType] = useState('day')
     const [refreshing, setRefreshing] = useState(false);
@@ -105,7 +96,7 @@ const Post = () => {
         const temp = {}
 
         for (let i = 0; i < sorted.length; i++) {
-            const date = new Date(sorted[i].node.modificationTimestamp * 1000)
+            const date = new Date(sorted[i].node.timestamp * 1000)
 
             let dateString = ''
             if (sortParam === 'year') {
@@ -145,9 +136,14 @@ const Post = () => {
         CameraRoll.getPhotos({
             first: 50,
             assetType: 'All',
+            groupTypes: 'All'
         })
             .then(r => {
-                setRawPhotos(r.edges)
+                setGallery({
+                    edges: r.edges,
+                    end_cursor: r.page_info.end_cursor,
+                    has_next_page: r.page_info.has_next_page
+                })
                 setIsContentLoading(false)
             })
             .catch((err) => {
@@ -160,14 +156,14 @@ const Post = () => {
     }, [])
 
     useEffect(() => {
-        setGroupedPhotos(groupPhotosBy(rawPhotos, sortType))
-    }, [rawPhotos, sortType])
+        setGroupedPhotos(groupPhotosBy(gallery.edges, sortType))
+    }, [gallery, sortType])
 
-    const onRefresh = useCallback(() => {
+    const onRefresh = () => {
         setRefreshing(true);
         getPhotos(sortType)
         setRefreshing(false)
-    }, []);
+    }
 
     function navigateToCreate() {
         if (selected === null) {
@@ -188,6 +184,35 @@ const Post = () => {
         })
 
 
+    }
+
+    function onEndReached(){
+        if(!gallery.has_next_page){
+            return
+        }
+
+        CameraRoll.getPhotos({
+            first: 20,
+            after: gallery.end_cursor,
+            assetType: 'All',
+            groupTypes: 'All'
+        })
+            .then(r => {
+                setGallery(prevState => {
+                    return {
+                        edges: [
+                            ...prevState.edges,
+                            ...r.edges
+                        ],
+                        end_cursor: r.page_info.end_cursor,
+                        has_next_page: r.page_info.has_next_page
+                    }
+                })
+                setIsContentLoading(false)
+            })
+            .catch((err) => {
+                setIsContentLoading(false)
+            });
     }
 
     const header = () => {
@@ -240,6 +265,7 @@ const Post = () => {
                             refreshControl={
                                 <RefreshControl refreshing={refreshing} onRefresh={onRefresh}/>
                             }
+                            onEndReached={() => onEndReached()}
                             data={groupedPhotos}
                             renderItem={({item}) =>
                                 <SectionItem

@@ -9,6 +9,11 @@ const $host = axios.create({
   timeout: 5000
 })
 
+const $generatorHost = axios.create({
+  baseURL: REACT_APP_API_URL,
+  timeout: 60000
+})
+
 const $authHost = axios.create({
   baseURL: REACT_APP_API_URL,
   timeout: 5000
@@ -23,5 +28,6 @@ $authHost.interceptors.request.use(authInterceptor)
 
 export {
   $host,
-  $authHost
+  $authHost,
+  $generatorHost
 }
