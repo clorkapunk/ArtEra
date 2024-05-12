@@ -5,9 +5,11 @@ import AuthLayout from "./src/screens/auth/AuthLayout";
 import {GestureHandlerRootView} from "react-native-gesture-handler";
 import {PermissionsAndroid, Platform} from "react-native";
 import {SafeAreaProvider} from "react-native-safe-area-context";
-import PostScreen from "./src/screens/post/PostScreen";
+import PostScreen from "./src/screens/PostScreen";
 import {createStackNavigator, TransitionPreset, TransitionPresets} from "@react-navigation/stack";
-import ProfileEdit from "./src/screens/profile-edit/ProfileEdit";
+import ProfileEdit from "./src/screens/ProfileEdit";
+import "./global.css"
+import ProfileUser from "./src/screens/ProfileUser";
 
 
 const Stack = createStackNavigator();
@@ -90,6 +92,13 @@ function App(): React.JSX.Element {
                         <Stack.Screen
                             name="profile-edit"
                             component={ProfileEdit}
+                            options={{
+                                ...TransitionPresets.SlideFromRightIOS
+                            }}
+                        />
+                        <Stack.Screen
+                            name="profile-user"
+                            component={ProfileUser}
                             options={{
                                 ...TransitionPresets.SlideFromRightIOS
                             }}
