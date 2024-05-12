@@ -26,7 +26,6 @@ export const getUserData = async (userId) => {
 
 export const editUserData = async (userId, formData) => {
 
-    console.log(formData)
     const {data} = await  $host.put(`api/users/${userId}`, formData, {
         headers: {
             'Content-Type': 'multipart/form-data'

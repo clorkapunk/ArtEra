@@ -1,28 +1,23 @@
-import React, {forwardRef, memo, useEffect, useImperativeHandle, useRef, useState} from "react";
+import React, {forwardRef, memo, useEffect, useImperativeHandle, useMemo, useRef, useState} from "react";
 import BottomSheet, {
     BottomSheetBackdrop,
     BottomSheetFlatList,
     BottomSheetFooter,
-    BottomSheetTextInput, useBottomSheet,
 } from "@gorhom/bottom-sheet/src";
-import {COLORS} from "../consts/colors";
 import {
     ActivityIndicator,
     Image,
-    Keyboard, KeyboardAvoidingView, RefreshControl,
     Text, ToastAndroid,
     TouchableNativeFeedback,
     TouchableOpacity,
-    TouchableWithoutFeedback,
     View
 } from "react-native";
 import {Portal} from "@gorhom/portal";
-import {Input} from "@rneui/themed";
 import {FontAwesomeIcon} from "@fortawesome/react-native-fontawesome";
 import {faPaperPlane} from "@fortawesome/free-solid-svg-icons";
-import {getCommentsByPost, getPosts, sendCommentToPost, sendLikeToPost} from "../api/ContentAPI";
-import {getUser, getUserData, login} from "../api/userAPI";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import {getCommentsByPost, sendCommentToPost} from "../api/ContentAPI";
+import {getUser, getUserData} from "../api/userAPI";
+import Input from './../components/Input'
 
 
 const CommentSheetBackdrop = memo(({animatedIndex, animatedPosition, style}) => {
@@ -64,9 +59,8 @@ const CommentSheetBackdrop = memo(({animatedIndex, animatedPosition, style}) => 
     );
 })
 
-const CommentSheetFooter = ({animatedFooterPosition, bottomSheetRef, postId, updateComments}) => {
+const CommentSheetFooter = ({animatedFooterPosition, postId, updateComments}) => {
     const [input, setInput] = useState("");
-    const inputRef = useRef(null);
 
 
     function sendComment(postId, text) {
@@ -99,20 +93,16 @@ const CommentSheetFooter = ({animatedFooterPosition, bottomSheetRef, postId, upd
         >
             <Input
                 onChangeText={(value) => setInput(value)}
-                ref={inputRef}
                 value={input}
-                onPress={() => {
-                }}
-                onFocus={() => {
-                    // bottomSheetRef.current?.expand()
-
-                }}
                 placeholder={"Write your comment"}
                 rightIcon={(
                     <TouchableOpacity onPress={() => {
                         sendComment(postId, input);
                     }}>
-                        <FontAwesomeIcon size={20} icon={faPaperPlane} color={COLORS.primary}/>
+                        <FontAwesomeIcon
+                            size={20}
+                            icon={faPaperPlane}
+                        />
                     </TouchableOpacity>
                 )}
                 containerStyle={{paddingHorizontal: 0}}
@@ -121,7 +111,7 @@ const CommentSheetFooter = ({animatedFooterPosition, bottomSheetRef, postId, upd
                 }}
                 inputStyle={{color: "white"}}
                 labelStyle={{color: "white", marginBottom: 5, fontWeight: "100"}}
-                placeholderTextColor={COLORS.lightGrey}
+                placeholderTextColor={'#FFFFFF'}
                 errorStyle={{margin: 0, height: 0}}
             />
         </BottomSheetFooter>
@@ -208,15 +198,6 @@ const Comment = ({item}) => {
 }
 
 
-const avatars = [
-    "https://toppng.com/uploads/preview/free-png-happy-black-person-png-images-transparent-black-man-thumbs-up-11563648491mkncpzrjrf.png",
-    "https://t4.ftcdn.net/jpg/03/83/25/83/360_F_383258331_D8imaEMl8Q3lf7EKU2Pi78Cn0R7KkW9o.jpg",
-    "https://www.dmarge.com/wp-content/uploads/2021/01/dwayne-the-rock-.jpg",
-    "https://t3.ftcdn.net/jpg/03/02/88/46/360_F_302884605_actpipOdPOQHDTnFtp4zg4RtlWzhOASp.jpg",
-    "https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500",
-];
-
-
 const CommentBottomSheet = forwardRef(({onClose}, ref) => {
     const bottomSheetRef = useRef(null);
     const [commentSheetData, setCommentSheetData] = useState({
@@ -226,6 +207,7 @@ const CommentBottomSheet = forwardRef(({onClose}, ref) => {
     const [isCommentsLoading, setIsCommentsLoading] = useState(false);
     const [sheetIndex, setSheetIndex] = useState(-1);
     const [refreshing, setRefreshing] = useState(false);
+    const snapPoints = useMemo(() => ["75%", "100%"], []);
 
     const onRefresh = () => {
         getCommentsByPost(commentSheetData.id).then(data => {
@@ -282,10 +264,10 @@ const CommentBottomSheet = forwardRef(({onClose}, ref) => {
             <Portal>
                 <BottomSheet
                     backgroundStyle={{
-                        backgroundColor: COLORS.darkGrey,
+                        backgroundColor: '#ffffff',
                     }}
                     ref={bottomSheetRef}
-                    snapPoints={["75%", "100%"]}
+                    snapPoints={snapPoints}
                     index={-1}
                     enablePanDownToClose={true}
                     enableDynamicSizing={true}

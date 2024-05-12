@@ -19,16 +19,14 @@ export const getLikedPosts = async (userId) => {
 }
 
 export const sendPost = async (formData) => {
-  // let { token } = JSON.parse(await AsyncStorage.getItem("user"))
-  // const id = jwtDecode(token.substring(2, token.length - 1)).id
-  // console.log("form here", formData)
   const response = await $host.post("api/posts/", formData, {
     headers: {
       'Content-Type': 'multipart/form-data'
     }
   })
-      .catch(e => console.log(e.response.data));
-  console.log('data', response.data)
+      .catch(e => {
+
+      });
   return response.status
 }
 

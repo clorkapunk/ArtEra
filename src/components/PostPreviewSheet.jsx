@@ -2,12 +2,11 @@ import React, {forwardRef, memo, useEffect, useImperativeHandle, useRef, useStat
 import {getCommentsByPost} from "../api/ContentAPI";
 import {Portal} from "@gorhom/portal";
 import BottomSheet, {BottomSheetFlatList, BottomSheetScrollView} from "@gorhom/bottom-sheet/src";
-import {COLORS} from "../consts/colors";
 import {ActivityIndicator, Image, Text, TouchableNativeFeedback, View} from "react-native";
 import ListItem from "./ListItem";
 import {FontAwesomeIcon} from "@fortawesome/react-native-fontawesome";
 import {faComment, faHeart, faPaperPlane} from "@fortawesome/free-solid-svg-icons";
-import {Input} from "@rneui/themed";
+import Input from './Input'
 
 const imgUrls = [
     "https://letsenhance.io/static/8f5e523ee6b2479e26ecc91b9c25261e/1015f/MainAfter.jpg",
@@ -57,7 +56,7 @@ const sampleListItem = (item) => {
                             <FontAwesomeIcon
                                 size={20}
                                 icon={faPaperPlane}
-                                color={COLORS.primary}/>
+                            />
                         </View>
                     </TouchableNativeFeedback>
                 )}
@@ -70,7 +69,7 @@ const sampleListItem = (item) => {
                 }}
                 inputStyle={{color: "black"}}
                 labelStyle={{color: "white", marginBottom: 5, fontWeight: "100"}}
-                placeholderTextColor={COLORS.lightGrey}
+                placeholderTextColor={'#ffffff'}
                 errorStyle={{margin: 0, height: 0}}
             />
         </View>
@@ -144,7 +143,7 @@ const PostPreviewSheet = forwardRef(({item}, ref) => {
             <Portal>
                 <BottomSheet
                     backgroundStyle={{
-                        backgroundColor: COLORS.darkGrey,
+                        backgroundColor: '#ffffff',
                     }}
                     ref={bottomSheetRef}
                     snapPoints={["100%"]}

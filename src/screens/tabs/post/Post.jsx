@@ -14,9 +14,7 @@ import {
 import {useNavigation} from "@react-navigation/native";
 import {CameraRoll} from "@react-native-camera-roll/camera-roll";
 import {Button} from "@rneui/themed";
-import {COLORS} from "../../../consts/colors";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import ErrorScreens from "../../../components/ErrorScreens";
 
 
 const GalleryItem = ({item, isSelected, select}) => {
@@ -176,18 +174,22 @@ const Post = () => {
         }
 
         getId().then(user => {
-            navigation.navigate('post-create', {
-                item: selected,
-                user: user,
-                aspectRatio: aspectRatio
-            })
+            if (user === null) {
+                ToastAndroid.show("Log in to make posts", ToastAndroid.SHORT)
+            } else {
+                navigation.navigate('post-create', {
+                    item: selected,
+                    user: user,
+                    aspectRatio: aspectRatio
+                })
+            }
         })
 
 
     }
 
-    function onEndReached(){
-        if(!gallery.has_next_page){
+    function onEndReached() {
+        if (!gallery.has_next_page) {
             return
         }
 
@@ -215,28 +217,6 @@ const Post = () => {
             });
     }
 
-    const header = () => {
-        return (
-            <View className='flex-row justify-center'>
-                <Button
-                    containerStyle={{flex: 1}}
-                    buttonStyle={{backgroundColor: sortType === 'day' ? COLORS.primary : 'gray'}}
-                    onPress={() => setSortType('day')}
-                    title={'day'}/>
-                <Button
-                    containerStyle={{flex: 1}}
-                    buttonStyle={{backgroundColor: sortType === 'month' ? COLORS.primary : 'gray'}}
-                    onPress={() => setSortType('month')}
-                    title={'month'}/>
-                <Button
-                    containerStyle={{flex: 1}}
-                    buttonStyle={{backgroundColor: sortType === 'year' ? COLORS.primary : 'gray'}}
-                    onPress={() => setSortType('year')}
-                    title={'year'}/>
-            </View>
-        )
-    }
-
     const componentLoaded = () => {
         if (isLoading) return (
             <View>
@@ -244,7 +224,7 @@ const Post = () => {
             </View>
         )
 
-        if(isContentLoading) return (
+        if (isContentLoading) return (
             <View className='w-full h-full justify-center items-center'>
                 <ActivityIndicator size={50}/>
             </View>
@@ -284,13 +264,13 @@ const Post = () => {
                                 }
                                 title="Next"
                                 buttonStyle={{
-                                    backgroundColor: COLORS.secondary,
+                                    backgroundColor: "#FFFFFF",
                                     padding: 10,
                                     borderRadius: 10,
                                 }}
                                 titleStyle={{
                                     fontSize: 20,
-                                    color: COLORS.primary
+                                    color: "#000000"
                                 }}
                                 containerStyle={{
                                     flex: 1,

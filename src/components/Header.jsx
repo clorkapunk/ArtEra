@@ -4,8 +4,7 @@ import {useIsFocused, useNavigation, useRoute} from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {FontAwesomeIcon} from "@fortawesome/react-native-fontawesome";
 import {faBars} from "@fortawesome/free-solid-svg-icons";
-import { styled } from "nativewind";
-import StyledFontAwesomeIcon from "./StyledFontAwesomeIcon";
+import {colors} from "../consts/colors";
 
 
 const Header = ({title, route, openSideMenu}) => {
@@ -34,32 +33,35 @@ const Header = ({title, route, openSideMenu}) => {
 
     return (
         <View
-            className={`bg-header-bg border-b-2 border-b-header-border
-            px-3 py-1 flex-row items-center justify-between `}
+            className={`bg-header-bg border-b border-b-header-border
+            py-1 flex-row items-center justify-between h-[40px]
+            relative
+            `}
         >
+
             <Text
-                className='text-2xl font-averia_l text-header-text'
+                className='text-3xl font-averia_l text-header-text
+                absolute w-full text-center'
             >
                 {title}
             </Text>
-            <View className='h-[45px] flex-row items-center'>
+
+            <View className='flex-row items-center'>
                 <TouchableNativeFeedback onPress={() => openSideMenu()}>
                     <View className='p-2'>
-                        <StyledFontAwesomeIcon
-                            className='text-header-menu'
+                        <FontAwesomeIcon
                             icon={faBars}
                             size={20}
+                            color={colors.header.menu}
                         />
                     </View>
                 </TouchableNativeFeedback>
             </View>
 
-
         </View>
 
     );
 };
-
 
 
 export default memo(Header);

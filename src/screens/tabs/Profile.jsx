@@ -1,7 +1,6 @@
 import React, {memo, useEffect, useState} from "react";
 import {
     ActivityIndicator,
-    FlatList,
     Text,
     TouchableNativeFeedback,
     View,
@@ -9,14 +8,13 @@ import {
     InteractionManager, RefreshControl, ToastAndroid, ScrollView,
 } from "react-native";
 import GridItem from "../../components/GridItem";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import {getLikedPosts, getPostsBySearch} from "../../api/ContentAPI";
 import MasonryList from "@react-native-seoul/masonry-list";
 import {getUser, getUserData} from "../../api/userAPI";
-import SplashScreen from "react-native-splash-screen";
 import {FontAwesomeIcon} from "@fortawesome/react-native-fontawesome";
 import {faArrowUp} from "@fortawesome/free-solid-svg-icons";
 import ErrorScreens from "../../components/ErrorScreens";
+import {Button} from "@rneui/themed";
 
 const Profile = () => {
     const [isLoading, setIsLoading] = useState(true);
@@ -171,7 +169,7 @@ const Profile = () => {
         }
 
         setIsNetworkError(false)
-        getPostsBySearch('', '', data.next)
+        getPostsBySearch('', user.id, data.next)
             .then(data => {
                 setData(prevState => {
                     return {
@@ -236,12 +234,20 @@ const Profile = () => {
         )
 
         if (!isLoggedIn) return (
-            <View className='flex-row justify-center items-center h-full'>
-                <Text className='text-lg mr-3'>Log in to see your profile</Text>
-                <FontAwesomeIcon
-                    style={{opacity: 0.7}}
-                    size={20}
-                    icon={faArrowUp}/>
+            <View className='flex-col justify-center items-center  h-full'>
+                <View className='flex-row justify-center'>
+                    <Text className='text-lg mr-3'>Log in to see your profile</Text>
+                    <FontAwesomeIcon
+                        style={{opacity: 0.7}}
+                        size={20}
+                        icon={faArrowUp}/>
+                </View>
+
+                <Button
+                    onPress={() => {onRefresh()}}
+                    type={'clear'}
+                    title={'Refresh'}
+                />
             </View>
         )
 
@@ -364,7 +370,6 @@ const Profile = () => {
                     </ScrollView>
             }
         </>
-
     );
 };
 

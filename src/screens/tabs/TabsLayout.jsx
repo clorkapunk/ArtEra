@@ -4,21 +4,20 @@ import Home from "./Home";
 import {View, Text} from "react-native";
 import {FontAwesomeIcon} from "@fortawesome/react-native-fontawesome";
 import Header from "../../components/Header";
-import {faHome, faMessage, faSearch, faSquarePlus, faUser} from "@fortawesome/free-solid-svg-icons";
+import {faHome, faMessage, faSearch, faSquarePlus, faSquareXmark, faUser} from "@fortawesome/free-solid-svg-icons";
 import Search from "./Search";
 import Profile from "./Profile";
 import {PortalProvider} from "@gorhom/portal";
 import PostLayout from "./post/PostLayout";
-import {createDrawerNavigator} from '@react-navigation/drawer';
 import SideMenuLayout from "../../components/SideMenuLayout";
 import MenuDrawer from 'react-native-side-drawer'
 import Generator from "./Generator";
-import {s} from 'react-native-wind'
+import {colors} from '../../consts/colors'
+
 
 const Tab = createBottomTabNavigator();
-const Drawer = createDrawerNavigator();
 
-const TabIcon = ({icon, color, name, focused}) => {
+const TabIcon = ({icon, color, name, focused, size = 20, style}) => {
     return (
         <View style={{
             justifyContent: "center",
@@ -27,12 +26,13 @@ const TabIcon = ({icon, color, name, focused}) => {
             <FontAwesomeIcon
                 color={color}
                 icon={icon}
-                size={20}
+                size={focused ? 20: size}
+                style={style}
             />
 
             {
                 focused &&
-                <Text style={{color: color, fontWeight: "bold"}}>
+                <Text style={{color: color, fontFamily: 'AveriaSerifLibre_Bold'}}>
                     {name}
                 </Text>
             }
@@ -40,19 +40,9 @@ const TabIcon = ({icon, color, name, focused}) => {
     );
 };
 
-
 const TabsLayout = () => {
-    const bottomSheetRef = useRef(null);
-    const [bottomSheetData, setBottomSheetData] = useState({
-        id: null,
-        comments: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
-    });
-    const snapPoints = useMemo(() => ["75%", "100%"], []);
+
     const [sideMenuOpen, setSideMenuOpen] = useState(false);
-
-    const handleSheetChanges = useCallback((index) => {
-
-    }, []);
 
     const renderItem = useCallback(
         ({item}) => (
@@ -69,7 +59,7 @@ const TabsLayout = () => {
 
             <MenuDrawer
                 open={sideMenuOpen}
-                position={'right'}
+                position={'left'}
                 drawerContent={<SideMenuLayout
                     onClose={() => setSideMenuOpen(false)}
                 />}
@@ -82,17 +72,14 @@ const TabsLayout = () => {
                     <Tab.Navigator
                         screenOptions={{
                             tabBarShowLabel: false,
-                            tabBarActiveTintColor: "#5BC0BE",
-                            tabBarInactiveTintColor: "#3A506B",
-                            tabBarStyle: [
-
-                                {
-                                    backgroundColor: "#0B132B",
-                                    height: 55,
-                                    borderTopWidth: 2,
-                                    borderTopColor: "#5BC0BE",
-                                }
-                            ],
+                            tabBarActiveTintColor: colors.tabbar.tab.active,
+                            tabBarInactiveTintColor: colors.tabbar.tab.inactive,
+                            tabBarStyle: {
+                                backgroundColor: colors.tabbar.bg,
+                                height: 45,
+                                borderTopWidth: 0,
+                                borderTopColor: colors.tabbar.border,
+                            },
                             freezeOnBlur: true,
                         }}
                         initialRouteName="home"
@@ -100,6 +87,7 @@ const TabsLayout = () => {
                         <Tab.Screen
                             name="home"
                             options={{
+                                tabBarHideOnKeyboard: true,
                                 tabBarIcon: ({color, focused}) => (
                                     <TabIcon
                                         icon={faHome}
@@ -144,10 +132,12 @@ const TabsLayout = () => {
                                 tabBarHideOnKeyboard: true,
                                 tabBarIcon: ({color, focused}) => (
                                     <TabIcon
-                                        icon={faSquarePlus}
-                                        color={color}
+                                        icon={faSquareXmark}
+                                        color={colors.tabbar.tab.center}
+                                        size={30}
                                         name="Post"
                                         focused={focused}
+                                        style={{transform: [{rotateZ: '45deg'}]}}
                                     />
                                 ),
                                 header: () => <Header
@@ -198,19 +188,6 @@ const TabsLayout = () => {
                         >
                             {() => <Profile/>}
                         </Tab.Screen>
-                        {/*<Stack.Screen*/}
-                        {/*    name='post-screen'*/}
-                        {/*    component={PostScreen}*/}
-                        {/*    options={{*/}
-                        {/*        tabBarStyle: {*/}
-                        {/*            display: 'none'*/}
-                        {/*        },*/}
-                        {/*        headerShown: false,*/}
-                        {/*        tabBarItemStyle: {*/}
-                        {/*            display: "none"*/}
-                        {/*        }*/}
-                        {/*    }}*/}
-                        {/*/>*/}
                     </Tab.Navigator>
                 </PortalProvider>
             </MenuDrawer>

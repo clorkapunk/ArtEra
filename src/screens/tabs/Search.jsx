@@ -3,18 +3,18 @@ import {
     View,
     Text,
     ScrollView,
-    FlatList,
     InteractionManager,
     ActivityIndicator,
-    TouchableNativeFeedback, TouchableOpacity, RefreshControl, ToastAndroid
+    RefreshControl,
+    ToastAndroid, TouchableOpacity
 } from "react-native";
 import GridItem from "../../components/GridItem";
-import {SearchBar} from "@rneui/base";
-import {faGlobe, faSearch, faX} from "@fortawesome/free-solid-svg-icons";
-import {FontAwesomeIcon} from "@fortawesome/react-native-fontawesome";
-import {getPosts, getPostsBySearch} from "../../api/ContentAPI";
+import {getPostsBySearch} from "../../api/ContentAPI";
 import MasonryList from '@react-native-seoul/masonry-list';
 import ErrorScreens from "../../components/ErrorScreens";
+import SearchBar from '../../components/SearchBar'
+import {FontAwesomeIcon} from "@fortawesome/react-native-fontawesome";
+import {faSearch, faX} from "@fortawesome/free-solid-svg-icons";
 
 
 const SearchTag = ({item}) => {
@@ -82,6 +82,12 @@ const Search = memo(() => {
     }
 
     const onRefresh = () => {
+        setData({
+            count: null,
+            next: null,
+            previous: null,
+            results: []
+        })
         setRefreshing(true);
         setIsNetworkError(false);
         setIsSearchLoading(true)
@@ -159,36 +165,10 @@ const Search = memo(() => {
                         <View className={"mx-5 my-4"}>
                             <SearchBar
                                 onSubmitEditing={() => onSearch()}
-                                placeholder="Search..."
-                                onChangeText={(value) => {
-                                    onChangeSearch(value)
-                                }}
+                                placeholder={''}
+                                onChangeText={(value) => onChangeSearch(value)}
                                 value={search}
-                                containerStyle={{
-                                    backgroundColor: "transparent",
-                                    borderColor: "transparent",
-                                    paddingVertical: 0,
-                                    paddingHorizontal: 0,
-                                }}
-                                inputContainerStyle={{
-                                    backgroundColor: "white",
-                                    borderColor: "#0b132b",
-                                    borderWidth: 1,
-                                    borderBottomWidth: 1,
-                                    borderRadius: 2,
-                                    display: "flex",
-                                    flexDirection: "row-reverse",
-
-                                }}
-                                inputStyle={{
-                                    marginLeft: 0,
-                                    fontSize: 20,
-                                    marginStart: 10,
-                                }}
-                                leftIconContainerStyle={{
-                                    marginEnd: 20,
-                                }}
-                                searchIcon={
+                                rightIcon={
                                     <TouchableOpacity onPress={() => onSearch()}>
                                         <View>
                                             <FontAwesomeIcon size={20} icon={faSearch}/>
@@ -200,10 +180,17 @@ const Search = memo(() => {
                                         className='p-2'
                                         onPress={() => onClear()}>
                                         <View>
-                                            <FontAwesomeIcon icon={faX}/>
+                                            <FontAwesomeIcon icon={faX} size={15}/>
                                         </View>
                                     </TouchableOpacity>
                                 }
+                                clearIconStyle={{}}
+                                labelStyle={{}}
+                                errorStyle={{}}
+                                containerStyle={{}}
+                                inputContainerStyle={{}}
+                                inputStyle={{}}
+                                iconContainerStyle={{}}
                             />
                         </View>
                         <View className="ml-3 mb-4">
@@ -238,8 +225,6 @@ const Search = memo(() => {
                                         keyExtractor={(item, index) => item.id}
                                     />
                             }
-
-
                         </View>
                     </View>
 

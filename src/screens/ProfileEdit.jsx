@@ -8,16 +8,15 @@ import {
     TouchableNativeFeedback, TouchableOpacity,
     View
 } from "react-native";
-import {editUserData, getUser, getUserData} from "../../api/userAPI";
+import {editUserData, getUser, getUserData} from "../api/userAPI";
 import {FontAwesomeIcon} from "@fortawesome/react-native-fontawesome";
 import {faArrowLeft, faArrowUp, faEnvelope, faPen} from "@fortawesome/free-solid-svg-icons";
-import ErrorScreens from "../../components/ErrorScreens";
+import ErrorScreens from "../components/ErrorScreens";
 import SplashScreen from "react-native-splash-screen";
 import {useNavigation} from "@react-navigation/native";
-import {Button, Input} from "@rneui/themed";
-import {COLORS} from "../../consts/colors";
+import {Button} from "@rneui/themed";
 import ImagePicker from "react-native-image-crop-picker";
-import {getPostsBySearch, sendPost} from "../../api/ContentAPI";
+import Input from '../components/Input'
 
 const ProfileEdit = () => {
     const [user, setUser] = useState({
@@ -283,7 +282,7 @@ const ProfileEdit = () => {
                                                 fontWeight: "100",
                                                 fontSize: 20
                                             }}
-                                            placeholderTextColor={COLORS.lightGrey}
+                                            placeholderTextColor={"#ffffff"}
                                             errorStyle={{color: "crimson"}}
                                         />
 
@@ -307,7 +306,7 @@ const ProfileEdit = () => {
                                                 fontWeight: "100",
                                                 fontSize: 20
                                             }}
-                                            placeholderTextColor={COLORS.lightGrey}
+                                            placeholderTextColor={'#ffffff'}
                                             errorStyle={{color: "crimson"}}
                                         />
 

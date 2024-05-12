@@ -3,12 +3,12 @@ import {Image, ScrollView, ToastAndroid, TouchableOpacity, View} from "react-nat
 import {FontAwesomeIcon} from "@fortawesome/react-native-fontawesome";
 import {faArrowLeft, faCrop} from "@fortawesome/free-solid-svg-icons";
 import {useNavigation} from "@react-navigation/native";
-import {Button, Input} from "@rneui/themed";
+import {Button} from "@rneui/themed";
 import ImagePicker from 'react-native-image-crop-picker';
-import {COLORS} from "../../../consts/colors";
 import PostPreviewSheet from "../../../components/PostPreviewSheet";
 import {sendPost} from "../../../api/ContentAPI";
 import {SafeAreaView} from "react-native-safe-area-context";
+import Input from "../../../components/Input";
 
 
 const PostCreate = ({route}) => {
@@ -30,7 +30,6 @@ const PostCreate = ({route}) => {
         title: "",
         description: "",
     });
-
 
 
     function onPostChange(name, value) {
@@ -81,8 +80,8 @@ const PostCreate = ({route}) => {
         formData.append('description', postData.description)
         formData.append("picture", {
             uri: postData.picture,
-            name:'post_image.jpg',
-            type:'image/jpg'
+            name: 'post_image.jpg',
+            type: 'image/jpg'
         })
 
         sendPost(formData)
@@ -105,43 +104,46 @@ const PostCreate = ({route}) => {
                 stickyHeaderIndices={[0]}
                 stickyHeaderHiddenOnScroll={true}
             >
-                <SafeAreaView className='flex-row justify-between items-center mb-3 py-2 px-3 bg-white border-b border-black'>
-                    <TouchableOpacity
-                        className="p-2" onPress={() => navigation.navigate("post")}>
-                        <View className='items-center'>
-                            <FontAwesomeIcon icon={faArrowLeft} color={"black"} size={25}/>
-                        </View>
-                    </TouchableOpacity>
-                    <Button
-                        onPress={() => {
-                            ImagePicker.openCropper({
-                                path: item.node.image.uri,
-                                freeStyleCropEnabled: true
-                            }).then(image => {
-                                onPostChange('picture',image.path)
-                                onPostChange("aspectRatio", image.width / image.height)
-                            });
-                        }}
-                        buttonStyle={{
-                            backgroundColor: 'white',
-                            borderRadius: 10,
-                            alignItems: 'center',
-                            borderWidth: 2,
-                            borderColor: 'black'
-                        }}
-                        titleStyle={{
-                            fontSize: 16,
-                            color: 'black'
-                        }}
-                    >
-                        <FontAwesomeIcon
-                            style={{marginRight: 10}}
-                            size={20}
-                            icon={faCrop}
-                            color={'black'}
-                        />
-                        Edit image
-                    </Button>
+                <SafeAreaView>
+                    <View className='flex-row justify-between items-center
+                    mb-3 py-2 px-3 bg-white border-b border-black'>
+                        <TouchableOpacity
+                            className="p-2" onPress={() => navigation.navigate('post')}>
+                            <View className='items-center'>
+                                <FontAwesomeIcon icon={faArrowLeft} color={"black"} size={25}/>
+                            </View>
+                        </TouchableOpacity>
+                        <Button
+                            onPress={() => {
+                                ImagePicker.openCropper({
+                                    path: item.node.image.uri,
+                                    freeStyleCropEnabled: true
+                                }).then(image => {
+                                    onPostChange('picture', image.path)
+                                    onPostChange("aspectRatio", image.width / image.height)
+                                });
+                            }}
+                            buttonStyle={{
+                                backgroundColor: 'white',
+                                borderRadius: 10,
+                                alignItems: 'center',
+                                borderWidth: 2,
+                                borderColor: 'black'
+                            }}
+                            titleStyle={{
+                                fontSize: 16,
+                                color: 'black'
+                            }}
+                        >
+                            <FontAwesomeIcon
+                                style={{marginRight: 10}}
+                                size={20}
+                                icon={faCrop}
+                                color={'black'}
+                            />
+                            Edit image
+                        </Button>
+                    </View>
                 </SafeAreaView>
 
                 <View className='mb-10 mx-4'>
@@ -171,12 +173,11 @@ const PostCreate = ({route}) => {
                             marginBottom: 5,
                             fontWeight: "100"
                         }}
-                        placeholderTextColor={COLORS.lightGrey}
+                        placeholderTextColor={"#ffffff"}
                         errorStyle={{color: "crimson"}}
                     />
 
                     <Input
-                        multiline={true}
                         onChangeText={(val) => onPostChange("description", val)}
                         value={postData.description}
                         placeholder={"Write description of your image"}
@@ -196,8 +197,11 @@ const PostCreate = ({route}) => {
                             marginBottom: 5,
                             fontWeight: "100"
                         }}
-                        placeholderTextColor={COLORS.lightGrey}
+                        placeholderTextColor={"#000000"}
                         errorStyle={{color: "crimson"}}
+                        textInputProps={{
+                            multiline: true
+                        }}
                     />
 
                     <View className='flex-row justify-between'>
@@ -208,7 +212,7 @@ const PostCreate = ({route}) => {
                             onPress={() => onShowPreview()}
                             buttonStyle={{
 
-                                backgroundColor: COLORS.primary,
+                                backgroundColor: "#ffffff",
                                 padding: 10,
                                 borderRadius: 10,
                             }}

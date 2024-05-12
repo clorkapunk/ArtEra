@@ -4,9 +4,9 @@ import {
     InteractionManager,
     RefreshControl,
     View,
-    FlatList, ToastAndroid
+    FlatList, ToastAndroid, Text
 } from "react-native";
-import { getPosts} from "../../api/ContentAPI";
+import {getPosts} from "../../api/ContentAPI";
 import ListItem from "../../components/ListItem";
 import CommentBottomSheet from "../../components/CommentBottomSheet";
 import SplashScreen from "react-native-splash-screen";
@@ -32,7 +32,6 @@ const Home = () => {
     const commentSheetRef = useRef()
 
 
-
     useEffect(() => {
         InteractionManager.runAfterInteractions(() => {
             setIsLoading(false);
@@ -56,6 +55,12 @@ const Home = () => {
     const onRefresh = () => {
         setRefreshing(true);
         setIsNetworkError(false);
+        setData({
+            count: null,
+            next: null,
+            previous: null,
+            results: []
+        })
         getPosts(1)
             .then(data => {
                 setData(data);
@@ -87,7 +92,6 @@ const Home = () => {
                 setEndReachedLoading(false)
             })
             .catch((e) => {
-                console.log('error')
                 setEndReachedLoading(false)
                 // setData(getRandomData());
             });
@@ -113,7 +117,7 @@ const Home = () => {
             </View>
         )
 
-        if(isContentLoading) return (
+        if (isContentLoading) return (
             <View className='w-full h-full justify-center items-center'>
                 <ActivityIndicator size={50}/>
             </View>

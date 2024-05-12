@@ -1,12 +1,11 @@
 import React, { useState } from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
-import { Button, Input } from "@rneui/themed";
+import { Button} from "@rneui/themed";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faArrowLeft, faEnvelope, faLock, faUser } from "@fortawesome/free-solid-svg-icons";
-import { COLORS } from "../../consts/colors";
 import { useNavigation } from "@react-navigation/native";
-import { login, registration } from "../../api/userAPI";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { registration } from "../../api/userAPI";
+import Input from './../../components/Input'
 
 const SignUp = () => {
   const navigation = useNavigation();
@@ -85,7 +84,6 @@ const SignUp = () => {
       errorsTemp["password"] = "Password must be at least 8 characters";
       isValid = false;
     } else if (!passwordRegex.test(form.password)) {
-      console.log("here");
       errorsTemp["password"] = "Password must contain at least one lowercase letter, one uppercase letter, one number, and one special character";
       isValid = false;
     } else {
@@ -113,11 +111,11 @@ const SignUp = () => {
         </TouchableOpacity>
         <Text className="text-3xl mb-2  text-white font-semibold">Create an account</Text>
         <Text className="text-lg  text-gray-500 mb-6">Welcome! Please enter your details.</Text>
-        {/*<Text className='text-white font-semibold text-lg mb-2'>Email</Text>*/}
         <Input
           onChangeText={(value) => onFormChange("email", value)}
           value={form.email}
-          leftIcon={<FontAwesomeIcon size={20} icon={faEnvelope} color={COLORS.lightGrey} />}
+          leftIcon={<FontAwesomeIcon size={20} icon={faEnvelope}
+                                     color={'#ffffff'} />}
           placeholder={"Enter your email"}
           label={"Email"}
           errorMessage={errors.email}
@@ -128,7 +126,7 @@ const SignUp = () => {
           }}
           inputStyle={{ color: "white" }}
           labelStyle={{ color: "white", marginBottom: 5, fontWeight: "100" }}
-          placeholderTextColor={COLORS.lightGrey}
+          placeholderTextColor={'#ffffff'}
           errorStyle={{ color: "crimson" }}
         />
 
@@ -136,7 +134,8 @@ const SignUp = () => {
         <Input
           onChangeText={(value) => onFormChange("username", value)}
           value={form.username}
-          leftIcon={<FontAwesomeIcon size={20} icon={faUser} color={COLORS.lightGrey} />}
+          leftIcon={<FontAwesomeIcon size={20} icon={faUser}
+                                     color={'#ffffff'} />}
           placeholder={"Enter your username"}
           label={"Username"}
           errorMessage={errors.username}
@@ -147,14 +146,15 @@ const SignUp = () => {
           }}
           inputStyle={{ color: "white" }}
           labelStyle={{ color: "white", marginBottom: 5, fontWeight: "100" }}
-          placeholderTextColor={COLORS.lightGrey}
+          placeholderTextColor={"#ffffff"}
           errorStyle={{ color: "crimson" }}
         />
 
         <Input
           onChangeText={(value) => onFormChange("password", value)}
           value={form.password}
-          leftIcon={<FontAwesomeIcon size={20} icon={faLock} color={COLORS.lightGrey} />}
+          leftIcon={<FontAwesomeIcon size={20} icon={faLock}
+                                     color={'#ffffff'} />}
           placeholder={"Enter your password"}
           label={"Password"}
           errorMessage={errors.password}
@@ -165,15 +165,19 @@ const SignUp = () => {
           }}
           inputStyle={{ color: "white" }}
           labelStyle={{ color: "white", marginBottom: 5, fontWeight: "100" }}
-          placeholderTextColor={COLORS.lightGrey}
+          placeholderTextColor={'#ffffff'}
           errorStyle={{ color: "crimson" }}
-          secureTextEntry={true}
+          textInputProps={{
+            secureTextEntry: true
+          }}
+
         />
 
         <Input
           onChangeText={(value) => onFormChange("passwordRepeat", value)}
           value={form.passwordRepeat}
-          leftIcon={<FontAwesomeIcon size={20} icon={faLock} color={COLORS.lightGrey} />}
+          leftIcon={<FontAwesomeIcon size={20} icon={faLock}
+                                     color={'#ffffff'} />}
           placeholder={"Repeat your password"}
           label={"Password repeat"}
           errorMessage={errors.passwordRepeat}
@@ -184,9 +188,11 @@ const SignUp = () => {
           }}
           inputStyle={{ color: "white" }}
           labelStyle={{ color: "white", marginBottom: 5, fontWeight: "100" }}
-          placeholderTextColor={COLORS.lightGrey}
+          placeholderTextColor={"#ffffff"}
           errorStyle={{ color: "crimson" }}
-          secureTextEntry={true}
+          textInputProps={{
+            secureTextEntry: true
+          }}
         />
 
         <Button

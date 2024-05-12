@@ -11,14 +11,11 @@ import {
 } from "react-native";
 import {FontAwesomeIcon} from "@fortawesome/react-native-fontawesome";
 import {faArrowLeft, faComment, faHeart, faPaperPlane} from "@fortawesome/free-solid-svg-icons";
-import {Input} from "@rneui/themed";
-import {COLORS} from "../../consts/colors";
-import {getCommentsByPost, getReactionsByPost, sendCommentToPost, sendLikeToPost} from "../../api/ContentAPI";
-import {getUser, getUserData} from "../../api/userAPI";
-import {BottomSheetFlatList, BottomSheetFooter} from "@gorhom/bottom-sheet/src";
+import {getCommentsByPost, getReactionsByPost, sendCommentToPost, sendLikeToPost} from "../api/ContentAPI";
+import {getUser, getUserData} from "../api/userAPI";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {useNavigation} from "@react-navigation/native";
-import SplashScreen from "react-native-splash-screen";
+import Input from '../components/Input'
 
 const CommentSheetFooter = ({postId, update}) => {
     const [input, setInput] = useState("");
@@ -68,7 +65,8 @@ const CommentSheetFooter = ({postId, update}) => {
                     <TouchableOpacity onPress={() => {
                         sendComment(postId, input);
                     }}>
-                        <FontAwesomeIcon size={20} icon={faPaperPlane} color={COLORS.primary}/>
+                        <FontAwesomeIcon size={20} icon={faPaperPlane}
+                                         color={"#ffffff"}/>
                     </TouchableOpacity>
                 )}
                 containerStyle={{paddingHorizontal: 0}}
@@ -77,7 +75,7 @@ const CommentSheetFooter = ({postId, update}) => {
                 }}
                 inputStyle={{color: "white"}}
                 labelStyle={{color: "white", marginBottom: 5, fontWeight: "100"}}
-                placeholderTextColor={COLORS.lightGrey}
+                placeholderTextColor={"#ffffff"}
                 errorStyle={{margin: 0, height: 0}}
             />
         </View>

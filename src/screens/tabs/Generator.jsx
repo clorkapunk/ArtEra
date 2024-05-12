@@ -1,20 +1,20 @@
 import React, {memo, useState} from "react";
 import {Text, View, Image, ToastAndroid, ActivityIndicator, ScrollView} from "react-native";
-import {Button, Input} from "@rneui/themed";
-import {COLORS} from "../../consts/colors";
+import {Button} from "@rneui/themed";
 import {getUser} from "../../api/userAPI";
 import ErrorScreens from "../../components/ErrorScreens";
 import {LinearProgress, Slider} from "@rneui/base";
 import {getGeneratedImage, getGeneratorStatus} from "../../api/ContentAPI";
 import {useNavigation} from "@react-navigation/native";
+import Input from './../../components/Input'
 import {s} from 'react-native-wind'
 
 
 const loadingGifs = [
-    require('../../assets/generator/generating-loading-1.gif')
+    require('../../../assets/generator/generating-loading-1.gif')
 ]
 
-const errorScreen = require('../../assets/generator/generator-error.png')
+const errorScreen = require('../../../assets/generator/generator-error.png')
 
 
 const Generator = () => {
@@ -85,6 +85,8 @@ const Generator = () => {
                     }
                 })
             })
+
+        if(status === undefined) return
 
         if (status.job_count !== 0) {
             ToastAndroid.show("Generator is busy now, try again later")
@@ -206,11 +208,9 @@ const Generator = () => {
                         />
                         <View className='mt-3'>
                             <Input
-                                multiline={true}
                                 onChangeText={(val) => onFormChange('prompt', val)}
                                 value={form.prompt}
                                 errorMessage={errors.prompt}
-                                inputMode={'text'}
                                 placeholder={"Enter your prompt"}
                                 label={"Prompt"}
                                 leftIconContainerStyle={{padding: 10, paddingRight: 10}}
@@ -226,8 +226,12 @@ const Generator = () => {
                                     fontWeight: "100",
                                     fontSize: 20
                                 }}
-                                placeholderTextColor={COLORS.lightGrey}
                                 errorStyle={{color: "crimson"}}
+                                textInputProps={{
+                                    inputMode: 'text',
+                                    multiline: true
+                                }}
+
                             />
                             <View>
                                 <Text className='text-lg text-black'>Steps: {form.steps}</Text>

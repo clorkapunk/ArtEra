@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import {Text, TextInput, ToastAndroid, TouchableOpacity, View} from "react-native";
-import { Input, Button } from "@rneui/themed";
+import { Button } from "@rneui/themed";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faArrowLeft, faEnvelope, faLock } from "@fortawesome/free-solid-svg-icons";
-import { COLORS } from "../../consts/colors";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { login } from "../../api/userAPI";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
+import Input from './../../components/Input'
 
 
 const SignIn = () => {
@@ -78,7 +78,6 @@ const SignIn = () => {
       errorsTemp["password"] = "Password must be at least 8 characters";
       isValid = false;
     } else if (!passwordRegex.test(form.password)) {
-      console.log("here");
       errorsTemp["password"] = "Password must contain at least one lowercase letter, one uppercase letter, one number, and one special character";
       isValid = false;
     } else {
@@ -104,8 +103,8 @@ const SignIn = () => {
         <Input
           onChangeText={(value) => onFormChange("email", value)}
           value={form.email}
-          inputMode={'email'}
-          leftIcon={<FontAwesomeIcon size={20} icon={faEnvelope} color={COLORS.lightGrey} />}
+          leftIcon={<FontAwesomeIcon size={20} icon={faEnvelope}
+                                     color={'#ffffff'} />}
           placeholder={"Enter your email"}
           label={"Email"}
           errorMessage={errors.email}
@@ -116,14 +115,18 @@ const SignIn = () => {
           }}
           inputStyle={{ color: "white" }}
           labelStyle={{ color: "white", marginBottom: 5, fontWeight: "100" }}
-          placeholderTextColor={COLORS.lightGrey}
+          placeholderTextColor={'#ffffff'}
           errorStyle={{ color: "crimson" }}
+          textInputProps={{
+            inputMode: 'email'
+          }}
         />
 
         <Input
           onChangeText={(value) => onFormChange("password", value)}
           value={form.password}
-          leftIcon={<FontAwesomeIcon size={20} icon={faLock} color={COLORS.lightGrey} />}
+          leftIcon={<FontAwesomeIcon size={20} icon={faLock}
+                                     color={'#ffffff'} />}
           placeholder={"Enter your password"}
           label={"Password"}
 
@@ -135,9 +138,11 @@ const SignIn = () => {
           }}
           inputStyle={{ color: "white" }}
           labelStyle={{ color: "white", marginBottom: 5, fontWeight: "100" }}
-          placeholderTextColor={COLORS.lightGrey}
+          placeholderTextColor={'#ffffff'}
           errorStyle={{ color: "crimson" }}
-          secureTextEntry={true}
+          textInputProps={{
+            secureTextEntry: true
+          }}
         />
 
         <Button

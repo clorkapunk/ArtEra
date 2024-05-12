@@ -1,28 +1,24 @@
-import React, {forwardRef, memo, useEffect, useImperativeHandle, useState} from "react";
+import React, {memo, useEffect, useState} from "react";
 import {
     ActivityIndicator,
     View,
     Text,
     Image,
-    TouchableOpacity,
-    TextInput,
     TouchableNativeFeedback,
     ToastAndroid
 } from "react-native";
 import {FontAwesomeIcon} from "@fortawesome/react-native-fontawesome";
-import {faComment, faHeart, faPaperPlane} from "@fortawesome/free-solid-svg-icons";
-import {
-    getReactionsByPost,
-    sendCommentToPost,
-    sendLikeToPost,
-} from "../api/ContentAPI";
-import {COLORS} from "../consts/colors";
-import {Input} from "@rneui/themed";
+import {getReactionsByPost, sendCommentToPost, sendLikeToPost,} from "../api/ContentAPI";
 import {getUser, getUserData} from "../api/userAPI";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import Input from "./Input";
+import {useNavigation} from "@react-navigation/native";
+import {faComment, faHeart, faPaperPlane} from "@fortawesome/free-regular-svg-icons";
+import {faHeart as faHeartFull} from "@fortawesome/free-solid-svg-icons";
+import {colors} from '../consts/colors'
+import {s} from 'react-native-wind'
 
 const ListItem = ({item, openCommentSheet, commentSheetState}) => {
-
+    const navigation = useNavigation()
     const [aspectRatio, setAspectRatio] = useState(1)
     const [owner, setOwner] = useState({
         id: '',
@@ -37,6 +33,7 @@ const ListItem = ({item, openCommentSheet, commentSheetState}) => {
         isLiked: false
     })
     const [input, setInput] = useState("");
+    const [showDescription, setShowDescription] = useState(false)
 
     Image.getSize(item.picture, (width, height) => {
         setAspectRatio(width / height)
@@ -60,7 +57,6 @@ const ListItem = ({item, openCommentSheet, commentSheetState}) => {
                 ToastAndroid.show("Log in to comment", ToastAndroid.SHORT)
             })
     }
-
 
     function setLike() {
         getUser()
@@ -116,6 +112,7 @@ const ListItem = ({item, openCommentSheet, commentSheetState}) => {
 
     }
 
+
     useEffect(() => {
         updateReactionsAmount()
         getUserData(item.owner)
@@ -133,31 +130,58 @@ const ListItem = ({item, openCommentSheet, commentSheetState}) => {
             })
     }, [commentSheetState])
 
-
     return (
-        <View key={item.id} className='flex-col m-3'>
-            <Text className='mb-3 text-gray-600 font-averia_b text-xl'>{owner.username}</Text>
-            <Image
-                source={{uri: item.picture}}
-                style={{width: '100%', flex: 1, aspectRatio: aspectRatio}}
-                PlaceholderContent={<ActivityIndicator/>}
-            />
-            <View className='mt-2'>
-                <Text className='text-xl font-averia_bi'>{item.title}</Text>
-                <Text className='text-lg font-averia_i'>{item.description}</Text>
+        <View key={item.id} className='flex-col mb-6'>
+            <TouchableNativeFeedback
+                onPress={() => {
+                    navigation.navigate('profile-user', {
+                        user: owner
+                    })
+                }}
+            >
+                <View className='flex-row items-center px-3 py-2'>
+                    <Image
+                        style={{width: '12%', aspectRatio: 1}}
+                        className='rounded-full bg-white'
+                        source={{uri: owner.avatar}}
+                    />
+                    <Text className='ml-3 text-listitem-title
+                    font-averia_b text-xl'>{owner.username}</Text>
+                </View>
+            </TouchableNativeFeedback>
+
+            <Text className='text-3xl text-listitem-title font-averia_r mx-3 mb-2'>{item.title}</Text>
+
+            <View className='mx-3'>
+                <Image
+                    source={{uri: item.picture}}
+                    className='rounded-lg'
+                    style={{width: '100%', flex: 1, aspectRatio: aspectRatio}}
+                    PlaceholderContent={<ActivityIndicator/>}
+                />
             </View>
 
-            <View className={'flex-row my-1'}>
+            <View className={'px-3 mt-2'}>
+                <Text
+                    numberOfLines={!showDescription ? 2 : 0}
+                    onPress={() => setShowDescription(prevState => !prevState)}
+                    className='px-3 text-xl font-averia_r text-listitem-description'
+                >{item.description}</Text>
+            </View>
+
+
+            <View className={'flex-row my-1 mx-3'}>
                 <TouchableNativeFeedback
                     onPress={() => setLike()}
                 >
-                    <View className='px-4 py-2 flex-row items-center justify-end'>
+                    <View className='px-3 py-2 flex-row items-center justify-end'>
                         <FontAwesomeIcon
-                            size={20}
-                            icon={faHeart}
-                            color={reactions.isLiked ? 'red' : "black"}
+                            size={25}
+                            icon={reactions.isLiked ? faHeartFull : faHeart}
+                            color={reactions.isLiked ? colors.listitem.like.active : colors.listitem.like.inactive}
                         />
-                        <Text className='text-sm ml-2 text-gray-400'>{reactions.likes}</Text>
+                        <Text className='text-xl font-averia_b
+                        ml-2 text-listitem-like-text'>{reactions.likes}</Text>
                     </View>
                 </TouchableNativeFeedback>
 
@@ -167,41 +191,53 @@ const ListItem = ({item, openCommentSheet, commentSheetState}) => {
                 }}
                 >
                     <View className='px-4 flex-row items-center justify-end'>
-                        <FontAwesomeIcon style={{marginBottom: 2}} size={20} icon={faComment}/>
-                        <Text className='text-sm ml-2 text-gray-400'>{reactions.comments}</Text>
+                        <FontAwesomeIcon
+                            color={colors.listitem.comment.icon}
+                            style={{marginBottom: 2}}
+                            size={25}
+                            icon={faComment}/>
+                        <Text
+                            className='text-xl font-averia_b
+                             ml-2 text-listitem-comment-text'
+                        >{reactions.comments}</Text>
                     </View>
                 </TouchableNativeFeedback>
 
             </View>
 
-            <Input
-                onChangeText={(value) => setInput(value)}
-                value={input}
-                placeholder={"Write your comment"}
-                rightIcon={(
-                    <TouchableNativeFeedback onPress={() => {
-                        sendComment(item.id, input);
-                    }}>
-                        <View className='p-2'>
-                            <FontAwesomeIcon
-                                size={20}
-                                icon={faPaperPlane}
-                                color={COLORS.primary}/>
-                        </View>
-                    </TouchableNativeFeedback>
-                )}
-                containerStyle={{paddingHorizontal: 0}}
-                inputContainerStyle={{
-                    paddingLeft: 20, borderRadius: 8,
-                    paddingRight: 10,
-                    backgroundColor: "white",
-                    borderWidth: 1, borderColor: 'black'
+            <View className='mx-3 px-3'>
+                <Input
+                    onChangeText={(val) => setInput(val)}
+                    value={input}
+                    placeholder={'Add a comment'}
+                    rightIcon={(
+                        <TouchableNativeFeedback onPress={() => {
+                            sendComment(item.id, input);
+                        }}>
+                            <View className='p-2'>
+                                <FontAwesomeIcon
+                                    size={20}
+                                    color={colors.listitem.input.icon}
+                                    icon={faPaperPlane}
+                                />
+                            </View>
+                        </TouchableNativeFeedback>
+                    )}
+                    iconPosition="right"
+                    containerStyle={{}}
+                    inputContainerStyle={{...s`border-b`, borderColor: colors.listitem.input.border}}
+                    placeholderTextColor={colors.listitem.input.placeholder}
+                    inputStyle={{
+                        fontFamily: 'AveriaSerifLibre_Regular',
+                        color: colors.listitem.input.text,
+                        ...s`text-lg py-0`
                 }}
-                inputStyle={{color: "black"}}
-                labelStyle={{color: "white", marginBottom: 5, fontWeight: "100"}}
-                placeholderTextColor={COLORS.lightGrey}
-                errorStyle={{margin: 0, height: 0}}
-            />
+
+                    iconContainerStyle={{}}
+                    textInputProps={{multiline: true}}
+                />
+            </View>
+
         </View>
     );
 }
