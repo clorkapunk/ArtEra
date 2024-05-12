@@ -136,15 +136,15 @@ const ListItem = ({item, openCommentSheet, commentSheetState}) => {
 
     return (
         <View key={item.id} className='flex-col m-3'>
-            <Text className='mb-3 text-gray-400 text-lg'>{owner.username}</Text>
+            <Text className='mb-3 text-gray-600 font-averia_b text-xl'>{owner.username}</Text>
             <Image
                 source={{uri: item.picture}}
                 style={{width: '100%', flex: 1, aspectRatio: aspectRatio}}
                 PlaceholderContent={<ActivityIndicator/>}
             />
             <View className='mt-2'>
-                <Text className='text-lg'>{item.title}</Text>
-                <Text className='text-base'>{item.description}</Text>
+                <Text className='text-xl font-averia_bi'>{item.title}</Text>
+                <Text className='text-lg font-averia_i'>{item.description}</Text>
             </View>
 
             <View className={'flex-row my-1'}>

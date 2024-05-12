@@ -11,7 +11,7 @@ const $host = axios.create({
 
 const $generatorHost = axios.create({
   baseURL: REACT_APP_API_URL,
-  timeout: 60000
+  timeout: 0
 })
 
 const $authHost = axios.create({

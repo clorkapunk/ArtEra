@@ -58,6 +58,11 @@ export const getReactionsByPost = async (postId, userId) => {
 }
 
 
+export const getGeneratorStatus = async () => {
+  const {data} = await $host.get('api/generate_image/getstatus/')
+  return data
+}
+
 export const getGeneratedImage = async (prompt, steps) => {
   const {data} = await $generatorHost.post('api/generate_image/', {
     prompt,

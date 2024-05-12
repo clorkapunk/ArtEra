@@ -1,11 +1,12 @@
 import React, {memo, useEffect} from "react";
-import {Image, Text, TouchableNativeFeedback, TouchableOpacity, View} from "react-native";
-import {Button} from "@rneui/themed";
+import {Text, TouchableNativeFeedback, View} from "react-native";
 import {useIsFocused, useNavigation, useRoute} from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {FontAwesomeIcon} from "@fortawesome/react-native-fontawesome";
-import {faBars, faCircleUser} from "@fortawesome/free-solid-svg-icons";
-import {COLORS} from "../consts/colors";
+import {faBars} from "@fortawesome/free-solid-svg-icons";
+import { styled } from "nativewind";
+import StyledFontAwesomeIcon from "./StyledFontAwesomeIcon";
+
 
 const Header = ({title, route, openSideMenu}) => {
     const navigation = useNavigation();
@@ -33,16 +34,22 @@ const Header = ({title, route, openSideMenu}) => {
 
     return (
         <View
-            className={`bg-secondary border-b-2 border-b-primary
+            className={`bg-header-bg border-b-2 border-b-header-border
             px-3 py-1 flex-row items-center justify-between `}
         >
-            <Text className={"text-primary font-cgregular text-xl"}>
+            <Text
+                className='text-2xl font-averia_l text-header-text'
+            >
                 {title}
             </Text>
             <View className='h-[45px] flex-row items-center'>
                 <TouchableNativeFeedback onPress={() => openSideMenu()}>
                     <View className='p-2'>
-                        <FontAwesomeIcon icon={faBars} size={20}/>
+                        <StyledFontAwesomeIcon
+                            className='text-header-menu'
+                            icon={faBars}
+                            size={20}
+                        />
                     </View>
                 </TouchableNativeFeedback>
             </View>
@@ -52,5 +59,7 @@ const Header = ({title, route, openSideMenu}) => {
 
     );
 };
+
+
 
 export default memo(Header);

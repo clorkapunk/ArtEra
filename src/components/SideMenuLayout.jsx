@@ -38,7 +38,7 @@ const SideMenuLayout = ({onClose, logOut}) => {
 
 
     function onLogIn(){
-        navigation.navigate("auth", { screens: "sign-in" })
+        navigation.navigate("auth", { screen: "sign-in" })
         onClose()
     }
 

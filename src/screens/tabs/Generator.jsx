@@ -1,15 +1,13 @@
-import React, {memo, useEffect, useMemo, useState} from "react";
+import React, {memo, useState} from "react";
 import {Text, View, Image, ToastAndroid, ActivityIndicator, ScrollView} from "react-native";
 import {Button, Input} from "@rneui/themed";
 import {COLORS} from "../../consts/colors";
-import {editUserData} from "../../api/userAPI";
-import {FontAwesomeIcon} from "@fortawesome/react-native-fontawesome";
-import {faArrowUp} from "@fortawesome/free-solid-svg-icons";
+import {getUser} from "../../api/userAPI";
 import ErrorScreens from "../../components/ErrorScreens";
-import {Slider} from "@rneui/base";
-import {getGeneratedImage} from "../../api/ContentAPI";
-import RNFS from "react-native-fs";
-import {err} from "react-native-svg";
+import {LinearProgress, Slider} from "@rneui/base";
+import {getGeneratedImage, getGeneratorStatus} from "../../api/ContentAPI";
+import {useNavigation} from "@react-navigation/native";
+import {s} from 'react-native-wind'
 
 
 const loadingGifs = [
@@ -20,6 +18,7 @@ const errorScreen = require('../../assets/generator/generator-error.png')
 
 
 const Generator = () => {
+    const [first, setFirst] = useState(true)
     const [isLoading, setIsLoading] = useState(true);
     const [isNetworkError, setIsNetworkError] = useState(false)
     const [imageUri, setImageUri] = useState(null);
@@ -33,6 +32,9 @@ const Generator = () => {
         prompt: '',
         steps: ''
     });
+    const [statusMessage, setStatusMessage] = useState('')
+    const [progress, setProgress] = useState(0)
+    const navigation = useNavigation()
 
     function validateForm() {
         let isValid = true;
@@ -61,19 +63,18 @@ const Generator = () => {
         setForm({...form, [name]: value});
     }
 
-    function randomLoadingGif(){
-        return loadingGifs[Math.floor(Math.random()*loadingGifs.length)];
+    function randomLoadingGif() {
+        return loadingGifs[Math.floor(Math.random() * loadingGifs.length)];
     }
 
-    function onFormSubmit() {
+    async function onFormSubmit() {
         if (!validateForm()) return
 
+        setFirst(false)
         setImageUri(null)
         setStatusImage(randomLoadingGif());
-        getGeneratedImage(form.prompt, form.steps)
-            .then(path => {
-                setImageUri(`file://${path}`)
-            })
+
+        const status = await getGeneratorStatus()
             .catch(e => {
                 setImageUri(null)
                 setStatusImage(errorScreen)
@@ -84,6 +85,76 @@ const Generator = () => {
                     }
                 })
             })
+
+        if (status.job_count !== 0) {
+            ToastAndroid.show("Generator is busy now, try again later")
+            return
+        }
+
+        const statusInterval = setInterval(async () => {
+            const status = await getGeneratorStatus()
+                .catch(e => {
+                    setImageUri(null)
+                    setStatusImage(errorScreen)
+                    setErrors(prevState => {
+                        return {
+                            ...prevState,
+                            image: 'Something went wrong. Please try again later!'
+                        }
+                    })
+                })
+            setStatusMessage(`Progress: ${parseFloat(status.progress).toFixed(2)} / 1.00`)
+            setProgress(status.progress)
+        }, 3000)
+
+        getGeneratedImage(form.prompt, form.steps)
+            .then(path => {
+                clearInterval(statusInterval)
+                setStatusMessage(`Progress: done`)
+                setProgress(1)
+                setImageUri(`file://${path}`)
+            })
+            .catch(e => {
+                clearInterval(statusInterval)
+                setImageUri(null)
+                setStatusImage(errorScreen)
+                setErrors(prevState => {
+                    return {
+                        ...prevState,
+                        image: 'Something went wrong. Please try again later!'
+                    }
+                })
+            })
+    }
+
+    function navigateToCreate() {
+        if (first === true) {
+            ToastAndroid.show("Generate image first!", ToastAndroid.SHORT)
+            return
+        }
+
+        getUser().then(user => {
+            if (user === null) {
+                ToastAndroid.show("Log in to create post", ToastAndroid.SHORT)
+                return
+            }
+
+            navigation.navigate('post-layout', {
+                screen: 'post-create', params: {
+                    item: {
+                        node: {
+                            image: {
+                                uri: imageUri
+                            }
+                        }
+                    },
+                    user: user,
+                    aspectRatio: 1
+                }
+            })
+        })
+
+
     }
 
     const componentLoaded = () => {
@@ -110,16 +181,29 @@ const Generator = () => {
 
                         <View
                             style={{width: '100%', aspectRatio: 1}}
-                            className='rounded border border-black'
+                            className='rounded border border-black justify-center items-center'
                         >
-                            <Image
-                                className='rounded'
-                                resizeMode={'cover'}
-                                style={{flex: 1, width: '100%', aspectRatio: 1, }}
-                                source={imageUri !== null ? {uri: imageUri} : statusImage}
-                            />
+                            {
+                                first ?
+                                    <Text className='text-lg text-black'>You will see the result here</Text>
+                                    :
+                                    <Image
+                                        className='rounded bg-white'
+                                        resizeMode={'cover'}
+                                        style={{flex: 1, width: '100%', aspectRatio: 1,}}
+                                        source={imageUri !== null ? {uri: imageUri} : statusImage}
+                                    />
+                            }
+
                         </View>
-                        <Text className='text-red-600'>{errors.image}</Text>
+                        <Text className={`text-red-600 ${errors.image === '' ? 'h-0' : 'h-auto'}`}
+                        >{errors.image}</Text>
+                        <Text className='text-black text-lg'>{statusMessage}</Text>
+                        <LinearProgress
+                            style={s`${progress === 0 ? 'h-0' : 'h-auto'}`}
+                            value={progress}
+                            variant="determinate"
+                        />
                         <View className='mt-3'>
                             <Input
                                 multiline={true}
@@ -159,10 +243,17 @@ const Generator = () => {
                             </View>
                         </View>
 
-                        <Button
-                            title={"generate"}
-                            onPress={() => onFormSubmit()}
-                        />
+                        <View className='flex-col'>
+                            <Button
+                                title={"generate"}
+                                onPress={() => onFormSubmit()}
+                            />
+
+                            <Button
+                                title={"creat post"}
+                                onPress={() => navigateToCreate()}
+                            />
+                        </View>
 
 
                     </ScrollView>

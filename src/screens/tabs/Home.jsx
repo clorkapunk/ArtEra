@@ -134,7 +134,10 @@ const Home = () => {
                     componentLoaded()
                     :
                     <>
-                        <View style={{flex: 1, justifyContent: "flex-end"}}>
+                        <View
+                            className={`bg-background`}
+                            style={{flex: 1, justifyContent: "flex-end"}}
+                        >
                             <FlatList
                                 disableVirtualization={true}
                                 initialNumToRender={5}

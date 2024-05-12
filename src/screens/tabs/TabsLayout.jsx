@@ -6,15 +6,14 @@ import {FontAwesomeIcon} from "@fortawesome/react-native-fontawesome";
 import Header from "../../components/Header";
 import {faHome, faMessage, faSearch, faSquarePlus, faUser} from "@fortawesome/free-solid-svg-icons";
 import Search from "./Search";
-import Chat from "./Generator";
 import Profile from "./Profile";
 import {PortalProvider} from "@gorhom/portal";
 import PostLayout from "./post/PostLayout";
 import {createDrawerNavigator} from '@react-navigation/drawer';
 import SideMenuLayout from "../../components/SideMenuLayout";
 import MenuDrawer from 'react-native-side-drawer'
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import Generator from "./Generator";
+import {s} from 'react-native-wind'
 
 const Tab = createBottomTabNavigator();
 const Drawer = createDrawerNavigator();
@@ -85,12 +84,15 @@ const TabsLayout = () => {
                             tabBarShowLabel: false,
                             tabBarActiveTintColor: "#5BC0BE",
                             tabBarInactiveTintColor: "#3A506B",
-                            tabBarStyle: {
-                                backgroundColor: "#0B132B",
-                                height: 55,
-                                borderTopWidth: 2,
-                                borderTopColor: "#5BC0BE",
-                            },
+                            tabBarStyle: [
+
+                                {
+                                    backgroundColor: "#0B132B",
+                                    height: 55,
+                                    borderTopWidth: 2,
+                                    borderTopColor: "#5BC0BE",
+                                }
+                            ],
                             freezeOnBlur: true,
                         }}
                         initialRouteName="home"
@@ -98,7 +100,6 @@ const TabsLayout = () => {
                         <Tab.Screen
                             name="home"
                             options={{
-
                                 tabBarIcon: ({color, focused}) => (
                                     <TabIcon
                                         icon={faHome}

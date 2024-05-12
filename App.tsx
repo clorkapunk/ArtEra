@@ -50,6 +50,8 @@ async function hasAndroidPermission() {
 
 function App(): React.JSX.Element {
 
+
+
     useEffect(() => {
         hasAndroidPermission().then();
     }, [])
