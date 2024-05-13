@@ -20,7 +20,8 @@ const Input = ({
                    errorStyle,
                    iconContainerStyle,
                    textInputProps,
-                   onSubmitEditing
+                   onSubmitEditing,
+                   onFocus
                }) => {
     return (
         <View style={{
@@ -42,13 +43,14 @@ const Input = ({
 
                 <View style={{flex: 1}}>
                     <TextInput
-                        style={{...inputStyle,}}
+                        style={{...inputStyle}}
                         onChangeText={onChangeText}
                         value={value}
                         placeholder={placeholder}
                         placeholderTextColor={placeholderTextColor}
                         {...textInputProps}
                         onSubmitEditing={onSubmitEditing}
+                        onFocus={onFocus}
                     />
                 </View>
                 <View style={{...iconContainerStyle}}>

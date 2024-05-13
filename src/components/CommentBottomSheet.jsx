@@ -18,6 +18,7 @@ import {faPaperPlane} from "@fortawesome/free-solid-svg-icons";
 import {getCommentsByPost, sendCommentToPost} from "../api/ContentAPI";
 import {getUser, getUserData} from "../api/userAPI";
 import Input from './../components/Input'
+import {SafeAreaView, useSafeAreaInsets} from "react-native-safe-area-context";
 
 
 const CommentSheetBackdrop = memo(({animatedIndex, animatedPosition, style}) => {
@@ -59,8 +60,9 @@ const CommentSheetBackdrop = memo(({animatedIndex, animatedPosition, style}) => 
     );
 })
 
-const CommentSheetFooter = ({animatedFooterPosition, postId, updateComments}) => {
+const CommentSheetFooter = memo(({animatedFooterPosition, postId, updateComments}) => {
     const [input, setInput] = useState("");
+    const { bottom: bottomSafeArea } = useSafeAreaInsets();
 
 
     function sendComment(postId, text) {
@@ -68,7 +70,7 @@ const CommentSheetFooter = ({animatedFooterPosition, postId, updateComments}) =>
         getUser()
             .then(user => {
                 sendCommentToPost(postId, user.id, text)
-                    .then(({status, postId}) => {
+                    .then(() => {
                         updateComments()
                     })
                     .catch(e => {
@@ -83,14 +85,14 @@ const CommentSheetFooter = ({animatedFooterPosition, postId, updateComments}) =>
     }
 
 
+
+
     return (
         <BottomSheetFooter
-            style={{
-                top: 0,
-            }}
-            bottomInset={0}
             animatedFooterPosition={animatedFooterPosition}
+            bottomInset={bottomSafeArea}
         >
+
             <Input
                 onChangeText={(value) => setInput(value)}
                 value={input}
@@ -114,9 +116,10 @@ const CommentSheetFooter = ({animatedFooterPosition, postId, updateComments}) =>
                 placeholderTextColor={'#FFFFFF'}
                 errorStyle={{margin: 0, height: 0}}
             />
+
         </BottomSheetFooter>
     );
-}
+})
 
 const CommentSheetHeader = memo(() => {
     return (
@@ -284,31 +287,35 @@ const CommentBottomSheet = forwardRef(({onClose}, ref) => {
                         <CommentSheetHeader/>
                     }
                     footerComponent={
-                        ({animatedFooterPosition}) =>
+                        ({animatedFooterPosition}) => {
+                            return (
                             <CommentSheetFooter
                                 animatedFooterPosition={animatedFooterPosition}
-                                bottomSheetRef={bottomSheetRef}
                                 postId={commentSheetData.id}
                                 updateComments={updateComments}
-                            />
+                            />)
+                        }
+
                     }
                     backdropComponent={(props) => <CommentSheetBackdrop {...props} />}
 
                 >
-                    <View className="bg-darkgray" style={{flex: 1}}>
+                    <View className="bg-teal-200" style={{flex: 1}}>
                         {
                             isCommentsLoading ?
-                                <ActivityIndicator
-                                    className="mt-10" size={50}/>
+                                <View className='bg-red-600 flex-1'>
+                                    <ActivityIndicator
+                                        size={50}/>
+                                </View>
                                 :
-                                <BottomSheetFlatList
-                                    refreshing={false}
-                                    onRefresh={() => onRefresh()}
-                                    style={{marginBottom: 50}}
-                                    data={commentSheetData.comments}
-                                    keyExtractor={(item, index) => index}
-                                    renderItem={({item}) => <Comment item={item}/>}
-                                />
+                            <BottomSheetFlatList
+                                refreshing={false}
+                                onRefresh={() => onRefresh()}
+                                style={{marginBottom: 50}}
+                                data={commentSheetData.comments}
+                                keyExtractor={(item, index) => index}
+                                renderItem={({item}) => <Comment item={item}/>}
+                            />
                         }
 
                     </View>

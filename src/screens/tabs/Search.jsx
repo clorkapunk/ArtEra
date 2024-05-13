@@ -15,6 +15,11 @@ import ErrorScreens from "../../components/ErrorScreens";
 import SearchBar from '../../components/SearchBar'
 import {FontAwesomeIcon} from "@fortawesome/react-native-fontawesome";
 import {faSearch, faX} from "@fortawesome/free-solid-svg-icons";
+import {Skeleton} from "@rneui/themed";
+import {s} from 'react-native-wind'
+import LinearGradient from "react-native-linear-gradient";
+import {colors} from "../../consts/colors";
+import {SafeAreaView} from "react-native-safe-area-context";
 
 
 const SearchTag = ({item}) => {
@@ -38,23 +43,24 @@ const Search = memo(() => {
     const [isLoading, setIsLoading] = useState(true);
     const tags = ["TAG 1", "TAG 2", "TAG 3", "TAG 4", "TAG 5", "TAG 6", "TAG 7", "TAG 8", "TAG 9"];
     const timeout = React.useRef(null);
-    const [isSearchLoading, setIsSearchLoading] = useState(false)
+    const [isContentLoaded, setIsContentLoaded] = useState(false)
     const [isNetworkError, setIsNetworkError] = useState(false);
     const [refreshing, setRefreshing] = useState(false)
+    const [inputStyle, setInputStyle] = useState()
 
     useEffect(() => {
         InteractionManager.runAfterInteractions(() => {
             setIsLoading(false);
         });
 
-        setIsSearchLoading(true)
+        setIsContentLoaded(false)
         getPostsBySearch('', '', 1)
             .then(data => {
-                setIsSearchLoading(false)
                 setData(data)
+                setIsContentLoaded(true)
             })
             .catch(e => {
-                setIsSearchLoading(false)
+                setIsContentLoaded(true)
                 setIsNetworkError(true)
             })
     }, []);
@@ -69,14 +75,16 @@ const Search = memo(() => {
 
     function onSearch() {
         setIsNetworkError(false)
-        setIsSearchLoading(true)
+        setIsContentLoaded(false)
         getPostsBySearch(search, '', 1)
             .then(data => {
                 setData(data)
-                setIsSearchLoading(false)
+                setTimeout(() => {
+                    setIsContentLoaded(true)
+                }, 1000)
             })
             .catch(e => {
-                setIsSearchLoading(false)
+                setIsContentLoaded(true)
                 setIsNetworkError(true)
             })
     }
@@ -88,19 +96,18 @@ const Search = memo(() => {
             previous: null,
             results: []
         })
-        setRefreshing(true);
         setIsNetworkError(false);
-        setIsSearchLoading(true)
+        setIsContentLoaded(false)
         getPostsBySearch(search, '', 1)
             .then(data => {
                 setData(data);
-                setRefreshing(false);
-                setIsSearchLoading(false)
+                setTimeout(() => {
+                    setIsContentLoaded(true)
+                }, 1000)
             })
             .catch((e) => {
-                setRefreshing(false);
                 setIsNetworkError(true);
-                setIsSearchLoading(false)
+                setIsContentLoaded(true)
             });
     }
 
@@ -128,16 +135,22 @@ const Search = memo(() => {
 
     function onClear() {
         setSearch('')
-        setIsSearchLoading(true)
+        setIsContentLoaded(false)
         getPostsBySearch('', '', 1)
             .then(data => {
                 setData(data)
-                setIsSearchLoading(false)
+                setTimeout(() => {
+                    setIsContentLoaded(true)
+                }, 1000)
             })
             .catch(e => {
-                setIsSearchLoading(false)
+                setIsContentLoaded(true)
                 setIsNetworkError(true)
             })
+    }
+
+    function isCloseToBottom({layoutMeasurement, contentOffset, contentSize}) {
+        return layoutMeasurement.height + contentOffset.y >= contentSize.height - 20;
     }
 
     const componentLoaded = () => {
@@ -148,7 +161,50 @@ const Search = memo(() => {
         )
 
         if (isNetworkError) return (
-            <ErrorScreens type={'network'} refreshing={refreshing} onRefresh={onRefresh}/>
+            <View style={{marginTop: 200}}>
+                <ErrorScreens
+                    type={'network'}
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                />
+            </View>
+        )
+
+        if (!isContentLoaded) return (
+            <View className='flex-row px-2 justify-between mb-2'>
+                <View className='flex-col' style={{width: '49.5%'}}>
+                    <Skeleton
+                        animation={'wave'}
+                        LinearGradientComponent={LinearGradient}
+                        style={[s``, {flex: 1, borderRadius: 0, height: 200}]}
+                    />
+                    <View className={'mb-1'}/>
+                    <Skeleton
+                        animation={'wave'}
+                        LinearGradientComponent={LinearGradient}
+                        style={[s``, {flex: 1, borderRadius: 0, height: 300}]}
+                    />
+                    <View className={'mb-1'}/>
+                    <Skeleton
+                        animation={'wave'}
+                        LinearGradientComponent={LinearGradient}
+                        style={[s``, {flex: 1, borderRadius: 0, height: 300}]}
+                    />
+                </View>
+                <View className='flex-col' style={{width: '49.5%'}}>
+                    <Skeleton
+                        animation={'wave'}
+                        LinearGradientComponent={LinearGradient}
+                        style={[s``, {flex: 1, borderRadius: 0, height: 300}]}
+                    />
+                    <View className={'mb-1'}/>
+                    <Skeleton
+                        animation={'wave'}
+                        LinearGradientComponent={LinearGradient}
+                        style={[s``, {flex: 1, borderRadius: 0, height: 200}]}
+                    />
+                </View>
+            </View>
         )
 
         return true
@@ -158,20 +214,37 @@ const Search = memo(() => {
     return (
         <>
             {
-                componentLoaded() !== true ?
-                    componentLoaded()
-                    :
-                    <View className={"flex-col flex-1"}>
-                        <View className={"mx-5 my-4"}>
+
+                <ScrollView
+                    onScroll={({nativeEvent}) => {
+                        if (isCloseToBottom(nativeEvent) && isContentLoaded) {
+                            onEndReached()
+                        }
+                    }}
+                    stickyHeaderIndices={[0]}
+                    stickyHeaderHiddenOnScroll={true}
+                    refreshControl={
+                        <RefreshControl
+                            enabled={true}
+                            refreshing={refreshing}
+                            onRefresh={onRefresh}
+                        />
+                    }
+                >
+                    <SafeAreaView>
+                        <View className='px-2 py-3 bg-background'>
                             <SearchBar
                                 onSubmitEditing={() => onSearch()}
-                                placeholder={''}
+                                placeholder={'Tap to explore'}
                                 onChangeText={(value) => onChangeSearch(value)}
                                 value={search}
                                 rightIcon={
                                     <TouchableOpacity onPress={() => onSearch()}>
                                         <View>
-                                            <FontAwesomeIcon size={20} icon={faSearch}/>
+                                            <FontAwesomeIcon
+                                                color={colors.search.icon}
+                                                size={20}
+                                                icon={faSearch}/>
                                         </View>
                                     </TouchableOpacity>
                                 }
@@ -180,53 +253,77 @@ const Search = memo(() => {
                                         className='p-2'
                                         onPress={() => onClear()}>
                                         <View>
-                                            <FontAwesomeIcon icon={faX} size={15}/>
+                                            <FontAwesomeIcon
+                                                color={colors.search.clear}
+                                                icon={faX}
+                                                size={15}/>
                                         </View>
                                     </TouchableOpacity>
                                 }
-                                clearIconStyle={{}}
+                                clearIconStyle={{
+                                    ...s`px-1`
+                                }}
                                 labelStyle={{}}
                                 errorStyle={{}}
-                                containerStyle={{}}
-                                inputContainerStyle={{}}
-                                inputStyle={{}}
-                                iconContainerStyle={{}}
+                                containerStyle={{...s``}}
+                                placeholderTextColor={colors.search.placeholder}
+                                inputContainerStyle={{
+                                    ...s`border rounded-xl`,
+                                    borderColor: colors.search.border
+                                }}
+                                inputStyle={{
+                                    textAlign: 'center',
+                                    fontFamily: 'AveriaSerifLibre_Regular',
+                                    color: colors.search.text,
+                                    ...s`text-xl py-1 ml-2`
+                                }}
+                                iconContainerStyle={{...s`p-2`}}
+                                textInputProps={{}}
                             />
                         </View>
-                        <View className="ml-3 mb-4">
-                            <ScrollView horizontal={true}>
+                    </SafeAreaView>
+                    {/*<View className="ml-3 mb-4">*/}
+                    {/*    <ScrollView horizontal={true}>*/}
+                    {/*        {*/}
+                    {/*            tags.map(item => {*/}
+                    {/*                return <SearchTag key={item} item={item}/>;*/}
+                    {/*            })*/}
+                    {/*        }*/}
+                    {/*    </ScrollView>*/}
+                    {/*</View>*/}
+
+                    {
+                        componentLoaded() !== true ?
+                            componentLoaded()
+                            :
+                            <View className="flex-1 px-1">
                                 {
-                                    tags.map(item => {
-                                        return <SearchTag key={item} item={item}/>;
-                                    })
+                                    data.results.length === 0 ?
+                                        <View>
+                                            <Text className='text-center mt-5'>Nothing here but us</Text>
+                                        </View>
+                                        :
+                                        <MasonryList
+                                            refreshControl={
+                                                <RefreshControl
+                                                    enabled={true}
+                                                    refreshing={refreshing}
+                                                    onRefresh={onRefresh}
+                                                />
+                                            }
+                                            onEndReached={() => onEndReached()}
+                                            columnWrapperStyle={{
+                                                justifyContent: "space-between",
+                                            }}
+                                            numColumns={2}
+                                            data={data.results}
+                                            renderItem={({item}) => (<GridItem item={item}/>)}
+                                            keyExtractor={(item, index) => item.id}
+                                        />
                                 }
-                            </ScrollView>
-                        </View>
-                        <View className="flex-1 px-1">
-                            {
-                                isSearchLoading ?
-                                    <ActivityIndicator size={30} className='mb-2'/>
-                                    :
-                                    <MasonryList
-                                        refreshControl={
-                                            <RefreshControl
-                                                enabled={true}
-                                                refreshing={refreshing}
-                                                onRefresh={onRefresh}
-                                            />
-                                        }
-                                        onEndReached={() => onEndReached()}
-                                        columnWrapperStyle={{
-                                            justifyContent: "space-between",
-                                        }}
-                                        numColumns={2}
-                                        data={data.results}
-                                        renderItem={({item}) => (<GridItem item={item}/>)}
-                                        keyExtractor={(item, index) => item.id}
-                                    />
-                            }
-                        </View>
-                    </View>
+                            </View>
+                    }
+                </ScrollView>
 
             }
         </>

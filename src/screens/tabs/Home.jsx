@@ -4,13 +4,92 @@ import {
     InteractionManager,
     RefreshControl,
     View,
-    FlatList, ToastAndroid, Text
+    FlatList, ToastAndroid, Text, Animated, TouchableNativeFeedback, Image, ScrollView
 } from "react-native";
 import {getPosts} from "../../api/ContentAPI";
 import ListItem from "../../components/ListItem";
 import CommentBottomSheet from "../../components/CommentBottomSheet";
 import SplashScreen from "react-native-splash-screen";
 import ErrorScreens from "../../components/ErrorScreens";
+import LinearGradient from 'react-native-linear-gradient';
+import {Skeleton} from "@rneui/themed";
+import {s} from "react-native-wind";
+
+
+const ListItemPlaceholder = memo(() => {
+
+    return (
+        <View className='flex-col mb-6'>
+
+            <View className='flex-row items-center px-3 py-2'>
+                <Skeleton
+                    LinearGradientComponent={LinearGradient}
+                    animation={'wave'}
+                    circle={true}
+                    style={{width: '12%', aspectRatio: 1}}
+                    skeletonStyle={{backgroundColor: 'red'}}
+                />
+
+                <Skeleton
+                    LinearGradientComponent={LinearGradient}
+                    animation={'wave'}
+                    style={[s`ml-3`, {flex: 1, height: 25}]}/>
+            </View>
+
+            <View className='flex-row mx-3 mb-2'>
+                <Skeleton
+                    LinearGradientComponent={LinearGradient}
+                    animation={'wave'}
+                    style={{flex: 1, height: 30}}/>
+            </View>
+
+            <View className='flex-row mx-3'>
+                <Skeleton
+                    LinearGradientComponent={LinearGradient}
+                    animation={'wave'}
+                    style={[s`rounded-lg`, {width: '100%', aspectRatio: 1}]}
+                />
+            </View>
+
+            <View className={'px-3 mt-2 flex-row'}>
+                <Skeleton
+                    LinearGradientComponent={LinearGradient}
+                    animation={'wave'}
+                    style={{flex: 1, height: 50}}/>
+            </View>
+
+
+            <View className={'flex-row my-1 mx-3'}>
+
+                <View className='px-3 py-2 flex-row items-center justify-end'>
+                    <Skeleton
+                        LinearGradientComponent={LinearGradient}
+                        animation={'wave'}
+                        style={[s`ml-2 rounded-full`, {width: 80, height: 25}]}/>
+                </View>
+
+
+                <View className='px-4 flex-row items-center justify-end'>
+                    <Skeleton
+                        LinearGradientComponent={LinearGradient}
+                        animation={'wave'}
+                        style={[s`ml-2 rounded-full`, {width: 80, height: 25}]}/>
+                </View>
+
+
+            </View>
+
+            <View className='mx-3 px-3 flex-row'>
+                <Skeleton
+                    LinearGradientComponent={LinearGradient}
+                    animation={'wave'}
+                    style={{flex: 1, height: 40}}
+                />
+            </View>
+
+        </View>
+    )
+})
 
 
 const Home = () => {
@@ -53,7 +132,7 @@ const Home = () => {
     }, []);
 
     const onRefresh = () => {
-        setRefreshing(true);
+        setIsContentLoading(true)
         setIsNetworkError(false);
         setData({
             count: null,
@@ -64,11 +143,14 @@ const Home = () => {
         getPosts(1)
             .then(data => {
                 setData(data);
-                setRefreshing(false);
+                setTimeout(() => {
+                    setIsContentLoading(false)
+                }, 1000)
+
             })
             .catch((e) => {
                 setIsNetworkError(true);
-                setRefreshing(false);
+                setIsContentLoading(false)
             });
     }
 
@@ -93,7 +175,6 @@ const Home = () => {
             })
             .catch((e) => {
                 setEndReachedLoading(false)
-                // setData(getRandomData());
             });
     }
 
@@ -118,9 +199,10 @@ const Home = () => {
         )
 
         if (isContentLoading) return (
-            <View className='w-full h-full justify-center items-center'>
-                <ActivityIndicator size={50}/>
-            </View>
+            <ScrollView>
+                <ListItemPlaceholder/>
+                <ListItemPlaceholder/>
+            </ScrollView>
         )
 
         if (isNetworkError) return (

@@ -19,17 +19,20 @@ const SearchBar = ({
                        errorStyle,
                        inputStyle,
                        placeholderTextColor,
+                       onFocus,
+                       textInputProps
                    }) => {
     return (
         <View style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
-            <View style={{marginRight: 5, ...clearIconStyle}}>
-                {
-                    value !== '' &&
-                    clearIcon
-                }
-            </View>
+            {
+                value !== '' &&
+                <View style={{marginRight: 5, ...clearIconStyle}}>
+                    {clearIcon}
+                </View>
+            }
             <View style={{flexGrow: 1}}>
                 <Input
+                    onFocus={onFocus}
                     onChangeText={onChangeText}
                     value={value}
                     placeholder={placeholder}
@@ -44,7 +47,8 @@ const SearchBar = ({
                     placeholderTextColor={placeholderTextColor}
                     textInputProps={{
                         inputMode: 'search',
-                        enterKeyHint: 'search'
+                        enterKeyHint: 'search',
+                        ...textInputProps
                     }}
                 />
             </View>

@@ -1,5 +1,5 @@
 import React, {memo, useState} from "react";
-import {Text, View, Image, ToastAndroid, ActivityIndicator, ScrollView} from "react-native";
+import {Text, View, Image, ToastAndroid, ActivityIndicator, ScrollView, TouchableNativeFeedback} from "react-native";
 import {Button} from "@rneui/themed";
 import {getUser} from "../../api/userAPI";
 import ErrorScreens from "../../components/ErrorScreens";
@@ -8,6 +8,9 @@ import {getGeneratedImage, getGeneratorStatus} from "../../api/ContentAPI";
 import {useNavigation} from "@react-navigation/native";
 import Input from './../../components/Input'
 import {s} from 'react-native-wind'
+import {FontAwesomeIcon} from "@fortawesome/react-native-fontawesome";
+import {colors} from "../../consts/colors";
+import {faPaperPlane} from "@fortawesome/free-regular-svg-icons";
 
 
 const loadingGifs = [
@@ -86,7 +89,7 @@ const Generator = () => {
                 })
             })
 
-        if(status === undefined) return
+        if (status === undefined) return
 
         if (status.job_count !== 0) {
             ToastAndroid.show("Generator is busy now, try again later")
@@ -105,7 +108,7 @@ const Generator = () => {
                         }
                     })
                 })
-            setStatusMessage(`Progress: ${parseFloat(status.progress).toFixed(2)} / 1.00`)
+            setStatusMessage(`Progress: ${parseFloat(status.progress).toFixed(2) * 100}%`)
             setProgress(status.progress)
         }, 3000)
 
@@ -182,12 +185,16 @@ const Generator = () => {
                     <ScrollView className='flex-1 px-3 py-3'>
 
                         <View
-                            style={{width: '100%', aspectRatio: 1}}
-                            className='rounded border border-black justify-center items-center'
+                            style={{
+                                width: '100%',
+                                aspectRatio: 1,
+                                overflow: 'hidden'
+                            }}
+                            className='rounded border border-generator-image-border justify-center items-center'
                         >
                             {
                                 first ?
-                                    <Text className='text-lg text-black'>You will see the result here</Text>
+                                    <Text className='text-lg text-generator-image-text'>You will see the result here</Text>
                                     :
                                     <Image
                                         className='rounded bg-white'
@@ -200,41 +207,39 @@ const Generator = () => {
                         </View>
                         <Text className={`text-red-600 ${errors.image === '' ? 'h-0' : 'h-auto'}`}
                         >{errors.image}</Text>
-                        <Text className='text-black text-lg'>{statusMessage}</Text>
+                        <Text
+                            className='text-black text-xl font-averia_r'
+                        >{statusMessage}</Text>
                         <LinearProgress
-                            style={s`${progress === 0 ? 'h-0' : 'h-auto'}`}
+                            color={colors.generator.progress.line.before}
+                            trackColor={colors.generator.progress.line.after}
+                            style={{
+                                ...s`${progress === 0 ? 'h-0' : 'h-auto'} mt-2`
+                            }}
                             value={progress}
                             variant="determinate"
                         />
-                        <View className='mt-3'>
+                        <View className='mt-5'>
                             <Input
                                 onChangeText={(val) => onFormChange('prompt', val)}
                                 value={form.prompt}
                                 errorMessage={errors.prompt}
-                                placeholder={"Enter your prompt"}
-                                label={"Prompt"}
-                                leftIconContainerStyle={{padding: 10, paddingRight: 10}}
-                                containerStyle={{paddingHorizontal: 0}}
-                                inputContainerStyle={{
-                                    paddingHorizontal: 5, borderRadius: 7, backgroundColor: "white",
-                                    borderWidth: 1
+                                placeholder={"What you want to create?"}
+                                containerStyle={{}}
+                                inputContainerStyle={{...s`border-b`, borderColor: colors.listitem.input.border}}
+                                placeholderTextColor={colors.listitem.input.placeholder}
+                                inputStyle={{
+                                    fontFamily: 'AveriaSerifLibre_Regular',
+                                    color: colors.listitem.input.text,
+                                    ...s`text-2xl py-0`
                                 }}
-                                inputStyle={{color: "black"}}
-                                labelStyle={{
-                                    color: "black",
-                                    marginBottom: 5,
-                                    fontWeight: "100",
-                                    fontSize: 20
-                                }}
-                                errorStyle={{color: "crimson"}}
-                                textInputProps={{
-                                    inputMode: 'text',
-                                    multiline: true
-                                }}
-
+                                iconContainerStyle={{}}
+                                textInputProps={{multiline: true}}
                             />
-                            <View>
-                                <Text className='text-lg text-black'>Steps: {form.steps}</Text>
+                            <View className='mt-5'>
+                                <Text
+                                    className={'text-2xl font-averia_b ml-2'}
+                                >Number of steps: {form.steps}</Text>
                                 <Slider
                                     value={form.steps}
                                     onValueChange={(val) => onFormChange('steps', val)}
@@ -242,21 +247,61 @@ const Generator = () => {
                                     minimumValue={1}
                                     step={1}
                                     orientation="horizontal"
-                                    thumbStyle={{height: 20, width: 20}}
+                                    thumbStyle={{
+                                        height: 20,
+                                        backgroundColor: colors.generator.slider.thumb,
+                                        width: 20
+                                    }}
+                                    trackStyle={{
+                                        height: 5
+                                    }}
+                                    minimumTrackTintColor={colors.generator.slider.before}
+                                    maximumTrackTintColor={colors.generator.slider.after}
                                 />
                             </View>
                         </View>
 
-                        <View className='flex-col'>
-                            <Button
-                                title={"generate"}
-                                onPress={() => onFormSubmit()}
-                            />
-
-                            <Button
-                                title={"creat post"}
-                                onPress={() => navigateToCreate()}
-                            />
+                        <View className='flex-col mb-10'>
+                            <View className='flex-row justify-center'>
+                                <Button
+                                    title={"Generate image"}
+                                    titleStyle={{
+                                        fontFamily: 'AveriaSerifLibre_Regular',
+                                        color: colors.generator.buttons.generate.text,
+                                        ...s`text-xl`
+                                    }}
+                                    onPress={() => onFormSubmit()}
+                                    containerStyle={{
+                                        marginTop: 40
+                                    }}
+                                    buttonStyle={{
+                                        ...s`border py-2 rounded-md`,
+                                        width: 200,
+                                        backgroundColor: colors.generator.buttons.generate.bg,
+                                        borderColor: colors.generator.buttons.generate.border
+                                    }}
+                                />
+                            </View>
+                            <View className='flex-row justify-center'>
+                                <Button
+                                    title={"Create post"}
+                                    onPress={() => navigateToCreate()}
+                                    titleStyle={{
+                                        fontFamily: 'AveriaSerifLibre_Regular',
+                                        color: colors.generator.buttons.create.text,
+                                        ...s`text-xl`
+                                    }}
+                                    containerStyle={{
+                                        marginTop: 20
+                                    }}
+                                    buttonStyle={{
+                                        ...s`border py-2 rounded-md`,
+                                        width: 200,
+                                        backgroundColor: colors.generator.buttons.create.bg,
+                                        borderColor: colors.generator.buttons.create.border
+                                    }}
+                                />
+                            </View>
                         </View>
 
 

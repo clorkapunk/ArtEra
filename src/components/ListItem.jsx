@@ -16,6 +16,9 @@ import {faComment, faHeart, faPaperPlane} from "@fortawesome/free-regular-svg-ic
 import {faHeart as faHeartFull} from "@fortawesome/free-solid-svg-icons";
 import {colors} from '../consts/colors'
 import {s} from 'react-native-wind'
+import LinearGradient from 'react-native-linear-gradient';
+import {Skeleton} from "@rneui/themed";
+
 
 const ListItem = ({item, openCommentSheet, commentSheetState}) => {
     const navigation = useNavigation()
@@ -34,6 +37,7 @@ const ListItem = ({item, openCommentSheet, commentSheetState}) => {
     })
     const [input, setInput] = useState("");
     const [showDescription, setShowDescription] = useState(false)
+    const [isUserLoaded, setIsUserLoaded] = useState(false)
 
     Image.getSize(item.picture, (width, height) => {
         setAspectRatio(width / height)
@@ -73,7 +77,6 @@ const ListItem = ({item, openCommentSheet, commentSheetState}) => {
     }
 
     function updateReactionsAmount() {
-
         getUser()
             .then(user => {
                 getReactionsByPost(item.id, user.id)
@@ -115,9 +118,13 @@ const ListItem = ({item, openCommentSheet, commentSheetState}) => {
 
     useEffect(() => {
         updateReactionsAmount()
+        setIsUserLoaded(false)
         getUserData(item.owner)
             .then(data => {
                 setOwner(data)
+                setTimeout(() => {
+                    setIsUserLoaded(true)
+                }, 200)
             })
             .catch(e => {
                 setOwner({
@@ -133,24 +140,54 @@ const ListItem = ({item, openCommentSheet, commentSheetState}) => {
     return (
         <View key={item.id} className='flex-col mb-6'>
             <TouchableNativeFeedback
+
                 onPress={() => {
+                    if (!isUserLoaded) return
                     navigation.navigate('profile-user', {
                         user: owner
                     })
                 }}
             >
+
                 <View className='flex-row items-center px-3 py-2'>
-                    <Image
-                        style={{width: '12%', aspectRatio: 1}}
-                        className='rounded-full bg-white'
-                        source={{uri: owner.avatar}}
-                    />
-                    <Text className='ml-3 text-listitem-title
+                    {
+                        !isUserLoaded ?
+                            <>
+                                <Skeleton
+                                    LinearGradientComponent={LinearGradient}
+                                    animation={'wave'}
+                                    circle={true}
+                                    style={{width: '12%', aspectRatio: 1}}
+                                />
+
+                                <Skeleton
+                                    LinearGradientComponent={LinearGradient}
+                                    animation={'wave'}
+                                    style={[s`ml-3`, {flex: 1, height: 25}]}/>
+                            </>
+                            :
+                            <>
+                                <Image
+                                    style={{width: '12%', aspectRatio: 1}}
+                                    className='rounded-full bg-white'
+                                    source={{uri: owner.avatar}}
+                                />
+
+                                <Text className='ml-3 text-listitem-title
                     font-averia_b text-xl'>{owner.username}</Text>
+                            </>
+                    }
+
                 </View>
+
             </TouchableNativeFeedback>
 
-            <Text className='text-3xl text-listitem-title font-averia_r mx-3 mb-2'>{item.title}</Text>
+            <View className={'mx-3 mb-2 flex-row'}>
+                <Text className='text-3xl text-listitem-title font-averia_r '
+                >{item.title}</Text>
+            </View>
+
+
 
             <View className='mx-3'>
                 <Image
@@ -231,7 +268,7 @@ const ListItem = ({item, openCommentSheet, commentSheetState}) => {
                         fontFamily: 'AveriaSerifLibre_Regular',
                         color: colors.listitem.input.text,
                         ...s`text-lg py-0`
-                }}
+                    }}
 
                     iconContainerStyle={{}}
                     textInputProps={{multiline: true}}
@@ -239,7 +276,8 @@ const ListItem = ({item, openCommentSheet, commentSheetState}) => {
             </View>
 
         </View>
-    );
+    )
+        ;
 }
 
 export default memo(ListItem);
