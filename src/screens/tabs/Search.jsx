@@ -65,12 +65,16 @@ const Search = memo(() => {
             })
     }, []);
 
-    const onChangeSearch = (value) => {
+    useEffect(() => {
         clearTimeout(timeout.current);
-        setSearch(value);
         timeout.current = setTimeout(() => {
             onSearch()
         }, 2000);
+    }, [search])
+
+    const onChangeSearch = (value) => {
+        setSearch(value);
+
     }
 
     function onSearch() {
@@ -161,7 +165,7 @@ const Search = memo(() => {
         )
 
         if (isNetworkError) return (
-            <View style={{marginTop: 200}}>
+            <View style={{marginVertical: 200}}>
                 <ErrorScreens
                     type={'network'}
                     refreshing={refreshing}
@@ -212,7 +216,7 @@ const Search = memo(() => {
 
 
     return (
-        <>
+        <View className='bg-background'>
             {
 
                 <ScrollView
@@ -256,7 +260,8 @@ const Search = memo(() => {
                                             <FontAwesomeIcon
                                                 color={colors.search.clear}
                                                 icon={faX}
-                                                size={15}/>
+                                                size={15}
+                                            />
                                         </View>
                                     </TouchableOpacity>
                                 }
@@ -278,7 +283,9 @@ const Search = memo(() => {
                                     ...s`text-xl py-1 ml-2`
                                 }}
                                 iconContainerStyle={{...s`p-2`}}
-                                textInputProps={{}}
+                                textInputProps={{
+
+                                }}
                             />
                         </View>
                     </SafeAreaView>
@@ -326,7 +333,7 @@ const Search = memo(() => {
                 </ScrollView>
 
             }
-        </>
+        </View>
 
     );
 });
