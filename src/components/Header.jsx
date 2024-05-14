@@ -48,10 +48,10 @@ const Header = ({title, route, openSideMenu}) => {
 
             <View className='flex-row items-center'>
                 <TouchableNativeFeedback onPress={() => openSideMenu()}>
-                    <View className='p-2'>
+                    <View className='ml-3 p-0'>
                         <FontAwesomeIcon
                             icon={faBars}
-                            size={20}
+                            size={25}
                             color={colors.header.menu}
                         />
                     </View>

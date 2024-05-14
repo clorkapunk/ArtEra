@@ -193,13 +193,13 @@ const Home = () => {
 
     const componentLoaded = () => {
         if (isLoading) return (
-            <View>
+            <View className='bg-background'>
                 <ActivityIndicator/>
             </View>
         )
 
         if (isContentLoading) return (
-            <ScrollView>
+            <ScrollView className='bg-background'>
                 <ListItemPlaceholder/>
                 <ListItemPlaceholder/>
             </ScrollView>

@@ -17,7 +17,7 @@ import {colors} from '../../consts/colors'
 
 const Tab = createBottomTabNavigator();
 
-const TabIcon = ({icon, color, name, focused, size = 20, style}) => {
+const TabIcon = ({icon, color, textColor, name, focused, size = 20, style}) => {
     return (
         <View style={{
             justifyContent: "center",
@@ -32,7 +32,8 @@ const TabIcon = ({icon, color, name, focused, size = 20, style}) => {
 
             {
                 focused &&
-                <Text style={{color: color, fontFamily: 'AveriaSerifLibre_Bold'}}>
+                <Text style={{color: textColor,
+                    fontFamily: 'AveriaSerifLibre_Bold'}}>
                     {name}
                 </Text>
             }
@@ -72,7 +73,7 @@ const TabsLayout = () => {
                     <Tab.Navigator
                         screenOptions={{
                             tabBarShowLabel: false,
-                            tabBarActiveTintColor: colors.tabbar.tab.active,
+                            tabBarActiveTintColor: colors.tabbar.tab.active.icon,
                             tabBarInactiveTintColor: colors.tabbar.tab.inactive,
                             tabBarStyle: {
                                 backgroundColor: colors.tabbar.bg,
@@ -92,6 +93,7 @@ const TabsLayout = () => {
                                     <TabIcon
                                         icon={faHome}
                                         color={color}
+                                        textColor={colors.tabbar.tab.active.text}
                                         name="Home"
                                         focused={focused}
                                     />
@@ -112,6 +114,7 @@ const TabsLayout = () => {
                                     <TabIcon
                                         icon={faSearch}
                                         color={color}
+                                        textColor={colors.tabbar.tab.active.text}
                                         name="Search"
                                         focused={focused}
                                     />
@@ -133,7 +136,8 @@ const TabsLayout = () => {
                                 tabBarIcon: ({color, focused}) => (
                                     <TabIcon
                                         icon={faSquareXmark}
-                                        color={colors.tabbar.tab.center}
+                                        color={colors.tabbar.tab.center.icon}
+                                        textColor={colors.tabbar.tab.center.text}
                                         size={30}
                                         name="Post"
                                         focused={focused}
@@ -157,6 +161,7 @@ const TabsLayout = () => {
                                     <TabIcon
                                         icon={faMessage}
                                         color={color}
+                                        textColor={colors.tabbar.tab.active.text}
                                         name="Generate"
                                         focused={focused}
                                     />
@@ -177,6 +182,7 @@ const TabsLayout = () => {
                                     <TabIcon
                                         icon={faUser}
                                         color={color}
+                                        textColor={colors.tabbar.tab.active.text}
                                         name="Profile"
                                         focused={focused}
                                     />

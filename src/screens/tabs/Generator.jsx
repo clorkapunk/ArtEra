@@ -208,7 +208,7 @@ const Generator = () => {
                         <Text className={`text-red-600 ${errors.image === '' ? 'h-0' : 'h-auto'}`}
                         >{errors.image}</Text>
                         <Text
-                            className='text-black text-xl font-averia_r'
+                            className='text-generator-progress-text text-xl font-averia_r'
                         >{statusMessage}</Text>
                         <LinearProgress
                             color={colors.generator.progress.line.before}
@@ -238,7 +238,7 @@ const Generator = () => {
                             />
                             <View className='mt-5'>
                                 <Text
-                                    className={'text-2xl font-averia_b ml-2'}
+                                    className={'text-2xl font-averia_b ml-2 text-generator-slider-text'}
                                 >Number of steps: {form.steps}</Text>
                                 <Slider
                                     value={form.steps}
