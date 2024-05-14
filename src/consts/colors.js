@@ -9,9 +9,15 @@ export const colors = {
   tabbar: {
     bg: "#132B37",
     tab: {
-      active: "#BD782D",
+      active: {
+        icon: "#BD782D",
+        text: "#FAF9EF",
+      },
       inactive: "#BD782D",
-      center: '#FAF9EF'
+      center: {
+        icon: '#FAF9EF',
+        text: "#BD782D"
+      }
     },
     border: "#FAF9EF",
   },

@@ -1,5 +1,5 @@
 import React, {useEffect} from "react";
-import {NavigationContainer} from "@react-navigation/native";
+import {DefaultTheme, NavigationContainer} from "@react-navigation/native";
 import TabsLayout from "./src/screens/tabs/TabsLayout";
 import AuthLayout from "./src/screens/auth/AuthLayout";
 import {GestureHandlerRootView} from "react-native-gesture-handler";
@@ -10,6 +10,7 @@ import {createStackNavigator, TransitionPreset, TransitionPresets} from "@react-
 import ProfileEdit from "./src/screens/ProfileEdit";
 import "./global.css"
 import ProfileUser from "./src/screens/ProfileUser";
+import {colors} from './src/consts/colors'
 
 
 const Stack = createStackNavigator();
@@ -61,7 +62,15 @@ function App(): React.JSX.Element {
     return (
         <SafeAreaProvider>
             <GestureHandlerRootView>
-                <NavigationContainer>
+                <NavigationContainer
+                    theme={{
+                        ...DefaultTheme,
+                        colors: {
+                            ...DefaultTheme.colors,
+                            background: colors.background
+                        }
+                    }}
+                >
                     <Stack.Navigator
                         screenOptions={{
                             headerShown: false,
