@@ -1,11 +1,11 @@
-import React, {memo, useEffect, useState} from "react";
+import React, {memo, useContext, useEffect, useState} from "react";
 import {
     ActivityIndicator,
     View,
     Text,
     Image,
     TouchableNativeFeedback,
-    ToastAndroid
+    ToastAndroid, Dimensions
 } from "react-native";
 import {FontAwesomeIcon} from "@fortawesome/react-native-fontawesome";
 import {getReactionsByPost, sendCommentToPost, sendLikeToPost,} from "../api/ContentAPI";
@@ -14,15 +14,15 @@ import Input from "./Input";
 import {useNavigation} from "@react-navigation/native";
 import {faComment, faHeart, faPaperPlane} from "@fortawesome/free-regular-svg-icons";
 import {faHeart as faHeartFull} from "@fortawesome/free-solid-svg-icons";
-import {colors} from '../consts/colors'
 import {s} from 'react-native-wind'
-import LinearGradient from 'react-native-linear-gradient';
-import {Skeleton} from "@rneui/themed";
-
+import SkeletonView from "./SkeletonView";
+import Swiper from 'react-native-swiper'
+import ImageSize from 'react-native-image-size'
+import ThemeContext from "../context/ThemeProvider";
 
 const ListItem = ({item, openCommentSheet, commentSheetState}) => {
     const navigation = useNavigation()
-    const [aspectRatio, setAspectRatio] = useState(1)
+    const {theme, colors} = useContext(ThemeContext)
     const [owner, setOwner] = useState({
         id: '',
         email: '',
@@ -38,10 +38,27 @@ const ListItem = ({item, openCommentSheet, commentSheetState}) => {
     const [input, setInput] = useState("");
     const [showDescription, setShowDescription] = useState(false)
     const [isUserLoaded, setIsUserLoaded] = useState(false)
+    const [isImageReady, setIsImageReady] = useState(false)
+    const [swiperAspectRatio, setSwiperAspectRatio] = useState(0.75)
 
-    Image.getSize(item.picture, (width, height) => {
-        setAspectRatio(width / height)
-    })
+    async function minAspectRatio(images) {
+        setIsImageReady(false)
+        let swiper = 1000
+
+        for (let i = 0; i < images.length; i++) {
+            let {width, height} = await ImageSize.getSize(images[i].image)
+            if ((width / height) < swiper) swiper = (width / height) < 0.75 ? 0.75 :
+                ((width + width * 0.055 ) / height)
+        }
+        setSwiperAspectRatio(swiper)
+        setTimeout(() => {
+            setIsImageReady(true)
+        }, 200)
+    }
+
+    useEffect(() => {
+        minAspectRatio(item.image_details)
+    }, [])
 
     function sendComment(postId, text) {
         if (input === "") return;
@@ -115,8 +132,8 @@ const ListItem = ({item, openCommentSheet, commentSheetState}) => {
 
     }
 
-
     useEffect(() => {
+
         updateReactionsAmount()
         setIsUserLoaded(false)
         getUserData(item.owner)
@@ -135,12 +152,18 @@ const ListItem = ({item, openCommentSheet, commentSheetState}) => {
                     user_background: 'https://www.clevelanddentalhc.com/wp-content/uploads/2018/03/sample-avatar.jpg'
                 })
             })
+
+
     }, [commentSheetState])
+
+    function addAlpha(color, opacity) {
+        let _opacity = Math.round(Math.min(Math.max(opacity ?? 1, 0), 1) * 255);
+        return color + _opacity.toString(16).toUpperCase();
+    }
 
     return (
         <View key={item.id} className='flex-col mb-6'>
             <TouchableNativeFeedback
-
                 onPress={() => {
                     if (!isUserLoaded) return
                     navigation.navigate('profile-user', {
@@ -153,16 +176,12 @@ const ListItem = ({item, openCommentSheet, commentSheetState}) => {
                     {
                         !isUserLoaded ?
                             <>
-                                <Skeleton
-                                    LinearGradientComponent={LinearGradient}
-                                    animation={'wave'}
+                                <SkeletonView
                                     circle={true}
                                     style={{width: '12%', aspectRatio: 1}}
                                 />
 
-                                <Skeleton
-                                    LinearGradientComponent={LinearGradient}
-                                    animation={'wave'}
+                                <SkeletonView
                                     style={[s`ml-3`, {flex: 1, height: 25}]}/>
                             </>
                             :
@@ -173,8 +192,10 @@ const ListItem = ({item, openCommentSheet, commentSheetState}) => {
                                     source={{uri: owner.avatar}}
                                 />
 
-                                <Text className='ml-3 text-listitem-title
-                    font-averia_b text-xl'>{owner.username}</Text>
+                                <Text
+                                    style={{color: colors.main}}
+                                    className={`ml-3  font-averia_b text-xl`}
+                                >{owner.username}</Text>
                             </>
                     }
 
@@ -183,26 +204,55 @@ const ListItem = ({item, openCommentSheet, commentSheetState}) => {
             </TouchableNativeFeedback>
 
             <View className={'mx-3 mb-2 flex-row'}>
-                <Text className='text-3xl text-listitem-title font-averia_r '
+                <Text
+                    style={{color: colors.main}}
+                    className={`text-3xl font-averia_r`}
                 >{item.title}</Text>
             </View>
 
 
-
-            <View className='mx-3'>
-                <Image
-                    source={{uri: item.picture}}
-                    className='rounded-lg'
-                    style={{width: '100%', flex: 1, aspectRatio: aspectRatio}}
-                    PlaceholderContent={<ActivityIndicator/>}
-                />
+            <View>
+                {
+                    !isImageReady ?
+                        <View className='flex-row mx-3'>
+                            <SkeletonView
+                                style={[s`rounded-lg`, {width: '100%', aspectRatio: 1}]}
+                            />
+                        </View>
+                        :
+                        <View style={{width: '100%', aspectRatio: swiperAspectRatio}}>
+                            <Swiper
+                                containerStyle={{
+                                    width: '100%',
+                                    height: '100%'
+                                }}
+                                loop={false}
+                            >
+                                {
+                                    item.image_details.map(i =>
+                                        <View
+                                            style={{backgroundColor: addAlpha(colors.main, 0.2), overflow: 'hidden'}}
+                                            className='mx-3 h-full flex-row items-center rounded-lg ' key={i.id}>
+                                            <Image
+                                                resizeMode={'contain'}
+                                                style={{width: '100%', height: '100%'}}
+                                                source={{uri: i.image}}
+                                                PlaceholderContent={<ActivityIndicator/>}
+                                            />
+                                        </View>
+                                    )
+                                }
+                            </Swiper>
+                        </View>
+                }
             </View>
 
             <View className={'px-3 mt-2'}>
                 <Text
                     numberOfLines={!showDescription ? 2 : 0}
                     onPress={() => setShowDescription(prevState => !prevState)}
-                    className='px-3 text-xl font-averia_r text-listitem-description'
+                    style={{color: colors.main}}
+                    className={`px-3 text-xl font-averia_r`}
                 >{item.description}</Text>
             </View>
 
@@ -215,10 +265,12 @@ const ListItem = ({item, openCommentSheet, commentSheetState}) => {
                         <FontAwesomeIcon
                             size={25}
                             icon={reactions.isLiked ? faHeartFull : faHeart}
-                            color={reactions.isLiked ? colors.listitem.like.active : colors.listitem.like.inactive}
+                            color={reactions.isLiked ? colors.primary : colors.main}
                         />
-                        <Text className='text-xl font-averia_b
-                        ml-2 text-listitem-like-text'>{reactions.likes}</Text>
+                        <Text
+                            style={{color: colors.main}}
+                            className={`text-xl font-averia_b ml-2`}
+                        >{reactions.likes}</Text>
                     </View>
                 </TouchableNativeFeedback>
 
@@ -229,13 +281,13 @@ const ListItem = ({item, openCommentSheet, commentSheetState}) => {
                 >
                     <View className='px-4 flex-row items-center justify-end'>
                         <FontAwesomeIcon
-                            color={colors.listitem.comment.icon}
+                            color={colors.main}
                             style={{marginBottom: 2}}
                             size={25}
                             icon={faComment}/>
                         <Text
-                            className='text-xl font-averia_b
-                             ml-2 text-listitem-comment-text'
+                            style={{color: colors.main}}
+                            className={`text-xl font-averia_b ml-2`}
                         >{reactions.comments}</Text>
                     </View>
                 </TouchableNativeFeedback>
@@ -254,7 +306,7 @@ const ListItem = ({item, openCommentSheet, commentSheetState}) => {
                             <View className='p-2'>
                                 <FontAwesomeIcon
                                     size={20}
-                                    color={colors.listitem.input.icon}
+                                    color={colors.main}
                                     icon={faPaperPlane}
                                 />
                             </View>
@@ -262,11 +314,11 @@ const ListItem = ({item, openCommentSheet, commentSheetState}) => {
                     )}
                     iconPosition="right"
                     containerStyle={{}}
-                    inputContainerStyle={{...s`border-b`, borderColor: colors.listitem.input.border}}
-                    placeholderTextColor={colors.listitem.input.placeholder}
+                    inputContainerStyle={{...s`border-b`, borderColor: colors.main}}
+                    placeholderTextColor={colors.placeholder}
                     inputStyle={{
                         fontFamily: 'AveriaSerifLibre_Regular',
-                        color: colors.listitem.input.text,
+                        color: colors.main,
                         ...s`text-lg py-0`
                     }}
 

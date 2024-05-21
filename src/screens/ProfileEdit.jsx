@@ -1,4 +1,4 @@
-import React, {memo, useEffect, useState} from 'react';
+import React, {memo, useContext, useEffect, useState} from 'react';
 import {
     ActivityIndicator,
     Image,
@@ -17,6 +17,9 @@ import {useNavigation} from "@react-navigation/native";
 import {Button} from "@rneui/themed";
 import ImagePicker from "react-native-image-crop-picker";
 import Input from '../components/Input'
+import ThemeContext from "../context/ThemeProvider";
+import {SafeAreaView} from "react-native-safe-area-context";
+import {s} from "react-native-wind";
 
 const ProfileEdit = () => {
     const [user, setUser] = useState({
@@ -26,6 +29,7 @@ const ProfileEdit = () => {
         avatar: 'https://www.clevelanddentalhc.com/wp-content/uploads/2018/03/sample-avatar.jpg',
         email: "",
     });
+    const {colors} = useContext(ThemeContext)
     const [isNetworkError, setIsNetworkError] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [isLoggedIn, setIsLoggedIn] = useState(false)
@@ -84,7 +88,7 @@ const ProfileEdit = () => {
         formData.append('username', form.username)
         formData.append('email', form.email)
 
-        if(user.avatar !== form.avatar){
+        if (user.avatar !== form.avatar) {
             formData.append("avatar", {
                 uri: form.avatar,
                 name: 'avatar.jpg',
@@ -92,7 +96,7 @@ const ProfileEdit = () => {
             })
         }
 
-        if(user.user_background !== form.user_background){
+        if (user.user_background !== form.user_background) {
             formData.append("user_background", {
                 uri: form.user_background,
                 name: 'user_background.jpg',
@@ -154,7 +158,6 @@ const ProfileEdit = () => {
                 getUserData(user.id)
                     .then(data => {
                         setIsNetworkError(false)
-                        setIsUserLoaded(true)
                         setUser(data)
                         setForm({
                             avatar: data.avatar,
@@ -162,6 +165,7 @@ const ProfileEdit = () => {
                             email: data.email,
                             username: data.username
                         })
+                        setIsUserLoaded(true)
                     })
                     .catch(e => {
                         setIsUserLoaded(true)
@@ -174,9 +178,7 @@ const ProfileEdit = () => {
 
     const componentLoaded = () => {
         if (isLoading) return (
-            <View>
-                <ActivityIndicator/>
-            </View>
+            <ErrorScreens type={'loading'} refreshing={refreshing} onRefresh={onRefresh}/>
         )
 
         if (!isLoggedIn) return (
@@ -208,160 +210,170 @@ const ProfileEdit = () => {
                 !componentLoaded() ?
                     componentLoaded()
                     :
-                    <View className='h-full w-full'>
-                        <View>
-                            <View className='flex-row items-center mt-3'>
-                                <TouchableNativeFeedback onPress={() => {
-                                    navigation.navigate('tabs')
-                                }}>
-                                    <View className='p-3'>
-                                        <FontAwesomeIcon size={20} icon={faArrowLeft}/>
-                                    </View>
-                                </TouchableNativeFeedback>
-                                <Text className={'text-2xl text-black ml-3'}>Personal Information</Text>
-                            </View>
-                            <View className='mt-4'>
-                                <ScrollView
-                                    className=''
-                                    refreshControl={
-                                        <RefreshControl
-                                            enabled={true}
-                                            refreshing={refreshing}
-                                            onRefresh={onRefresh}
-                                        />
-                                    }
-
+                    <ScrollView
+                        className="flex-1"
+                        stickyHeaderIndices={[0]}
+                    >
+                        <SafeAreaView>
+                            <View
+                                style={{backgroundColor: colors.header, borderColor: colors.main}}
+                                className={`border-b py-1 flex-row items-center justify-between h-[40px] relative`}
+                            >
+                                <Text
+                                    style={{color: colors.main}}
+                                    className='text-2xl font-averia_l  absolute w-full text-center'
                                 >
-                                    <View className='flex-col items-center px-3'>
-                                        <View className='items-center mb-5 relative'>
-                                            <Image
-                                                style={{width: 120, aspectRatio: 1}}
-                                                source={{uri: form.avatar}}
-                                                className='rounded-full bg-white'
-                                            />
-                                            <View className='absolute bottom-[-15]'>
-                                                <TouchableOpacity onPress={() => {
-                                                    ImagePicker.openPicker({
-                                                        width: 500,
-                                                        height: 500,
-                                                        mediaType: 'photo',
-                                                        multiple: false,
-                                                        cropping: true,
-                                                        cropperCircleOverlay: true,
-                                                        freeStyleCropEnabled: false
-                                                    }).then(image => {
-                                                        onFormChange("avatar", image.path)
-                                                    })
-                                                }}
-                                                >
-                                                    <View className='bg-blue-500 rounded-full p-1.5'>
-                                                        <FontAwesomeIcon color={"white"} icon={faPen}/>
-                                                    </View>
-                                                </TouchableOpacity>
+                                    Personal Information
+                                </Text>
+
+                                <TouchableOpacity
+                                    className="p-2" onPress={() => navigation.goBack()}>
+                                    <View className='ml-3 items-center'>
+                                        <FontAwesomeIcon icon={faArrowLeft} color={colors.main} size={20}/>
+                                    </View>
+                                </TouchableOpacity>
+
+                            </View>
+
+                        </SafeAreaView>
+
+                        <View className='mt-4'>
+                            <View className='px-3'>
+                                <View className='items-center relative'>
+                                    <Image
+                                        style={{width: "40%", aspectRatio: 1}}
+                                        source={{uri: form.avatar}}
+                                        className='rounded-full bg-white'
+                                    />
+                                    <View className='absolute ' style={{bottom: -20}}>
+                                        <TouchableOpacity onPress={() => {
+                                            ImagePicker.openPicker({
+                                                width: 500,
+                                                height: 500,
+                                                mediaType: 'photo',
+                                                multiple: false,
+                                                cropping: true,
+                                                cropperCircleOverlay: true,
+                                                freeStyleCropEnabled: false
+                                            }).then(image => {
+                                                onFormChange("avatar", image.path)
+                                            })
+                                                .catch(e => {
+
+                                                })
+                                        }}
+                                        >
+                                            <View
+                                                style={{backgroundColor: colors.buttons.image_edit}}
+                                                className=' rounded-full p-3'>
+                                                <FontAwesomeIcon color={"white"} icon={faPen}/>
                                             </View>
-                                        </View>
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
 
-
+                                <View style={{marginTop: 60, marginBottom: 50}}>
+                                    <View style={{marginBottom: 20}}>
                                         <Input
                                             onChangeText={(val) => onFormChange('username', val)}
                                             value={form.username}
                                             errorMessage={errors.username}
-                                            inputMode={'text'}
-                                            placeholder={"Enter your username"}
-                                            label={"Username"}
-                                            leftIconContainerStyle={{padding: 10, paddingRight: 10}}
-                                            containerStyle={{paddingHorizontal: 0}}
-                                            inputContainerStyle={{
-                                                paddingHorizontal: 5, borderRadius: 7, backgroundColor: "white",
-                                                borderWidth: 1
+                                            placeholder={"Username"}
+                                            inputContainerStyle={{...s`border-b`, borderColor: colors.main}}
+                                            placeholderTextColor={colors.placeholder}
+                                            inputStyle={{
+                                                fontFamily: 'AveriaSerifLibre_Regular',
+                                                color: colors.main,
+                                                ...s`text-2xl py-0`
                                             }}
-                                            inputStyle={{color: "black"}}
-                                            labelStyle={{
-                                                color: "black",
-                                                marginBottom: 5,
-                                                fontWeight: "100",
-                                                fontSize: 20
+                                            errorStyle={{
+                                                color: colors.errorRed
                                             }}
-                                            placeholderTextColor={"#ffffff"}
-                                            errorStyle={{color: "crimson"}}
+                                            iconContainerStyle={{}}
+                                            textInputProps={{multiline: true}}
                                         />
-
+                                    </View>
+                                    <View>
                                         <Input
                                             onChangeText={(val) => onFormChange('email', val)}
                                             value={form.email}
                                             errorMessage={errors.email}
-                                            inputMode={'email'}
-                                            placeholder={"Enter your email"}
-                                            label={"Email"}
-                                            leftIconContainerStyle={{padding: 10, paddingRight: 10}}
-                                            containerStyle={{paddingHorizontal: 0}}
-                                            inputContainerStyle={{
-                                                paddingHorizontal: 5, borderRadius: 7, backgroundColor: "white",
-                                                borderWidth: 1
+                                            placeholder={"Email"}
+                                            inputContainerStyle={{...s`border-b`, borderColor: colors.main}}
+                                            placeholderTextColor={colors.placeholder}
+                                            inputStyle={{
+                                                fontFamily: 'AveriaSerifLibre_Regular',
+                                                color: colors.main,
+                                                ...s`text-2xl py-0`
                                             }}
-                                            inputStyle={{color: "black"}}
-                                            labelStyle={{
-                                                color: "black",
-                                                marginBottom: 5,
-                                                fontWeight: "100",
-                                                fontSize: 20
+                                            errorStyle={{
+                                                color: colors.errorRed
                                             }}
-                                            placeholderTextColor={'#ffffff'}
-                                            errorStyle={{color: "crimson"}}
+                                            iconContainerStyle={{}}
+                                            textInputProps={{multiline: true}}
                                         />
+                                    </View>
+                                </View>
 
-                                        <View>
-                                            <Text className='text-xl text-black mb-2'>Background image</Text>
 
-                                            <TouchableOpacity onPress={() => {
-                                                ImagePicker.openPicker({
-                                                    width: 1920,
-                                                    height: 1080,
-                                                    mediaType: 'photo',
-                                                    multiple: false,
-                                                    cropping: true,
-                                                    freeStyleCropEnabled: false
-                                                }).then(image => {
-                                                    onFormChange("user_background", image.path)
-                                                })
-                                            }}
-                                            >
-                                                <View className='p-1 border rounded'>
-                                                    <Image
-                                                        style={{
-                                                            width: '100%',
-                                                            aspectRatio: 16 / 9,
-                                                        }}
-                                                        className='rounded'
-                                                        source={{uri: form.user_background}}
-                                                    />
-                                                </View>
-                                            </TouchableOpacity>
+
+
+                                <View>
+                                    <TouchableOpacity onPress={() => {
+                                        ImagePicker.openPicker({
+                                            width: 1920,
+                                            height: 1080,
+                                            mediaType: 'photo',
+                                            multiple: false,
+                                            cropping: true,
+                                            freeStyleCropEnabled: false
+                                        }).then(image => {
+                                            onFormChange("user_background", image.path)
+                                        })
+                                            .catch(e => {
+
+                                            })
+                                    }}
+                                    >
+                                        <View
+                                            style={{borderColor: colors.main}}
+                                            className='p-1 border rounded'>
+                                            <Image
+                                                style={{
+                                                    width: '100%',
+                                                    aspectRatio: 16 / 9,
+                                                }}
+                                                className='rounded'
+                                                source={{uri: form.user_background}}
+                                            />
                                         </View>
+                                    </TouchableOpacity>
+                                </View>
 
-                                    </View>
-                                    <View className='px-3 items-center'>
-                                        <Button
-                                            onPress={() => onFormSubmit()}
-                                            loading={loading}
-                                            title="Save Changes"
-                                            buttonStyle={{
-                                                backgroundColor: "#e43190",
-                                                padding: 10,
-                                                width: 250,
-                                                borderRadius: 10,
-                                            }}
-                                            titleStyle={{fontSize: 20}}
-                                            containerStyle={{
-                                                marginTop: 20,
-                                            }}
-                                        />
-                                    </View>
-                                </ScrollView>
                             </View>
-
+                            <View style={{marginTop: 50}} className='px-3 items-center'>
+                                <Button
+                                    onPress={() => onFormSubmit()}
+                                    loading={loading}
+                                    title="Confirm changes"
+                                    buttonStyle={{
+                                        backgroundColor: colors.buttons.confirm,
+                                        padding: 10,
+                                        width: 250,
+                                        borderRadius: 5,
+                                    }}
+                                    titleStyle={{
+                                        fontFamily: 'AveriaSerifLibre_Regular',
+                                        fontSize: 20,
+                                        color: colors.main
+                                }}
+                                    containerStyle={{
+                                    }}
+                                />
+                            </View>
                         </View>
-                    </View>
+
+                    </ScrollView>
             }
         </>
 

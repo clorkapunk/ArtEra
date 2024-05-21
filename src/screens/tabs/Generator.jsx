@@ -1,4 +1,4 @@
-import React, {memo, useState} from "react";
+import React, {memo, useContext, useState} from "react";
 import {Text, View, Image, ToastAndroid, ActivityIndicator, ScrollView, TouchableNativeFeedback} from "react-native";
 import {Button} from "@rneui/themed";
 import {getUser} from "../../api/userAPI";
@@ -8,9 +8,8 @@ import {getGeneratedImage, getGeneratorStatus} from "../../api/ContentAPI";
 import {useNavigation} from "@react-navigation/native";
 import Input from './../../components/Input'
 import {s} from 'react-native-wind'
-import {FontAwesomeIcon} from "@fortawesome/react-native-fontawesome";
-import {colors} from "../../consts/colors";
-import {faPaperPlane} from "@fortawesome/free-regular-svg-icons";
+import ThemeContext from "../../context/ThemeProvider";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
 const loadingGifs = [
@@ -21,6 +20,7 @@ const errorScreen = require('../../../assets/generator/generator-error.png')
 
 
 const Generator = () => {
+    const {theme, colors} = useContext(ThemeContext)
     const [first, setFirst] = useState(true)
     const [isLoading, setIsLoading] = useState(true);
     const [isNetworkError, setIsNetworkError] = useState(false)
@@ -133,7 +133,7 @@ const Generator = () => {
     }
 
     function navigateToCreate() {
-        if (first === true) {
+        if (first === true || imageUri === null) {
             ToastAndroid.show("Generate image first!", ToastAndroid.SHORT)
             return
         }
@@ -146,15 +146,14 @@ const Generator = () => {
 
             navigation.navigate('post-layout', {
                 screen: 'post-create', params: {
-                    item: {
+                    images: [{
                         node: {
                             image: {
                                 uri: imageUri
                             }
                         }
-                    },
+                    }],
                     user: user,
-                    aspectRatio: 1
                 }
             })
         })
@@ -164,9 +163,7 @@ const Generator = () => {
 
     const componentLoaded = () => {
         if (isLoading) return (
-            <View>
-                <ActivityIndicator/>
-            </View>
+            <ErrorScreens type={'loading'}/>
         )
 
         if (isNetworkError) return (
@@ -188,50 +185,64 @@ const Generator = () => {
                             style={{
                                 width: '100%',
                                 aspectRatio: 1,
-                                overflow: 'hidden'
+                                overflow: 'hidden',
+                                backgroundColor: colors.tertiary,
+                                borderWidth: 1,
+                                borderColor: colors.main
                             }}
-                            className='rounded border border-generator-image-border justify-center items-center'
+                            className='rounded justify-center items-center'
                         >
                             {
                                 first ?
-                                    <Text className='text-lg text-generator-image-text'>You will see the result here</Text>
+                                    <Text
+                                        style={{color: colors.main}}
+                                        className='text-2xl font-averia_r'
+                                    >You will see the result here</Text>
                                     :
                                     <Image
-                                        className='rounded bg-white'
                                         resizeMode={'cover'}
-                                        style={{flex: 1, width: '100%', aspectRatio: 1,}}
+                                        style={{flex: 1, width: '100%', aspectRatio: 1,
+                                            backgroundColor: colors.background}}
                                         source={imageUri !== null ? {uri: imageUri} : statusImage}
                                     />
                             }
 
                         </View>
-                        <Text className={`text-red-600 ${errors.image === '' ? 'h-0' : 'h-auto'}`}
+                        <Text
+                            style={{color: colors.errorRed}}
+                            className={`font-averia_r text-center
+                        ${errors.image === '' ? 'h-0 mt-0' : 'h-auto mt-2'}`}
                         >{errors.image}</Text>
                         <Text
-                            className='text-generator-progress-text text-xl font-averia_r'
+                            style={{color: colors.main}}
+                            className=' text-xl font-averia_r'
                         >{statusMessage}</Text>
+
                         <LinearProgress
-                            color={colors.generator.progress.line.before}
-                            trackColor={colors.generator.progress.line.after}
+                            color={colors.primary}
+                            trackColor={colors.main}
                             style={{
-                                ...s`${progress === 0 ? 'h-0' : 'h-auto'} mt-2`
+                                ...s`${progress === 0 ? 'h-0 mt-0' : 'h-auto mt-2'} `
                             }}
                             value={progress}
                             variant="determinate"
                         />
+
                         <View className='mt-5'>
                             <Input
                                 onChangeText={(val) => onFormChange('prompt', val)}
                                 value={form.prompt}
                                 errorMessage={errors.prompt}
                                 placeholder={"What you want to create?"}
-                                containerStyle={{}}
-                                inputContainerStyle={{...s`border-b`, borderColor: colors.listitem.input.border}}
-                                placeholderTextColor={colors.listitem.input.placeholder}
+                                inputContainerStyle={{...s`border-b`, borderColor: colors.main}}
+                                placeholderTextColor={colors.placeholder}
                                 inputStyle={{
                                     fontFamily: 'AveriaSerifLibre_Regular',
-                                    color: colors.listitem.input.text,
+                                    color: colors.main,
                                     ...s`text-2xl py-0`
+                                }}
+                                errorStyle={{
+                                    color: colors.errorRed
                                 }}
                                 iconContainerStyle={{}}
                                 textInputProps={{multiline: true}}
@@ -249,56 +260,48 @@ const Generator = () => {
                                     orientation="horizontal"
                                     thumbStyle={{
                                         height: 20,
-                                        backgroundColor: colors.generator.slider.thumb,
+                                        backgroundColor: colors.primary,
                                         width: 20
                                     }}
                                     trackStyle={{
                                         height: 5
                                     }}
-                                    minimumTrackTintColor={colors.generator.slider.before}
-                                    maximumTrackTintColor={colors.generator.slider.after}
+                                    minimumTrackTintColor={colors.main}
+                                    maximumTrackTintColor={colors.main}
                                 />
                             </View>
                         </View>
 
-                        <View className='flex-col mb-10'>
-                            <View className='flex-row justify-center'>
+                        <View className='flex-row items-center mt-10 mb-5'>
+                            <View className='flex-1'>
                                 <Button
                                     title={"Generate image"}
                                     titleStyle={{
                                         fontFamily: 'AveriaSerifLibre_Regular',
-                                        color: colors.generator.buttons.generate.text,
+                                        color: colors.background,
                                         ...s`text-xl`
                                     }}
                                     onPress={() => onFormSubmit()}
-                                    containerStyle={{
-                                        marginTop: 40
-                                    }}
                                     buttonStyle={{
-                                        ...s`border py-2 rounded-md`,
-                                        width: 200,
-                                        backgroundColor: colors.generator.buttons.generate.bg,
-                                        borderColor: colors.generator.buttons.generate.border
+                                        ...s`py-2 rounded-md`,
+                                        backgroundColor: colors.buttons.generate,
                                     }}
                                 />
                             </View>
-                            <View className='flex-row justify-center'>
+                            <View className='mx-2'/>
+                            <View className='flex-1'>
                                 <Button
                                     title={"Create post"}
                                     onPress={() => navigateToCreate()}
                                     titleStyle={{
                                         fontFamily: 'AveriaSerifLibre_Regular',
-                                        color: colors.generator.buttons.create.text,
+                                        color: colors.background,
                                         ...s`text-xl`
                                     }}
-                                    containerStyle={{
-                                        marginTop: 20
-                                    }}
+
                                     buttonStyle={{
-                                        ...s`border py-2 rounded-md`,
-                                        width: 200,
-                                        backgroundColor: colors.generator.buttons.create.bg,
-                                        borderColor: colors.generator.buttons.create.border
+                                        ...s`py-2 rounded-md`,
+                                        backgroundColor: colors.buttons.create,
                                     }}
                                 />
                             </View>

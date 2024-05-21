@@ -1,4 +1,4 @@
-import React, {memo, useEffect, useState} from "react";
+import React, {memo, useContext, useEffect, useState} from "react";
 import {
     View,
     Text,
@@ -15,11 +15,20 @@ import ErrorScreens from "../../components/ErrorScreens";
 import SearchBar from '../../components/SearchBar'
 import {FontAwesomeIcon} from "@fortawesome/react-native-fontawesome";
 import {faSearch, faX} from "@fortawesome/free-solid-svg-icons";
-import {Skeleton} from "@rneui/themed";
 import {s} from 'react-native-wind'
 import LinearGradient from "react-native-linear-gradient";
-import {colors} from "../../consts/colors";
 import {SafeAreaView} from "react-native-safe-area-context";
+import SkeletonView from "../../components/SkeletonView";
+import ThemeContext from "../../context/ThemeProvider";
+
+
+const CustomLinearGradient = () =>
+    <LinearGradient
+        colors={['transparent', 'rgba(255,255,255,0.5)',  "transparent"]}
+        start={{ x: 0, y: 0.5 }}
+        end={{ x: 1, y: 0.5 }}
+        style={{flex: 1}}
+    />
 
 
 const SearchTag = ({item}) => {
@@ -33,6 +42,7 @@ const SearchTag = ({item}) => {
 };
 
 const Search = memo(() => {
+    const {colors} = useContext(ThemeContext)
     const [data, setData] = useState({
         count: null,
         next: null,
@@ -41,12 +51,10 @@ const Search = memo(() => {
     });
     const [search, setSearch] = useState("");
     const [isLoading, setIsLoading] = useState(true);
-    const tags = ["TAG 1", "TAG 2", "TAG 3", "TAG 4", "TAG 5", "TAG 6", "TAG 7", "TAG 8", "TAG 9"];
     const timeout = React.useRef(null);
     const [isContentLoaded, setIsContentLoaded] = useState(false)
     const [isNetworkError, setIsNetworkError] = useState(false);
     const [refreshing, setRefreshing] = useState(false)
-    const [inputStyle, setInputStyle] = useState()
 
     useEffect(() => {
         InteractionManager.runAfterInteractions(() => {
@@ -159,9 +167,7 @@ const Search = memo(() => {
 
     const componentLoaded = () => {
         if (isLoading) return (
-            <View>
-                <ActivityIndicator/>
-            </View>
+            <ErrorScreens type={'loading'} refreshing={refreshing} onRefresh={onRefresh}/>
         )
 
         if (isNetworkError) return (
@@ -177,34 +183,25 @@ const Search = memo(() => {
         if (!isContentLoaded) return (
             <View className='flex-row px-2 justify-between mb-2'>
                 <View className='flex-col' style={{width: '49.5%'}}>
-                    <Skeleton
-                        animation={'wave'}
-                        LinearGradientComponent={LinearGradient}
-                        style={[s``, {flex: 1, borderRadius: 0, height: 200}]}
+                    <SkeletonView
+                        style={[s``, {flex: 1, borderRadius: 0, height: 200,}]}
                     />
                     <View className={'mb-1'}/>
-                    <Skeleton
-                        animation={'wave'}
-                        LinearGradientComponent={LinearGradient}
-                        style={[s``, {flex: 1, borderRadius: 0, height: 300}]}
+                    <SkeletonView
+                        style={[s``, {flex: 1, borderRadius: 0, height: 300,
+                           }]}
                     />
                     <View className={'mb-1'}/>
-                    <Skeleton
-                        animation={'wave'}
-                        LinearGradientComponent={LinearGradient}
+                    <SkeletonView
                         style={[s``, {flex: 1, borderRadius: 0, height: 300}]}
                     />
                 </View>
                 <View className='flex-col' style={{width: '49.5%'}}>
-                    <Skeleton
-                        animation={'wave'}
-                        LinearGradientComponent={LinearGradient}
+                    <SkeletonView
                         style={[s``, {flex: 1, borderRadius: 0, height: 300}]}
                     />
                     <View className={'mb-1'}/>
-                    <Skeleton
-                        animation={'wave'}
-                        LinearGradientComponent={LinearGradient}
+                    <SkeletonView
                         style={[s``, {flex: 1, borderRadius: 0, height: 200}]}
                     />
                 </View>
@@ -216,7 +213,7 @@ const Search = memo(() => {
 
 
     return (
-        <View className='bg-background'>
+        <View style={{backgroundColor: colors.background}}>
             {
 
                 <ScrollView
@@ -236,7 +233,9 @@ const Search = memo(() => {
                     }
                 >
                     <SafeAreaView>
-                        <View className='px-2 py-3 bg-background'>
+                        <View
+                            style={{backgroundColor: colors.background}}
+                            className='px-2 py-3'>
                             <SearchBar
                                 onSubmitEditing={() => onSearch()}
                                 placeholder={'Tap to explore'}
@@ -246,7 +245,7 @@ const Search = memo(() => {
                                     <TouchableOpacity onPress={() => onSearch()}>
                                         <View>
                                             <FontAwesomeIcon
-                                                color={colors.search.icon}
+                                                color={colors.main}
                                                 size={20}
                                                 icon={faSearch}/>
                                         </View>
@@ -258,7 +257,7 @@ const Search = memo(() => {
                                         onPress={() => onClear()}>
                                         <View>
                                             <FontAwesomeIcon
-                                                color={colors.search.clear}
+                                                color={colors.main}
                                                 icon={faX}
                                                 size={15}
                                             />
@@ -271,33 +270,22 @@ const Search = memo(() => {
                                 labelStyle={{}}
                                 errorStyle={{}}
                                 containerStyle={{...s``}}
-                                placeholderTextColor={colors.search.placeholder}
+                                placeholderTextColor={colors.placeholder}
                                 inputContainerStyle={{
                                     ...s`border rounded-xl`,
-                                    borderColor: colors.search.border
+                                    borderColor: colors.main
                                 }}
                                 inputStyle={{
                                     textAlign: 'center',
                                     fontFamily: 'AveriaSerifLibre_Regular',
-                                    color: colors.search.text,
+                                    color: colors.main,
                                     ...s`text-xl py-1 ml-2`
                                 }}
                                 iconContainerStyle={{...s`p-2`}}
-                                textInputProps={{
-
-                                }}
+                                textInputProps={{}}
                             />
                         </View>
                     </SafeAreaView>
-                    {/*<View className="ml-3 mb-4">*/}
-                    {/*    <ScrollView horizontal={true}>*/}
-                    {/*        {*/}
-                    {/*            tags.map(item => {*/}
-                    {/*                return <SearchTag key={item} item={item}/>;*/}
-                    {/*            })*/}
-                    {/*        }*/}
-                    {/*    </ScrollView>*/}
-                    {/*</View>*/}
 
                     {
                         componentLoaded() !== true ?
@@ -307,7 +295,10 @@ const Search = memo(() => {
                                 {
                                     data.results.length === 0 ?
                                         <View>
-                                            <Text className='text-center mt-5'>Nothing here but us</Text>
+                                            <Text
+                                                style={{color: colors.main}}
+                                                className='text-xl text-center mt-5 font-averia_r'
+                                            >Nothing here but us</Text>
                                         </View>
                                         :
                                         <MasonryList
@@ -325,7 +316,7 @@ const Search = memo(() => {
                                             numColumns={2}
                                             data={data.results}
                                             renderItem={({item}) => (<GridItem item={item}/>)}
-                                            keyExtractor={(item, index) => item.id}
+                                            keyExtractor={(item) => item.id}
                                         />
                                 }
                             </View>

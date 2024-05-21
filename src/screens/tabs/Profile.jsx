@@ -1,4 +1,4 @@
-import React, {memo, useEffect, useState} from "react";
+import React, {memo, useContext, useEffect, useState} from "react";
 import {
     ActivityIndicator,
     Text,
@@ -14,9 +14,13 @@ import {getUser, getUserData} from "../../api/userAPI";
 import {FontAwesomeIcon} from "@fortawesome/react-native-fontawesome";
 import {faArrowUp} from "@fortawesome/free-solid-svg-icons";
 import ErrorScreens from "../../components/ErrorScreens";
-import {Button} from "@rneui/themed";
+import {Button, Dialog} from "@rneui/themed";
+import {useNavigation} from "@react-navigation/native";
+import {s} from 'react-native-wind'
+import ThemeContext from "../../context/ThemeProvider";
 
 const Profile = () => {
+    const {colors} = useContext(ThemeContext)
     const [isLoading, setIsLoading] = useState(true);
     const [isLoggedIn, setIsLoggedIn] = useState(false)
     const [isUserLoaded, setIsUserLoaded] = useState(false)
@@ -38,6 +42,7 @@ const Profile = () => {
     });
     const [refreshing, setRefreshing] = useState(false)
     const [isNetworkError, setIsNetworkError] = useState(false);
+    const navigation = useNavigation()
 
     function updateProfileInfo() {
         getUser()
@@ -54,7 +59,7 @@ const Profile = () => {
                         setUser(data)
                         setIsUserLoaded(true)
                         setIsContentLoaded(false)
-                        if(tab === 'arts'){
+                        if (tab === 'arts') {
                             getPostsBySearch('', data.id, 1)
                                 .then(data => {
                                     setData(data)
@@ -65,8 +70,7 @@ const Profile = () => {
                                     setIsContentLoaded(true)
                                     setIsNetworkError(true)
                                 })
-                        }
-                        else if(tab === 'favorites'){
+                        } else if (tab === 'favorites') {
                             getLikedPosts(user.id)
                                 .then(data => {
                                     setData({
@@ -118,8 +122,9 @@ const Profile = () => {
                 getUserData(user.id)
                     .then(data => {
                         setUser(data)
+                        setIsUserLoaded(true)
                         setIsContentLoaded(false)
-                        if(tab === 'arts'){
+                        if (tab === 'arts') {
                             getPostsBySearch('', data.id, 1)
                                 .then(data => {
                                     setData(data)
@@ -130,8 +135,7 @@ const Profile = () => {
                                     setIsContentLoaded(true)
                                     setIsNetworkError(true)
                                 })
-                        }
-                        else if(tab === 'favorites'){
+                        } else if (tab === 'favorites') {
                             getLikedPosts(user.id)
                                 .then(data => {
                                     setData({
@@ -168,6 +172,9 @@ const Profile = () => {
             return
         }
 
+        if(refreshing) return;
+
+        setRefreshing(true)
         setIsNetworkError(false)
         getPostsBySearch('', user.id, data.next)
             .then(data => {
@@ -179,18 +186,20 @@ const Profile = () => {
                         results: prevState.results.concat(data.results)
                     }
                 });
+                setRefreshing(false)
             })
             .catch((e) => {
                 setIsNetworkError(true)
+                setRefreshing(false)
             });
     }
 
-    function onTabChange(tab){
+    function onTabChange(tab) {
         setTab(tab)
         setIsContentLoaded(false)
         getUser()
             .then(user => {
-                if(tab === 'favorites'){
+                if (tab === 'favorites') {
                     getLikedPosts(user.id)
                         .then(data => {
                             setData({
@@ -205,8 +214,7 @@ const Profile = () => {
                             setIsNetworkError(true)
                             setIsContentLoaded(true)
                         })
-                }
-                else if(tab === 'arts'){
+                } else if (tab === 'arts') {
                     getPostsBySearch('', user.id, 1)
                         .then(data => {
                             setData(data)
@@ -222,36 +230,39 @@ const Profile = () => {
 
     }
 
-    function isCloseToBottom({layoutMeasurement, contentOffset, contentSize}){
+    function isCloseToBottom({layoutMeasurement, contentOffset, contentSize}) {
         return layoutMeasurement.height + contentOffset.y >= contentSize.height - 20;
     }
 
     const componentLoaded = () => {
         if (isLoading) return (
-            <View>
-                <ActivityIndicator/>
-            </View>
+            <ErrorScreens type={'loading'} refreshing={refreshing} onRefresh={onRefresh}/>
         )
 
         if (!isLoggedIn) return (
             <View className='flex-col justify-center items-center  h-full'>
-                <View className='flex-row justify-center'>
-                    <Text className='text-lg mr-3'>Log in to see your profile</Text>
-                    <FontAwesomeIcon
-                        style={{opacity: 0.7}}
-                        size={20}
-                        icon={faArrowUp}/>
+                <View className='flex-row justify-center items-center'>
+                    <Button
+                        onPress={() => navigation.navigate('auth', {screen: 'sign-in'})}
+                        type={'clear'}
+                        title={'Log in'}
+                    />
+                    <Text
+                        style={{color: colors.main}}
+                        className='text-lg mr-3'>to see your profile or</Text>
                 </View>
 
                 <Button
-                    onPress={() => {onRefresh()}}
+                    onPress={() => {
+                        onRefresh()
+                    }}
                     type={'clear'}
                     title={'Refresh'}
                 />
             </View>
         )
 
-        if(isNetworkError) return (
+        if (isNetworkError) return (
             <ErrorScreens type={'network'} refreshing={refreshing} onRefresh={onRefresh}/>
         )
 
@@ -269,9 +280,10 @@ const Profile = () => {
                 componentLoaded() !== true ?
                     componentLoaded()
                     :
+
                     <ScrollView
                         onScroll={({nativeEvent}) => {
-                            if(isCloseToBottom(nativeEvent) && tab === 'arts') {
+                            if (isCloseToBottom(nativeEvent) && tab === 'arts') {
                                 onEndReached()
                             }
                         }}
@@ -285,7 +297,7 @@ const Profile = () => {
                             />
                         }
                     >
-                        <View style={{width: '100%', aspectRatio: 16/9}}>
+                        <View style={{width: '100%', aspectRatio: 16 / 9}}>
                             <Image
                                 source={{uri: user.user_background}}
                                 style={{flex: 1}}
@@ -295,10 +307,12 @@ const Profile = () => {
                         </View>
 
                         <View className='flex-row justify-between items-center my-2 mx-3'>
-                            <Text className="text-2xl font-cgbold mb-2">{user.username}</Text>
+                            <Text
+                                style={{color: colors.main}}
+                                className="text-2xl font-averia_r mb-2">{user.username}</Text>
                             <Image
                                 source={{uri: user.avatar}}
-                                className="rounded-full"
+                                className="rounded-full bg-white"
                                 style={{width: "28%", aspectRatio: 1}}
                                 resizeMode={"cover"}
                                 PlaceholderContent={<ActivityIndicator/>}
@@ -311,7 +325,9 @@ const Profile = () => {
                                     onPress={() => alert("Coming soon")}
                                 >
                                     <View className="p-1 rounded">
-                                        <Text className={`text-xl font-cgregular underline `}>
+                                        <Text
+                                            style={{color: colors.main}}
+                                            className={`text-xl font-averia_r underline `}>
                                             0 followers
                                         </Text>
                                     </View>
@@ -321,20 +337,25 @@ const Profile = () => {
                                 onPress={() => alert("list of arts (maybe not)")}
                             >
                                 <View className="p-1 rounded">
-                                    <Text className={`text-xl font-cgregular underline `}>
+                                    <Text
+                                        style={{color: colors.main}}
+                                        className={`text-xl text-profile-info_labels font-averia_r underline `}>
                                         {artsCount} arts
                                     </Text>
                                 </View>
                             </TouchableNativeFeedback>
                         </View>
 
-                        <View className="flex-row py-2 justify-around bg-white">
+                        <View
+                            style={{backgroundColor: colors.background}}
+                            className="flex-row py-2 justify-around">
                             <TouchableNativeFeedback
                                 onPress={() => onTabChange('arts')}
                             >
                                 <View className="p-1 rounded">
                                     <Text
-                                        className={`text-xl font-cgregular ${tab === "arts" && "underline"} `}>Your
+                                        style={{color: colors.main}}
+                                        className={`text-xl font-averia_r ${tab === "arts" && "underline"} `}>Your
                                         arts</Text>
                                 </View>
                             </TouchableNativeFeedback>
@@ -344,7 +365,8 @@ const Profile = () => {
                             >
                                 <View className="p-1 rounded">
                                     <Text
-                                        className={`text-xl font-cgregular ${tab === "favorites" && "underline"} `}>Favorites</Text>
+                                        style={{color: colors.main}}
+                                        className={`text-xl font-averia_r ${tab === "favorites" && "underline"} `}>Favorites</Text>
                                 </View>
                             </TouchableNativeFeedback>
                         </View>
@@ -354,20 +376,42 @@ const Profile = () => {
                                 !isContentLoaded ?
                                     <ActivityIndicator size={30} className='mb-2'/>
                                     :
-                                    <MasonryList
-                                        onEndReached={() => onEndReached()}
-                                        columnWrapperStyle={{
-                                            justifyContent: "space-between",
-                                        }}
-                                        numColumns={2}
-                                        data={data.results}
-                                        renderItem={({item}) => (<GridItem item={item}/>)}
-                                        keyExtractor={(item, index) => item.id}
-                                    />
+                                    (
+                                        data.results.length === 0 ?
+                                            <View className='flex-row items-center justify-center mt-10'>
+                                                <Text className='
+                                                text-generator-slider-text font-averia_b
+                                                text-xl
+                                                '>Nothing here, go</Text>
+                                                <Button
+                                                    onPress={() => navigation.navigate('search')}
+                                                    titleStyle={[s`text-xl`, {
+                                                        fontFamily: 'AveriaSerifLibre_BoldItalic',
+                                                        color: colors.primary
+                                                    }]}
+                                                    title={'Explore'}
+                                                    type={'clear'}
+                                                />
+                                            </View>
+                                            :
+                                            <MasonryList
+                                                onEndReached={() => onEndReached()}
+                                                columnWrapperStyle={{
+                                                    justifyContent: "space-between",
+                                                }}
+                                                numColumns={2}
+                                                data={data.results}
+                                                renderItem={({item}) => (<GridItem update={onRefresh} item={item}/>)}
+                                                keyExtractor={(item, index) => item.id}
+                                            />
+                                    )
+
                             }
                         </View>
 
                     </ScrollView>
+
+
             }
         </>
     );

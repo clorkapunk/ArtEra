@@ -1,18 +1,17 @@
-import React, {memo, useEffect} from "react";
+import React, {memo, useContext, useEffect} from "react";
 import {Text, TouchableNativeFeedback, View} from "react-native";
 import {useIsFocused, useNavigation, useRoute} from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {FontAwesomeIcon} from "@fortawesome/react-native-fontawesome";
 import {faBars} from "@fortawesome/free-solid-svg-icons";
-import {colors} from "../consts/colors";
+import ThemeContext from "../context/ThemeProvider";
 
 
 const Header = ({title, route, openSideMenu}) => {
     const navigation = useNavigation();
     const isFocused = useIsFocused();
     const [user, setUser] = React.useState(null);
-    const [showDropdown, setShowDropdown] = React.useState(false);
-
+    const {theme, colors} = useContext(ThemeContext)
 
     async function logout() {
         await AsyncStorage.removeItem('user');
@@ -31,28 +30,28 @@ const Header = ({title, route, openSideMenu}) => {
         });
     }, [isFocused]);
 
+
+
     return (
         <View
-            className={`bg-header-bg border-b border-b-header-border
-            py-1 flex-row items-center justify-between h-[40px]
-            relative
-            `}
+            style={{backgroundColor: colors.header, borderColor: colors.main}}
+            className={`border-b py-1 flex-row items-center justify-between h-[40px] relative`}
         >
 
             <Text
-                className='text-3xl font-averia_l text-header-text
-                absolute w-full text-center'
+                style={{color: colors.main}}
+                className={`text-3xl font-averia_l absolute w-full text-center`}
             >
                 {title}
             </Text>
 
             <View className='flex-row items-center'>
-                <TouchableNativeFeedback onPress={() => openSideMenu()}>
+                <TouchableNativeFeedback onPress={openSideMenu}>
                     <View className='ml-3 p-0'>
                         <FontAwesomeIcon
                             icon={faBars}
                             size={25}
-                            color={colors.header.menu}
+                            color={colors.main}
                         />
                     </View>
                 </TouchableNativeFeedback>

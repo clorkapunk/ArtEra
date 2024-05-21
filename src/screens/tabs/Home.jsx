@@ -4,16 +4,17 @@ import {
     InteractionManager,
     RefreshControl,
     View,
-    FlatList, ToastAndroid, Text, Animated, TouchableNativeFeedback, Image, ScrollView
+    FlatList,
+    ToastAndroid,
+    ScrollView
 } from "react-native";
 import {getPosts} from "../../api/ContentAPI";
 import ListItem from "../../components/ListItem";
 import CommentBottomSheet from "../../components/CommentBottomSheet";
 import SplashScreen from "react-native-splash-screen";
 import ErrorScreens from "../../components/ErrorScreens";
-import LinearGradient from 'react-native-linear-gradient';
-import {Skeleton} from "@rneui/themed";
 import {s} from "react-native-wind";
+import SkeletonView from "../../components/SkeletonView";
 
 
 const ListItemPlaceholder = memo(() => {
@@ -22,39 +23,28 @@ const ListItemPlaceholder = memo(() => {
         <View className='flex-col mb-6'>
 
             <View className='flex-row items-center px-3 py-2'>
-                <Skeleton
-                    LinearGradientComponent={LinearGradient}
-                    animation={'wave'}
+                <SkeletonView
                     circle={true}
                     style={{width: '12%', aspectRatio: 1}}
-                    skeletonStyle={{backgroundColor: 'red'}}
                 />
 
-                <Skeleton
-                    LinearGradientComponent={LinearGradient}
-                    animation={'wave'}
+                <SkeletonView
                     style={[s`ml-3`, {flex: 1, height: 25}]}/>
             </View>
 
             <View className='flex-row mx-3 mb-2'>
-                <Skeleton
-                    LinearGradientComponent={LinearGradient}
-                    animation={'wave'}
+                <SkeletonView
                     style={{flex: 1, height: 30}}/>
             </View>
 
             <View className='flex-row mx-3'>
-                <Skeleton
-                    LinearGradientComponent={LinearGradient}
-                    animation={'wave'}
+                <SkeletonView
                     style={[s`rounded-lg`, {width: '100%', aspectRatio: 1}]}
                 />
             </View>
 
             <View className={'px-3 mt-2 flex-row'}>
-                <Skeleton
-                    LinearGradientComponent={LinearGradient}
-                    animation={'wave'}
+                <SkeletonView
                     style={{flex: 1, height: 50}}/>
             </View>
 
@@ -62,17 +52,13 @@ const ListItemPlaceholder = memo(() => {
             <View className={'flex-row my-1 mx-3'}>
 
                 <View className='px-3 py-2 flex-row items-center justify-end'>
-                    <Skeleton
-                        LinearGradientComponent={LinearGradient}
-                        animation={'wave'}
+                    <SkeletonView
                         style={[s`ml-2 rounded-full`, {width: 80, height: 25}]}/>
                 </View>
 
 
                 <View className='px-4 flex-row items-center justify-end'>
-                    <Skeleton
-                        LinearGradientComponent={LinearGradient}
-                        animation={'wave'}
+                    <SkeletonView
                         style={[s`ml-2 rounded-full`, {width: 80, height: 25}]}/>
                 </View>
 
@@ -80,9 +66,7 @@ const ListItemPlaceholder = memo(() => {
             </View>
 
             <View className='mx-3 px-3 flex-row'>
-                <Skeleton
-                    LinearGradientComponent={LinearGradient}
-                    animation={'wave'}
+                <SkeletonView
                     style={{flex: 1, height: 40}}
                 />
             </View>
@@ -160,6 +144,8 @@ const Home = () => {
             return
         }
 
+        if(endReachedLoading) return;
+
         setEndReachedLoading(true)
         getPosts(data.next)
             .then(data => {
@@ -178,28 +164,33 @@ const Home = () => {
             });
     }
 
-    const _renderitem = ({item}) =>
-        <ListItem
-            commentSheetState={item.id === commentSheetState.id ? commentSheetState.status : false}
-            openCommentSheet={(id) => {
-                commentSheetRef.current?.open(id)
-                setCommentSheetState({
-                    id: id,
-                    status: true
-                })
-            }}
-            item={item}
-        />;
+
+    const _renderitem = ({item}) =>{
+
+        return (
+            <ListItem
+                commentSheetState={item.id === commentSheetState.id ? commentSheetState.status : false}
+                openCommentSheet={(id) => {
+                    commentSheetRef.current?.open(id)
+                    setCommentSheetState({
+                        id: id,
+                        status: true
+                    })
+                }}
+                item={item}
+                images={item.image_details}
+            />
+        )
+    }
+
 
     const componentLoaded = () => {
         if (isLoading) return (
-            <View className='bg-background'>
-                <ActivityIndicator/>
-            </View>
+            <ErrorScreens type={'loading'} refreshing={refreshing} onRefresh={onRefresh}/>
         )
 
         if (isContentLoading) return (
-            <ScrollView className='bg-background'>
+            <ScrollView className=''>
                 <ListItemPlaceholder/>
                 <ListItemPlaceholder/>
             </ScrollView>
@@ -221,12 +212,12 @@ const Home = () => {
                     :
                     <>
                         <View
-                            className={`bg-background`}
+
                             style={{flex: 1, justifyContent: "flex-end"}}
                         >
                             <FlatList
                                 disableVirtualization={true}
-                                initialNumToRender={5}
+                                // initialNumToRender={5}
                                 refreshControl={
                                     <RefreshControl
                                         enabled={true}
@@ -235,15 +226,14 @@ const Home = () => {
                                     />
                                 }
                                 onEndReached={() => onEndReached()}
-                                onEndReachedThreshold={0.2}
                                 data={data.results}
                                 renderItem={_renderitem}
-                                keyExtractor={(item, index) => item.id}
+                                keyExtractor={(item) => item.id}
                             />
                         </View>
 
                         <CommentBottomSheet
-                            onClose={() => setCommentSheetState(false)}
+                            onClose={() => setCommentSheetState({id: null, status: false})}
                             ref={commentSheetRef}/>
 
                     </>

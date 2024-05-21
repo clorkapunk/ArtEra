@@ -1,4 +1,4 @@
-import React, {forwardRef, memo, useEffect, useImperativeHandle, useMemo, useRef, useState} from "react";
+import React, {forwardRef, memo, useContext, useEffect, useImperativeHandle, useMemo, useRef, useState} from "react";
 import BottomSheet, {
     BottomSheetBackdrop,
     BottomSheetFlatList,
@@ -19,30 +19,13 @@ import {getCommentsByPost, sendCommentToPost} from "../api/ContentAPI";
 import {getUser, getUserData} from "../api/userAPI";
 import Input from './../components/Input'
 import {SafeAreaView, useSafeAreaInsets} from "react-native-safe-area-context";
+import ThemeContext from "../context/ThemeProvider";
+import SkeletonView from "./SkeletonView";
+import {s} from "react-native-wind";
 
 
 const CommentSheetBackdrop = memo(({animatedIndex, animatedPosition, style}) => {
-
-
-    // const adjustedAnimatedIndex = useSharedValue(0);
-    // useAnimatedReaction(
-    //   () => animatedIndex.value,
-    //   (prepared, pre) => {
-    //     if (pre === null) {
-    //       // initial state
-    //       adjustedAnimatedIndex.value = prepared;
-    //       return;
-    //     }
-    //
-    //     const jumpForward = prepared - pre === 1;
-    //     const jumpBackward = pre - prepared === 1;
-    //
-    //     if (pre !== prepared && !jumpBackward && !jumpForward) {
-    //       adjustedAnimatedIndex.value = prepared;
-    //     }
-    //   },
-    // );
-
+    const {colors} = useContext(ThemeContext)
 
     return (
 
@@ -61,8 +44,9 @@ const CommentSheetBackdrop = memo(({animatedIndex, animatedPosition, style}) => 
 })
 
 const CommentSheetFooter = memo(({animatedFooterPosition, postId, updateComments}) => {
+    const {colors} = useContext(ThemeContext)
     const [input, setInput] = useState("");
-    const { bottom: bottomSafeArea } = useSafeAreaInsets();
+    const {bottom: bottomSafeArea} = useSafeAreaInsets();
 
 
     function sendComment(postId, text) {
@@ -85,14 +69,14 @@ const CommentSheetFooter = memo(({animatedFooterPosition, postId, updateComments
     }
 
 
-
-
     return (
         <BottomSheetFooter
             animatedFooterPosition={animatedFooterPosition}
             bottomInset={bottomSafeArea}
         >
-
+            <View
+                style={{backgroundColor: colors.main}}
+                className="w-fit h-[0.5px] opacity-80 mx-2"/>
             <Input
                 onChangeText={(value) => setInput(value)}
                 value={input}
@@ -104,16 +88,22 @@ const CommentSheetFooter = memo(({animatedFooterPosition, postId, updateComments
                         <FontAwesomeIcon
                             size={20}
                             icon={faPaperPlane}
+                            color={colors.main}
                         />
                     </TouchableOpacity>
                 )}
                 containerStyle={{paddingHorizontal: 0}}
                 inputContainerStyle={{
-                    paddingHorizontal: 20, borderRadius: 0, backgroundColor: "#272728", borderBottomWidth: 0,
+                    paddingHorizontal: 20, borderRadius: 0,
+                    backgroundColor: colors.background, borderBottomWidth: 0,
                 }}
-                inputStyle={{color: "white"}}
-                labelStyle={{color: "white", marginBottom: 5, fontWeight: "100"}}
-                placeholderTextColor={'#FFFFFF'}
+                inputStyle={{
+                    color: colors.main,
+                    fontFamily: 'AveriaSerifLibre_Regular',
+                    ...s`text-base`
+            }}
+
+                placeholderTextColor={colors.placeholder}
                 errorStyle={{margin: 0, height: 0}}
             />
 
@@ -122,16 +112,25 @@ const CommentSheetFooter = memo(({animatedFooterPosition, postId, updateComments
 })
 
 const CommentSheetHeader = memo(() => {
+    const {colors} = useContext(ThemeContext)
     return (
-        <View className="bg-darkgray rounded-t-lg">
-            <Text className="text-2xl text-white opacity-80 m-3">Comments</Text>
-            <View className="w-fit bg-white h-[0.5px] opacity-80 mx-2"/>
+        <View className="rounded-t-lg bg-red-300">
+            <View className='my-2'>
+                <Text
+                    style={{color: colors.main}}
+                    className="text-2xl font-averia_r text-center opacity-80">Comments</Text>
+
+            </View>
+            <View
+                style={{backgroundColor: colors.main}}
+                className="w-fit h-[0.5px] opacity-80 mx-2"/>
         </View>
     );
 })
 
 const Comment = ({item}) => {
-
+    const {colors} = useContext(ThemeContext)
+    const [isUserLoaded, setIsUserLoaded] = useState(false)
     const [user, setUser] = useState({
         id: null,
         email: null,
@@ -172,9 +171,13 @@ const Comment = ({item}) => {
         getUserData(item.owner_id)
             .then(data => {
                 setUser(data)
+                setTimeout(() => {
+                    setIsUserLoaded(true)
+                }, 200)
+
             })
             .catch(e => {
-
+                setIsUserLoaded(true)
             })
     }, [])
 
@@ -184,16 +187,43 @@ const Comment = ({item}) => {
             onPress={() => alert("good")}>
             <View className="flex-row px-3 pt-4 pb-1" style={{flex: 1}}>
                 <View style={{flex: 1}} className="mr-3 mt-1">
-                    <Image
-                        className="rounded-full "
-                        style={{aspectRatio: 1}}
-                        source={{uri: user.avatar}}
-                    />
+                    {
+                        !isUserLoaded ?
+                            <View className={'flex-row'}>
+                                <SkeletonView
+                                    circle={true}
+                                    style={{aspectRatio: 1}}
+                                />
+                            </View>
+                            :
+                            <Image
+                                className="rounded-full bg-white"
+                                style={{aspectRatio: 1}}
+                                source={{uri: user.avatar}}
+                            />
+                    }
+
                 </View>
                 <View style={{flex: 7}}>
-                    <Text className="text-white opacity-80 text-base">{user.username}</Text>
-                    <Text className="text-white text-base my-0.5">{item.text}</Text>
-                    <Text className="text-white text-sm opacity-50">{parseDate(item.published_at)}</Text>
+                    {
+                        !isUserLoaded ?
+                            <View className={'flex-row'}>
+                                <SkeletonView
+                                    style={{height: 23}}
+                                />
+                            </View>
+                            :
+                            <Text
+                                style={{color: colors.main}}
+                                className=" opacity-80 font-averia_b text-base">{user.username}</Text>
+                    }
+
+                    <Text
+                        style={{color: colors.main}}
+                        className=" text-base font-averia_r my-1">{item.text}</Text>
+                    <Text
+                        style={{color: colors.main}}
+                        className=" text-sm font-averia_r opacity-50 mt-1">{parseDate(item.published_at)}</Text>
                 </View>
             </View>
         </TouchableNativeFeedback>
@@ -202,10 +232,11 @@ const Comment = ({item}) => {
 
 
 const CommentBottomSheet = forwardRef(({onClose}, ref) => {
+    const {colors} = useContext(ThemeContext)
     const bottomSheetRef = useRef(null);
     const [commentSheetData, setCommentSheetData] = useState({
         id: null,
-        comments: ["huy"],
+        comments: [],
     });
     const [isCommentsLoading, setIsCommentsLoading] = useState(false);
     const [sheetIndex, setSheetIndex] = useState(-1);
@@ -213,6 +244,12 @@ const CommentBottomSheet = forwardRef(({onClose}, ref) => {
     const snapPoints = useMemo(() => ["75%", "100%"], []);
 
     const onRefresh = () => {
+        setCommentSheetData(prevState => {
+            return {
+                ...prevState,
+                comments: []
+            }
+        })
         getCommentsByPost(commentSheetData.id).then(data => {
             setCommentSheetData(prevState => {
                 return {...prevState, comments: data}
@@ -267,7 +304,7 @@ const CommentBottomSheet = forwardRef(({onClose}, ref) => {
             <Portal>
                 <BottomSheet
                     backgroundStyle={{
-                        backgroundColor: '#ffffff',
+                        backgroundColor: colors.header,
                     }}
                     ref={bottomSheetRef}
                     snapPoints={snapPoints}
@@ -278,7 +315,6 @@ const CommentBottomSheet = forwardRef(({onClose}, ref) => {
                         marginBottom: 0,
                         padding: 0,
                         paddingBottom: 0,
-                        borderColor: "red",
                         borderBottomWidth: 0,
                     }}
 
@@ -289,33 +325,33 @@ const CommentBottomSheet = forwardRef(({onClose}, ref) => {
                     footerComponent={
                         ({animatedFooterPosition}) => {
                             return (
-                            <CommentSheetFooter
-                                animatedFooterPosition={animatedFooterPosition}
-                                postId={commentSheetData.id}
-                                updateComments={updateComments}
-                            />)
+                                <CommentSheetFooter
+                                    animatedFooterPosition={animatedFooterPosition}
+                                    postId={commentSheetData.id}
+                                    updateComments={updateComments}
+                                />)
                         }
 
                     }
                     backdropComponent={(props) => <CommentSheetBackdrop {...props} />}
 
                 >
-                    <View className="bg-teal-200" style={{flex: 1}}>
+                    <View style={{flex: 1, backgroundColor: colors.background}}>
                         {
                             isCommentsLoading ?
-                                <View className='bg-red-600 flex-1'>
+                                <View className='flex-1'>
                                     <ActivityIndicator
                                         size={50}/>
                                 </View>
                                 :
-                            <BottomSheetFlatList
-                                refreshing={false}
-                                onRefresh={() => onRefresh()}
-                                style={{marginBottom: 50}}
-                                data={commentSheetData.comments}
-                                keyExtractor={(item, index) => index}
-                                renderItem={({item}) => <Comment item={item}/>}
-                            />
+                                <BottomSheetFlatList
+                                    refreshing={false}
+                                    onRefresh={() => onRefresh()}
+                                    style={{marginBottom: 50}}
+                                    data={commentSheetData.comments}
+                                    keyExtractor={(item, index) => index}
+                                    renderItem={({item}) => <Comment item={item}/>}
+                                />
                         }
 
                     </View>

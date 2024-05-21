@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, {useContext, useState} from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { Button} from "@rneui/themed";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
@@ -6,9 +6,13 @@ import { faArrowLeft, faEnvelope, faLock, faUser } from "@fortawesome/free-solid
 import { useNavigation } from "@react-navigation/native";
 import { registration } from "../../api/userAPI";
 import Input from './../../components/Input'
+import ThemeContext from "../../context/ThemeProvider";
+import {s} from "react-native-wind";
 
 const SignUp = () => {
   const navigation = useNavigation();
+  const [loading, setLoading] = useState(false);
+  const {colors} = useContext(ThemeContext)
   const [form, setForm] = useState({
     email: "",
     username: "",
@@ -31,13 +35,14 @@ const SignUp = () => {
   function onFormSubmit() {
     if (!validateForm()) return;
 
+    setLoading(true)
     registration(
       form.email,
       form.password,
       form.username
     )
       .then( async (data) => {
-
+        setLoading(false)
         setForm({
           email: "",
           password: "",
@@ -45,6 +50,7 @@ const SignUp = () => {
         navigation.navigate("tabs", { screens: "home" });
       })
         .catch(({response}) => {
+          setLoading(false)
           setErrors({
             "email": response.data.email === undefined ? "" : response.data.email,
             "username": response.data.username === undefined ? "" : response.data.username,
@@ -58,7 +64,9 @@ const SignUp = () => {
     let isValid = true;
     let errorsTemp = {
       email: "",
+      username: "",
       password: "",
+      passwordRepeat: "",
     };
 
     const emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -102,119 +110,134 @@ const SignUp = () => {
   }
 
   return (
-    <View className={"bg-darkgray h-full p-4 justify-start"}>
-      <ScrollView className="mt-10">
-        <TouchableOpacity className='mb-7' onPress={() => navigation.navigate("tabs", {screens: 'home'})}>
-          <View>
-            <FontAwesomeIcon icon={faArrowLeft} color={"white"} size={20} />
+    <View className={"h-full p-4 justify-start"}>
+      <ScrollView>
+        <View className='mb-10'>
+          <TouchableOpacity onPress={() => navigation.navigate("tabs", {screens: 'home'})}>
+            <View>
+              <FontAwesomeIcon icon={faArrowLeft} color={"white"} size={20} />
+            </View>
+          </TouchableOpacity>
+        </View>
+
+        <Text style={{color: colors.main}} className="text-3xl mb-2 font-averia_r">Create an account</Text>
+        <Text style={{color: colors.main, opacity: 0.8}} className="text-lg font-averia_r mb-6">Welcome! Please enter your details.</Text>
+
+        <View style={{marginTop: 40}}>
+          <View style={{marginBottom: 30}}>
+            <Input
+                onChangeText={(value) => onFormChange("email", value)}
+                value={form.email}
+                errorMessage={errors.email}
+                placeholder={"Enter your email"}
+                inputContainerStyle={{...s`border-b`, borderColor: colors.main}}
+                placeholderTextColor={colors.placeholder}
+                inputStyle={{
+                  fontFamily: 'AveriaSerifLibre_Regular',
+                  color: colors.main,
+                  ...s`text-2xl py-0`
+                }}
+                errorStyle={{
+                  color: colors.errorRed
+                }}
+                iconContainerStyle={{}}
+                textInputProps={{
+                  inputMode: 'email'
+                }}
+            />
           </View>
-        </TouchableOpacity>
-        <Text className="text-3xl mb-2  text-white font-semibold">Create an account</Text>
-        <Text className="text-lg  text-gray-500 mb-6">Welcome! Please enter your details.</Text>
-        <Input
-          onChangeText={(value) => onFormChange("email", value)}
-          value={form.email}
-          leftIcon={<FontAwesomeIcon size={20} icon={faEnvelope}
-                                     color={'#ffffff'} />}
-          placeholder={"Enter your email"}
-          label={"Email"}
-          errorMessage={errors.email}
-          leftIconContainerStyle={{ padding: 10, paddingRight: 10 }}
-          containerStyle={{ paddingHorizontal: 0 }}
-          inputContainerStyle={{
-            paddingHorizontal: 5, borderRadius: 7, backgroundColor: "#272728", borderBottomWidth: 0,
-          }}
-          inputStyle={{ color: "white" }}
-          labelStyle={{ color: "white", marginBottom: 5, fontWeight: "100" }}
-          placeholderTextColor={'#ffffff'}
-          errorStyle={{ color: "crimson" }}
-        />
+          <View style={{marginBottom: 30}}>
+            <Input
+                onChangeText={(value) => onFormChange("username", value)}
+                value={form.username}
+                errorMessage={errors.username}
+                placeholder={"Enter your username"}
+                inputContainerStyle={{...s`border-b`, borderColor: colors.main}}
+                placeholderTextColor={colors.placeholder}
+                inputStyle={{
+                  fontFamily: 'AveriaSerifLibre_Regular',
+                  color: colors.main,
+                  ...s`text-2xl py-0`
+                }}
+                errorStyle={{
+                  color: colors.errorRed
+                }}
+                iconContainerStyle={{}}
 
+            />
+          </View>
+          <View style={{marginBottom: 30}}>
+            <Input
+                onChangeText={(value) => onFormChange("password", value)}
+                value={form.password}
+                errorMessage={errors.password}
+                placeholder={"Enter your password"}
+                inputContainerStyle={{...s`border-b`, borderColor: colors.main}}
+                placeholderTextColor={colors.placeholder}
+                inputStyle={{
+                  fontFamily: 'AveriaSerifLibre_Regular',
+                  color: colors.main,
+                  ...s`text-2xl py-0`
+                }}
+                errorStyle={{
+                  color: colors.errorRed
+                }}
+                iconContainerStyle={{}}
+                textInputProps={{
+                  secureTextEntry: true
+                }}
+            />
+          </View>
+          <View style={{marginBottom: 30}}>
+            <Input
+                onChangeText={(value) => onFormChange("passwordRepeat", value)}
+                value={form.passwordRepeat}
+                errorMessage={errors.passwordRepeat}
+                placeholder={"Repeat your password"}
+                inputContainerStyle={{...s`border-b`, borderColor: colors.main}}
+                placeholderTextColor={colors.placeholder}
+                inputStyle={{
+                  fontFamily: 'AveriaSerifLibre_Regular',
+                  color: colors.main,
+                  ...s`text-2xl py-0`
+                }}
+                errorStyle={{
+                  color: colors.errorRed
+                }}
+                iconContainerStyle={{}}
+                textInputProps={{
+                  secureTextEntry: true
+                }}
+            />
+          </View>
+        </View>
 
-        <Input
-          onChangeText={(value) => onFormChange("username", value)}
-          value={form.username}
-          leftIcon={<FontAwesomeIcon size={20} icon={faUser}
-                                     color={'#ffffff'} />}
-          placeholder={"Enter your username"}
-          label={"Username"}
-          errorMessage={errors.username}
-          leftIconContainerStyle={{ padding: 10, paddingRight: 10 }}
-          containerStyle={{ paddingHorizontal: 0, marginTop: 5 }}
-          inputContainerStyle={{
-            paddingHorizontal: 5, borderRadius: 7, backgroundColor: "#272728", borderBottomWidth: 0,
-          }}
-          inputStyle={{ color: "white" }}
-          labelStyle={{ color: "white", marginBottom: 5, fontWeight: "100" }}
-          placeholderTextColor={"#ffffff"}
-          errorStyle={{ color: "crimson" }}
-        />
+        <View style={{marginTop: 50}} className='px-3 items-center'>
+          <Button
+              onPress={() => onFormSubmit()}
+              loading={loading}
+              title="Sign up"
+              buttonStyle={{
+                backgroundColor: colors.buttons.signup,
+                padding: 10,
+                width: 250,
+                borderRadius: 5,
+              }}
+              titleStyle={{
+                fontFamily: 'AveriaSerifLibre_Regular',
+                fontSize: 20,
+                color: colors.main
+              }}
+              containerStyle={{}}
+          />
+        </View>
 
-        <Input
-          onChangeText={(value) => onFormChange("password", value)}
-          value={form.password}
-          leftIcon={<FontAwesomeIcon size={20} icon={faLock}
-                                     color={'#ffffff'} />}
-          placeholder={"Enter your password"}
-          label={"Password"}
-          errorMessage={errors.password}
-          leftIconContainerStyle={{ padding: 10, paddingRight: 10 }}
-          containerStyle={{ paddingHorizontal: 0, marginTop: 5 }}
-          inputContainerStyle={{
-            paddingHorizontal: 5, borderRadius: 7, backgroundColor: "#272728", borderBottomWidth: 0,
-          }}
-          inputStyle={{ color: "white" }}
-          labelStyle={{ color: "white", marginBottom: 5, fontWeight: "100" }}
-          placeholderTextColor={'#ffffff'}
-          errorStyle={{ color: "crimson" }}
-          textInputProps={{
-            secureTextEntry: true
-          }}
-
-        />
-
-        <Input
-          onChangeText={(value) => onFormChange("passwordRepeat", value)}
-          value={form.passwordRepeat}
-          leftIcon={<FontAwesomeIcon size={20} icon={faLock}
-                                     color={'#ffffff'} />}
-          placeholder={"Repeat your password"}
-          label={"Password repeat"}
-          errorMessage={errors.passwordRepeat}
-          leftIconContainerStyle={{ padding: 10, paddingRight: 10 }}
-          containerStyle={{ paddingHorizontal: 0, marginTop: 5 }}
-          inputContainerStyle={{
-            paddingHorizontal: 5, borderRadius: 7, backgroundColor: "#272728", borderBottomWidth: 0,
-          }}
-          inputStyle={{ color: "white" }}
-          labelStyle={{ color: "white", marginBottom: 5, fontWeight: "100" }}
-          placeholderTextColor={"#ffffff"}
-          errorStyle={{ color: "crimson" }}
-          textInputProps={{
-            secureTextEntry: true
-          }}
-        />
-
-        <Button
-          title="Sign Up"
-          buttonStyle={{
-            backgroundColor: "#ba4954",
-            padding: 10,
-            borderRadius: 10,
-          }}
-          titleStyle={{ fontSize: 20 }}
-          containerStyle={{
-            marginTop: 20,
-          }}
-          onPress={() => onFormSubmit()}
-        />
-
-        <View className="justify-center flex-row items-center mt-2">
-          <Text className={"text-gray-500 text-sm"}>
+        <View className="justify-center flex-row items-center mt-3">
+          <Text style={{color: colors.main}} className={"text-base font-averia_r"}>
             Already have an account? {" "}
           </Text>
           <TouchableOpacity onPress={() => navigation.navigate("sign-in")}>
-            <Text className="text-white text-sm">
+            <Text style={{color: colors.main}} className="text-base font-averia_b">
               Log In
             </Text>
           </TouchableOpacity>

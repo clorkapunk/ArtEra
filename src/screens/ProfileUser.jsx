@@ -1,4 +1,4 @@
-import React, {memo, useEffect, useState} from 'react';
+import React, {memo, useContext, useEffect, useState} from 'react';
 import {getUser, getUserData} from "../api/userAPI";
 import {getLikedPosts, getPostsBySearch} from "../api/ContentAPI";
 import {
@@ -19,9 +19,12 @@ import GridItem from "../components/GridItem";
 import ImagePicker from "react-native-image-crop-picker";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {useNavigation} from "@react-navigation/native";
+import {s} from "react-native-wind";
+import ThemeContext from "../context/ThemeProvider";
 
 const ProfileUser = ({route}) => {
     const navigation = useNavigation()
+    const {colors} = useContext(ThemeContext)
     const [user, setUser] = useState(route.params.user)
     const [isLoading, setIsLoading] = useState(true);
     const [isUserLoaded, setIsUserLoaded] = useState(false)
@@ -165,9 +168,7 @@ const ProfileUser = ({route}) => {
 
     const componentLoaded = () => {
         if (isLoading) return (
-            <View>
-                <ActivityIndicator/>
-            </View>
+            <ErrorScreens type={'loading'} refreshing={refreshing} onRefresh={onRefresh}/>
         )
 
 
@@ -197,8 +198,7 @@ const ProfileUser = ({route}) => {
                             }
                         }}
                         className="flex-1"
-                        stickyHeaderIndices={[0, 4]}
-                        stickyHeaderHiddenOnScroll={true}
+                        stickyHeaderIndices={[0,4]}
                         refreshControl={
                             <RefreshControl
                                 enabled={true}
@@ -207,17 +207,27 @@ const ProfileUser = ({route}) => {
                             />
                         }
                     >
-
                         <SafeAreaView>
                             <View
-                                className='flex-row justify-between items-center py-2 px-3 bg-white border-b border-black'>
+                                style={{backgroundColor: colors.header, borderColor: colors.main}}
+                                className={`border-b py-1 flex-row items-center justify-between h-[40px] relative`}
+                            >
+                                <Text
+                                    style={{color: colors.main}}
+                                    className='text-2xl font-averia_l  absolute w-full text-center'
+                                >
+                                    {`${user.username}'s profile`}
+                                </Text>
+
                                 <TouchableOpacity
                                     className="p-2" onPress={() => navigation.goBack()}>
-                                    <View className='items-center'>
-                                        <FontAwesomeIcon icon={faArrowLeft} color={"black"} size={25}/>
+                                    <View className='ml-3 items-center'>
+                                        <FontAwesomeIcon icon={faArrowLeft} color={colors.main} size={20}/>
                                     </View>
                                 </TouchableOpacity>
+
                             </View>
+
                         </SafeAreaView>
                         <View style={{width: '100%', aspectRatio: 16 / 9}}>
                             <Image
@@ -229,10 +239,12 @@ const ProfileUser = ({route}) => {
                         </View>
 
                         <View className='flex-row justify-between items-center my-2 mx-3'>
-                            <Text className="text-2xl font-cgbold mb-2">{user.username}</Text>
+                            <Text
+                                style={{color: colors.main}}
+                                className="text-2xl font-averia_r mb-2">{user.username}</Text>
                             <Image
                                 source={{uri: user.avatar}}
-                                className="rounded-full"
+                                className="rounded-full bg-white"
                                 style={{width: "28%", aspectRatio: 1}}
                                 resizeMode={"cover"}
                                 PlaceholderContent={<ActivityIndicator/>}
@@ -245,7 +257,9 @@ const ProfileUser = ({route}) => {
                                     onPress={() => alert("Coming soon")}
                                 >
                                     <View className="p-1 rounded">
-                                        <Text className={`text-xl font-cgregular underline `}>
+                                        <Text
+                                            style={{color: colors.main}}
+                                            className={`text-xl font-averia_r underline `}>
                                             0 followers
                                         </Text>
                                     </View>
@@ -255,20 +269,25 @@ const ProfileUser = ({route}) => {
                                 onPress={() => alert("list of arts (maybe not)")}
                             >
                                 <View className="p-1 rounded">
-                                    <Text className={`text-xl font-cgregular underline `}>
+                                    <Text
+                                        style={{color: colors.main}}
+                                        className={`text-xl text-profile-info_labels font-averia_r underline `}>
                                         {artsCount} arts
                                     </Text>
                                 </View>
                             </TouchableNativeFeedback>
                         </View>
 
-                        <View className="flex-row py-2 justify-around bg-white">
+                        <View
+                            style={{backgroundColor: colors.background}}
+                            className="flex-row py-2 justify-around">
                             <TouchableNativeFeedback
                                 onPress={() => onTabChange('arts')}
                             >
                                 <View className="p-1 rounded">
                                     <Text
-                                        className={`text-xl font-cgregular ${tab === "arts" && "underline"} `}>Your
+                                        style={{color: colors.main}}
+                                        className={`text-xl font-averia_r ${tab === "arts" && "underline"} `}>Your
                                         arts</Text>
                                 </View>
                             </TouchableNativeFeedback>
@@ -278,7 +297,8 @@ const ProfileUser = ({route}) => {
                             >
                                 <View className="p-1 rounded">
                                     <Text
-                                        className={`text-xl font-cgregular ${tab === "favorites" && "underline"} `}>Favorites</Text>
+                                        style={{color: colors.main}}
+                                        className={`text-xl font-averia_r ${tab === "favorites" && "underline"} `}>Favorites</Text>
                                 </View>
                             </TouchableNativeFeedback>
                         </View>
@@ -290,8 +310,20 @@ const ProfileUser = ({route}) => {
                                     :
                                     (
                                         data.results.length === 0 ?
-                                            <View className={'flex-col justify-center items-center mt-5'}>
-                                                <Text>Nothing here...</Text>
+                                            <View className='flex-row items-center justify-center mt-10'>
+                                                <Text className='
+                                                text-generator-slider-text font-averia_b
+                                                text-xl
+                                                '>Nothing here, go</Text>
+                                                <Button
+                                                    onPress={() => navigation.navigate('search')}
+                                                    titleStyle={[s`text-xl`, {
+                                                        fontFamily: 'AveriaSerifLibre_BoldItalic',
+                                                        color: colors.primary
+                                                    }]}
+                                                    title={'Explore'}
+                                                    type={'clear'}
+                                                />
                                             </View>
                                             :
                                             <MasonryList

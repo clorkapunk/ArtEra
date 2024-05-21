@@ -1,4 +1,4 @@
-import React, {useCallback, useMemo, useRef, useState} from "react";
+import React, {useCallback, useContext, useMemo, useRef, useState} from "react";
 import {createBottomTabNavigator} from "@react-navigation/bottom-tabs";
 import Home from "./Home";
 import {View, Text} from "react-native";
@@ -12,7 +12,7 @@ import PostLayout from "./post/PostLayout";
 import SideMenuLayout from "../../components/SideMenuLayout";
 import MenuDrawer from 'react-native-side-drawer'
 import Generator from "./Generator";
-import {colors} from '../../consts/colors'
+import ThemeContext from "../../context/ThemeProvider";
 
 
 const Tab = createBottomTabNavigator();
@@ -42,8 +42,8 @@ const TabIcon = ({icon, color, textColor, name, focused, size = 20, style}) => {
 };
 
 const TabsLayout = () => {
-
     const [sideMenuOpen, setSideMenuOpen] = useState(false);
+    const {theme, colors} = useContext(ThemeContext)
 
     const renderItem = useCallback(
         ({item}) => (
@@ -73,13 +73,12 @@ const TabsLayout = () => {
                     <Tab.Navigator
                         screenOptions={{
                             tabBarShowLabel: false,
-                            tabBarActiveTintColor: colors.tabbar.tab.active.icon,
-                            tabBarInactiveTintColor: colors.tabbar.tab.inactive,
+                            tabBarActiveTintColor: colors.primary,
+                            tabBarInactiveTintColor: colors.primary,
                             tabBarStyle: {
-                                backgroundColor: colors.tabbar.bg,
+                                backgroundColor: colors.secondary,
                                 height: 45,
-                                borderTopWidth: 0,
-                                borderTopColor: colors.tabbar.border,
+                                borderTopWidth: 0
                             },
                             freezeOnBlur: true,
                         }}
@@ -93,7 +92,7 @@ const TabsLayout = () => {
                                     <TabIcon
                                         icon={faHome}
                                         color={color}
-                                        textColor={colors.tabbar.tab.active.text}
+                                        textColor={colors.main_contrast}
                                         name="Home"
                                         focused={focused}
                                     />
@@ -114,7 +113,7 @@ const TabsLayout = () => {
                                     <TabIcon
                                         icon={faSearch}
                                         color={color}
-                                        textColor={colors.tabbar.tab.active.text}
+                                        textColor={colors.main_contrast}
                                         name="Search"
                                         focused={focused}
                                     />
@@ -136,20 +135,17 @@ const TabsLayout = () => {
                                 tabBarIcon: ({color, focused}) => (
                                     <TabIcon
                                         icon={faSquareXmark}
-                                        color={colors.tabbar.tab.center.icon}
-                                        textColor={colors.tabbar.tab.center.text}
+                                        color={colors.tertiary}
+                                        textColor={colors.main_contrast}
                                         size={30}
                                         name="Post"
                                         focused={focused}
                                         style={{transform: [{rotateZ: '45deg'}]}}
                                     />
-                                ),
-                                header: () => <Header
-                                    openSideMenu={() => setSideMenuOpen(true)}
-                                    title={"Post"}/>,
+                                )
                             }}
                         >
-                            {() => <PostLayout/>}
+                            {() => <PostLayout openSideMenu={() => setSideMenuOpen(true)}/>}
                         </Tab.Screen>
 
 
@@ -161,7 +157,7 @@ const TabsLayout = () => {
                                     <TabIcon
                                         icon={faMessage}
                                         color={color}
-                                        textColor={colors.tabbar.tab.active.text}
+                                        textColor={colors.main_contrast}
                                         name="Generate"
                                         focused={focused}
                                     />
@@ -182,7 +178,7 @@ const TabsLayout = () => {
                                     <TabIcon
                                         icon={faUser}
                                         color={color}
-                                        textColor={colors.tabbar.tab.active.text}
+                                        textColor={colors.main_contrast}
                                         name="Profile"
                                         focused={focused}
                                     />

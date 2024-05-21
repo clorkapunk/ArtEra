@@ -1,4 +1,4 @@
-import React, {memo, useEffect, useState} from 'react';
+import React, {memo, useContext, useEffect, useState} from 'react';
 import {
     Animated,
     Text,
@@ -6,20 +6,20 @@ import {
     TouchableNativeFeedback,
     TouchableWithoutFeedback,
     View,
-    TouchableOpacity
+    TouchableOpacity, Appearance
 } from "react-native";
 import {getUser, getUserData} from "../api/userAPI";
 import {FontAwesomeIcon} from "@fortawesome/react-native-fontawesome";
 import {
-    faArrowLeft,
     faArrowRightFromBracket,
     faChevronRight, faGear,
-    faGears,
-    faUser, faUserGear,
+    faSun,
+    faUserGear,
     faX
 } from "@fortawesome/free-solid-svg-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {useIsFocused, useNavigation} from "@react-navigation/native";
+import ThemeContext from "../context/ThemeProvider";
 
 
 const SideMenuLayout = ({onClose, logOut}) => {
@@ -34,11 +34,17 @@ const SideMenuLayout = ({onClose, logOut}) => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [isNetworkError, setIsNetworkError] = useState(false);
     const isFocused = useIsFocused()
+    const {theme, colors, toggleTheme} = useContext(ThemeContext)
 
 
+    function changeTheme(){
+        if (theme === 'dark') toggleTheme('light')
+        else if (theme === 'light') toggleTheme('dark')
+    }
 
-    function onLogIn(){
-        navigation.navigate("auth", { screen: "sign-in" })
+
+    function onLogIn() {
+        navigation.navigate("auth", {screen: "sign-in"})
         onClose()
     }
 
@@ -55,7 +61,7 @@ const SideMenuLayout = ({onClose, logOut}) => {
         onClose()
     }
 
-    function onEditProfile(){
+    function onEditProfile() {
         onClose()
         navigation.navigate('profile-edit')
     }
@@ -78,17 +84,16 @@ const SideMenuLayout = ({onClose, logOut}) => {
             })
     }, [isFocused])
 
-
     return (
         <View>
             <TouchableWithoutFeedback>
-                <View className="h-full w-full bg-gray-800">
+                <View className={`h-full w-full`} style={{backgroundColor: colors.secondary}}>
                     <View className='flex-row justify-end'>
                         <TouchableOpacity onPress={onClose}>
                             <View className='pt-3 pr-3'>
                                 <FontAwesomeIcon
                                     style={{opacity: 0.8}}
-                                    color={'white'}
+                                    color={colors.main_contrast}
                                     size={20}
                                     icon={faX}/>
                             </View>
@@ -98,22 +103,37 @@ const SideMenuLayout = ({onClose, logOut}) => {
                         isLoggedIn &&
                         <>
                             <TouchableNativeFeedback
+                                onPress={() => {
+                                    onClose()
+                                    navigation.navigate('profile')
+                                }}
                                 background={TouchableNativeFeedback.Ripple("black", false)}
                             >
                                 <View className='flex-row items-center justify-between p-3 mt-3'>
                                     <View className='flex-row items-center'>
                                         <Image
                                             source={{uri: user.avatar}}
-                                            style={{width: '25%', aspectRatio: 1, borderWidth: 1, borderColor: 'white'}}
+                                            style={{
+                                                width: '25%',
+                                                aspectRatio: 1
+                                            }}
                                             className="rounded-full bg-white"
                                         />
                                         <View className='ml-4'>
-                                            <Text className={'text-white text-xl'}>{user.username}</Text>
-                                            <Text className={'text-gray-400 text-lg'}>{user.email}</Text>
+                                            <Text
+                                                style={{color: colors.main_contrast}}
+                                                className={`font-averia_b text-2xl`}>{user.username}</Text>
+                                            <Text
+                                                style={{color: colors.main_contrast}}
+                                                className={`font-averia_r text-lg`}>{user.email}</Text>
                                         </View>
                                     </View>
                                     <View>
-                                        <FontAwesomeIcon icon={faChevronRight} color={'white'}/>
+                                        <FontAwesomeIcon
+                                            size={20}
+                                            icon={faChevronRight}
+                                            color={colors.main_contrast}
+                                        />
                                     </View>
                                 </View>
                             </TouchableNativeFeedback>
@@ -124,14 +144,17 @@ const SideMenuLayout = ({onClose, logOut}) => {
                         <View>
                             <TouchableNativeFeedback
                                 onPress={() => onEditProfile()}
-                                background={TouchableNativeFeedback.Ripple("black", false)}
+                                background={TouchableNativeFeedback.Ripple("white", false)}
                             >
                                 <View className='p-3 py-5 flex-row items-center justify-between'>
                                     <View className='flex-row items-center'>
-                                        <FontAwesomeIcon size={20} color={'white'} icon={faUserGear}/>
-                                        <Text className=' ml-4 text-white text-xl'>Edit profile</Text>
+                                        <FontAwesomeIcon size={25} color={colors.main_contrast} icon={faUserGear}/>
+                                        <Text
+                                            style={{color: colors.main_contrast}}
+                                            className={`ml-4 font-averia_r text-2xl`}
+                                        >Edit profile</Text>
                                     </View>
-                                    <FontAwesomeIcon icon={faChevronRight} color={'white'}/>
+                                    <FontAwesomeIcon size={20} icon={faChevronRight} color={colors.main_contrast}/>
                                 </View>
                             </TouchableNativeFeedback>
                             <TouchableNativeFeedback
@@ -139,10 +162,12 @@ const SideMenuLayout = ({onClose, logOut}) => {
                             >
                                 <View className='p-3 py-5 flex-row items-center justify-between'>
                                     <View className='flex-row items-center'>
-                                        <FontAwesomeIcon size={20} color={'white'} icon={faGear}/>
-                                        <Text className=' ml-4 text-white text-xl'>Settings</Text>
+                                        <FontAwesomeIcon size={25} color={colors.main_contrast} icon={faGear}/>
+                                        <Text
+                                            style={{color: colors.main_contrast}}
+                                            className={`ml-4 font-averia_r text-2xl`}>Settings</Text>
                                     </View>
-                                    <FontAwesomeIcon icon={faChevronRight} color={'white'}/>
+                                    <FontAwesomeIcon size={20} icon={faChevronRight}  color={colors.main_contrast}/>
                                 </View>
                             </TouchableNativeFeedback>
                         </View>
@@ -155,10 +180,14 @@ const SideMenuLayout = ({onClose, logOut}) => {
                                 >
                                     <View className='p-3 py-5 flex-row items-center justify-between'>
                                         <View className='flex-row items-center'>
-                                            <FontAwesomeIcon size={20} color={'white'} icon={faArrowRightFromBracket}/>
-                                            <Text className=' ml-4 text-white text-xl'>Log out</Text>
+                                            <FontAwesomeIcon size={25} color={colors.main_contrast}
+                                                             icon={faArrowRightFromBracket}/>
+                                            <Text
+                                                style={{color: colors.main_contrast}}
+                                                className={`ml-4 font-averia_r text-2xl`}
+                                            >Log out</Text>
                                         </View>
-                                        <FontAwesomeIcon icon={faChevronRight} color={'white'}/>
+                                        <FontAwesomeIcon size={20} icon={faChevronRight}  color={colors.main_contrast}/>
                                     </View>
                                 </TouchableNativeFeedback>
                                 :
@@ -168,13 +197,25 @@ const SideMenuLayout = ({onClose, logOut}) => {
                                 >
                                     <View className='p-3 py-5 flex-row items-center justify-between'>
                                         <View className='flex-row items-center'>
-                                            <FontAwesomeIcon size={20} color={'white'} icon={faArrowRightFromBracket}/>
-                                            <Text className=' ml-4 text-white text-xl'>Log In / Sign Up</Text>
+                                            <FontAwesomeIcon size={25} color={colors.main_contrast}
+                                                             icon={faArrowRightFromBracket}/>
+                                            <Text
+                                                style={{color: colors.main_contrast}}
+                                                className={`ml-4 font-averia_r text-2xl`}
+                                            >Log In / Sign Up</Text>
                                         </View>
-                                        <FontAwesomeIcon icon={faChevronRight} color={'white'}/>
+                                        <FontAwesomeIcon size={20} icon={faChevronRight}  color={colors.main_contrast}/>
                                     </View>
                                 </TouchableNativeFeedback>
                         }
+
+                        <View className='flex-row justify-center'>
+                            <TouchableOpacity onPress={() => changeTheme()}>
+                                <View>
+                                    <FontAwesomeIcon icon={faSun} size={40}  color={colors.main_contrast}/>
+                                </View>
+                            </TouchableOpacity>
+                        </View>
 
                     </View>
                 </View>

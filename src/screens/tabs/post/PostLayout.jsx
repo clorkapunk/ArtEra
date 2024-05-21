@@ -1,15 +1,13 @@
 import React from 'react';
 import {createNativeStackNavigator} from "@react-navigation/native-stack";
-import SignIn from "../../auth/SignIn";
 import Post from "./Post";
 import Header from "../../../components/Header";
 import PostCreate from "./PostCreate";
-import {useNavigation} from "@react-navigation/native";
+import {TransitionPresets} from "@react-navigation/stack";
 
 const Stack = createNativeStackNavigator()
 
-const PostLayout = () => {
-    const navigation = useNavigation();
+const PostLayout = ({openSideMenu}) => {
 
     return (
         <>
@@ -23,14 +21,18 @@ const PostLayout = () => {
                     name="post"
                     component={Post}
                     options={{
-                        header: () => <Header title={"Post"}/>,
+                        header: () => <Header
+                            openSideMenu={openSideMenu}
+                            title={"Post"}/>,
+                        ...TransitionPresets.SlideFromRightIOS
                     }}
                 />
                 <Stack.Screen
                     name="post-create"
                     component={PostCreate}
                     options={{
-                        headerShown: false
+                        headerShown: false,
+                        ...TransitionPresets.SlideFromRightIOS
                     }}
                 />
             </Stack.Navigator>
