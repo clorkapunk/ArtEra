@@ -8,6 +8,11 @@ export const getPosts = async (page_number) => {
   return data;
 };
 
+export const deletePost = async (id) => {
+  const {data} = await $host.delete(`api/posts/${id}`);
+  return data
+}
+
 export const getPostsBySearch = async (searchString, userId, page) => {
   const {data} = await $host.get(`api/posts/?search=${searchString}&page=${page}&owner=${userId} `)
   return data
@@ -24,9 +29,7 @@ export const sendPost = async (formData) => {
       'Content-Type': 'multipart/form-data'
     }
   })
-      .catch(e => {
 
-      });
   return response.status
 }
 
