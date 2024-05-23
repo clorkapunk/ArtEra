@@ -2,7 +2,7 @@
 
 export const colors = {
   light: {
-    header: "#D9D9D9",
+    header: "#FAF9EF",
     background: "#FAF9EF",
     errorRed: '#ff0000',
     primary: "#BD782D",
@@ -34,7 +34,7 @@ export const colors = {
       generate: '#ff8077',
       create: '#f9bb05',
       post: '#00919B',
-      preview: "#0644FA",
+      preview: "#ff8077",
       confirm: '#f9bb05',
       image_edit: '#ff8077',
       signin: '#f9bb05',
