@@ -22,25 +22,6 @@ import SkeletonView from "../../components/SkeletonView";
 import ThemeContext from "../../context/ThemeProvider";
 
 
-const CustomLinearGradient = () =>
-    <LinearGradient
-        colors={['transparent', 'rgba(255,255,255,0.5)',  "transparent"]}
-        start={{ x: 0, y: 0.5 }}
-        end={{ x: 1, y: 0.5 }}
-        style={{flex: 1}}
-    />
-
-
-const SearchTag = ({item}) => {
-    return (
-        <View className="bg-white mr-2 px-2 py-1 rounded-full border">
-            <Text>
-                {item}
-            </Text>
-        </View>
-    );
-};
-
 const Search = memo(() => {
     const {colors} = useContext(ThemeContext)
     const [data, setData] = useState({
@@ -55,6 +36,7 @@ const Search = memo(() => {
     const [isContentLoaded, setIsContentLoaded] = useState(false)
     const [isNetworkError, setIsNetworkError] = useState(false);
     const [refreshing, setRefreshing] = useState(false)
+    const [onEndReachedCalled, setOnEndReachedCalled] = useState(false)
 
     useEffect(() => {
         InteractionManager.runAfterInteractions(() => {
@@ -129,6 +111,10 @@ const Search = memo(() => {
             return
         }
 
+        if (onEndReachedCalled === true) return;
+
+        console.log(`called for ${data.next}`)
+
         getPostsBySearch(search, '', data.next)
             .then(data => {
                 setData(prevState => {
@@ -139,13 +125,16 @@ const Search = memo(() => {
                         results: prevState.results.concat(data.results)
                     }
                 });
+                setOnEndReachedCalled(false)
             })
             .catch((e) => {
                 setIsNetworkError(true)
+                setOnEndReachedCalled(false)
             });
     }
 
     function onClear() {
+        clearTimeout(timeout.current);
         setSearch('')
         setIsContentLoaded(false)
         getPostsBySearch('', '', 1)
@@ -153,7 +142,7 @@ const Search = memo(() => {
                 setData(data)
                 setTimeout(() => {
                     setIsContentLoaded(true)
-                }, 1000)
+                }, 200)
             })
             .catch(e => {
                 setIsContentLoaded(true)
@@ -188,8 +177,9 @@ const Search = memo(() => {
                     />
                     <View className={'mb-1'}/>
                     <SkeletonView
-                        style={[s``, {flex: 1, borderRadius: 0, height: 300,
-                           }]}
+                        style={[s``, {
+                            flex: 1, borderRadius: 0, height: 300,
+                        }]}
                     />
                     <View className={'mb-1'}/>
                     <SkeletonView
@@ -219,6 +209,7 @@ const Search = memo(() => {
                 <ScrollView
                     onScroll={({nativeEvent}) => {
                         if (isCloseToBottom(nativeEvent) && isContentLoaded) {
+                            setOnEndReachedCalled(true)
                             onEndReached()
                         }
                     }}
@@ -277,7 +268,7 @@ const Search = memo(() => {
                                 }}
                                 inputStyle={{
                                     textAlign: 'center',
-                                    fontFamily: 'AveriaSerifLibre_Regular',
+                                    fontFamily: 'AveriaSansLibre_Regular',
                                     color: colors.main,
                                     ...s`text-xl py-1 ml-2`
                                 }}
@@ -309,14 +300,13 @@ const Search = memo(() => {
                                                     onRefresh={onRefresh}
                                                 />
                                             }
-                                            onEndReached={() => onEndReached()}
                                             columnWrapperStyle={{
                                                 justifyContent: "space-between",
                                             }}
                                             numColumns={2}
                                             data={data.results}
                                             renderItem={({item}) => (<GridItem item={item}/>)}
-                                            keyExtractor={(item) => item.id}
+                                            keyExtractor={(item, index) => item.id}
                                         />
                                 }
                             </View>

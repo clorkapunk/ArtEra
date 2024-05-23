@@ -379,14 +379,16 @@ const Profile = () => {
                                     (
                                         data.results.length === 0 ?
                                             <View className='flex-row items-center justify-center mt-10'>
-                                                <Text className='
+                                                <Text
+                                                    style={{color: colors.main}}
+                                                    className='
                                                 text-generator-slider-text font-averia_b
                                                 text-xl
                                                 '>Nothing here, go</Text>
                                                 <Button
                                                     onPress={() => navigation.navigate('search')}
                                                     titleStyle={[s`text-xl`, {
-                                                        fontFamily: 'AveriaSerifLibre_BoldItalic',
+                                                        fontFamily: 'AveriaSansLibre_BoldItalic',
                                                         color: colors.primary
                                                     }]}
                                                     title={'Explore'}
@@ -401,7 +403,7 @@ const Profile = () => {
                                                 }}
                                                 numColumns={2}
                                                 data={data.results}
-                                                renderItem={({item}) => (<GridItem update={onRefresh} item={item}/>)}
+                                                renderItem={({item}) => (<GridItem type={tab} update={onRefresh} item={item}/>)}
                                                 keyExtractor={(item, index) => item.id}
                                             />
                                     )

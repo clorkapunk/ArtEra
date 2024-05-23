@@ -7,7 +7,7 @@ import {
     RefreshControl,
     ScrollView,
     Text,
-    ToastAndroid,
+    ToastAndroid, TouchableHighlight,
     TouchableOpacity,
     View
 } from "react-native";
@@ -15,9 +15,26 @@ import {useNavigation} from "@react-navigation/native";
 import {CameraRoll} from "@react-native-camera-roll/camera-roll";
 import {Button} from "@rneui/themed";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import Animated, {useAnimatedStyle, useSharedValue, withRepeat, withTiming} from "react-native-reanimated";
+import Animated, {
+    Easing,
+    ReduceMotion, runOnJS,
+    useAnimatedStyle,
+    useSharedValue,
+    withRepeat,
+    withTiming
+} from "react-native-reanimated";
 import ThemeContext from "../../../context/ThemeProvider";
 import ErrorScreens from "../../../components/ErrorScreens";
+import {SpeedDial} from "@rneui/base";
+import {FontAwesomeIcon} from "@fortawesome/react-native-fontawesome";
+import {
+    faArrowLeft,
+    faArrowUp,
+    faGear,
+    faObjectGroup,
+    faObjectUngroup,
+    faSliders
+} from "@fortawesome/free-solid-svg-icons";
 
 
 const GalleryItem = ({item, status, select, unselect}) => {
@@ -42,8 +59,10 @@ const GalleryItem = ({item, status, select, unselect}) => {
             {
                 status.isSelected &&
                 <View
-                    style={{aspectRatio: 1, height: 30, width: 30, backgroundColor: colors.primary,
-                        transform: [{translateX: 5}, {translateY: -5}]}}
+                    style={{
+                        aspectRatio: 1, height: 30, width: 30, backgroundColor: colors.primary,
+                        transform: [{translateX: 5}, {translateY: -5}]
+                    }}
                     className='absolute top-0 right-0 rounded-full'
                 >
                     <Text
@@ -55,14 +74,13 @@ const GalleryItem = ({item, status, select, unselect}) => {
             }
 
 
-
-
         </View>
     )
 }
 
 const SectionItem = ({group, selected, select, unselect}) => {
     const {colors} = useContext(ThemeContext)
+
 
     return (
         <View className='mx-3 my-4'>
@@ -92,7 +110,6 @@ const SectionItem = ({group, selected, select, unselect}) => {
     )
 }
 
-
 const Post = () => {
     const navigation = useNavigation();
     const {colors} = useContext(ThemeContext)
@@ -113,7 +130,25 @@ const Post = () => {
     const [sortType, setSortType] = useState('day')
     const [refreshing, setRefreshing] = useState(false);
     const [isContentLoading, setIsContentLoading] = useState(false)
+    const [open, setOpen] = React.useState(false);
 
+    const buttonOffset = useSharedValue(20)
+    const buttonHeight = useSharedValue(0)
+    const selectedLine = useSharedValue(sortType === 'day' ? 100 : (sortType === 'month' ? 200 : 300))
+    const selectedLineConfig = {
+        duration: 300,
+        easing: Easing.inOut(Easing.back(3)),
+        reduceMotion: ReduceMotion.System,
+    }
+
+    const animatedButton = useAnimatedStyle(() => ({
+        transform: [{translateY: buttonOffset.value}],
+        height: buttonHeight.value
+    }))
+
+    const animatedLine = useAnimatedStyle(() => ({
+        transform: [{translateX: selectedLine.value}]
+    }))
 
     function groupPhotosBy(photos, sortParam) {
         const sorted = photos.sort((a, b) => b.node.timestamp - a.node.timestamp)
@@ -168,6 +203,7 @@ const Post = () => {
                     end_cursor: r.page_info.end_cursor,
                     has_next_page: r.page_info.has_next_page
                 })
+
                 setIsContentLoading(false)
             })
             .catch((err) => {
@@ -181,6 +217,7 @@ const Post = () => {
 
     useEffect(() => {
         setGroupedPhotos(groupPhotosBy(gallery.edges, sortType))
+
     }, [gallery, sortType])
 
     const onRefresh = () => {
@@ -226,16 +263,13 @@ const Post = () => {
         CameraRoll.getPhotos({
             first: 20,
             after: gallery.end_cursor,
-            assetType: 'All',
+            assetType: 'Photos',
             groupTypes: 'All'
         })
             .then(r => {
                 setGallery(prevState => {
                     return {
-                        edges: [
-                            ...prevState.edges,
-                            ...r.edges
-                        ],
+                        edges: prevState.edges.concat(r.edges),
                         end_cursor: r.page_info.end_cursor,
                         has_next_page: r.page_info.has_next_page
                     }
@@ -247,12 +281,87 @@ const Post = () => {
             });
     }
 
+    function select(item) {
+        if (selected.length === 0) {
+            buttonOffset.value = withTiming(0, {duration: 1000})
+            buttonHeight.value = withTiming(65, {duration: 1000})
+        }
 
-    const height = useSharedValue(0);
+        if (selected.length === 5) {
+            ToastAndroid.show("No more that 5 images", ToastAndroid.SHORT)
+            return
+        }
 
-    const handlePress = () => {
-        height.value = withTiming(height.value + 100, {duration: 1000})
-    };
+        setSelected(prevValue => {
+            return [
+                ...prevValue,
+                item
+            ]
+        })
+    }
+
+    function unselect(item) {
+        if (selected.length === 1) {
+            buttonOffset.value = withTiming(20, {duration: 1000})
+            buttonHeight.value = withTiming(0, {duration: 1000})
+        }
+
+        setSelected(prevValue =>
+            prevValue.filter(i => i.node.id !== item.node.id))
+    }
+
+    const headerComponent = () =>
+        <View className='flex-col'>
+            <View className='flex-row px-3 pt-3 items-center' style={{backgroundColor: colors.background}}>
+                <View style={{width: 80}}>
+                    <Text
+                        style={{color: colors.main}}
+                        className='text-start font-averia_r text-lg'
+                    >Group by</Text>
+                </View>
+                <View className='flex-row h-full' style={{flex: 1}}>
+                    <TouchableOpacity style={{flex: 1}} onPress={() => {
+                        selectedLine.value = withTiming(100, selectedLineConfig, () => {
+                            runOnJS(setSortType)('day')
+                        })
+                    }}
+                    >
+                        <View>
+                            <Text
+                                style={{color: colors.main}}
+                                className='text-center font-averia_r text-base'
+                            >DAYS</Text>
+                        </View>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={{flex: 1}} onPress={() => {
+                        selectedLine.value = withTiming(200, selectedLineConfig, () => {
+                            runOnJS(setSortType)('month')
+                        })
+                    }}>
+                        <View>
+                            <Text style={{color: colors.main}}
+                                  className='text-center font-averia_r text-base'
+                            >MONTHS</Text>
+                        </View>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={{flex: 1}} onPress={() => {
+                        selectedLine.value = withTiming(300, selectedLineConfig, () => {
+                            runOnJS(setSortType)('year')
+                        })
+                    }}>
+                        <View>
+                            <Text style={{color: colors.main}}
+                                  className='text-center font-averia_r text-base'
+                            >YEARS</Text>
+                        </View>
+                    </TouchableOpacity>
+                </View>
+            </View>
+            <View className='w-full py-2' style={{backgroundColor: colors.background}}>
+                <Animated.View className=' rounded-full'
+                               style={[{backgroundColor: colors.primary, height: 6, width: 80}, animatedLine]}/>
+            </View>
+        </View>
 
     const componentLoaded = () => {
         if (isLoading) return (
@@ -274,75 +383,47 @@ const Post = () => {
                 componentLoaded() !== true ?
                     componentLoaded()
                     :
-                    <View className={"flex-1"}>
+                    <View style={{flex: 1}}>
 
-                        {/*<View>*/}
-                        {/*    <Animated.View*/}
-                        {/*        className={'w-full border-b border-generator-image-border ' +*/}
-                        {/*            'flex-row justify-between items-center px-3'}*/}
-                        {/*        style={{height}}*/}
-                        {/*    >*/}
-                        {/*        <Text className='text-header-menu text-xl'>Selected</Text>*/}
-                        {/*        <Text className='text-header-menu text-2xl'>{selected.length}</Text>*/}
-                        {/*    </Animated.View>*/}
-                        {/*</View>*/}
+                        <View style={{flex: 1}}>
+                            <FlatList
+                                refreshControl={
+                                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh}/>
+                                }
+                                onEndReached={() => onEndReached()}
+                                data={groupedPhotos}
+                                renderItem={({item}) =>
+                                    <SectionItem
+                                        group={item}
+                                        selected={selected}
+                                        select={select}
+                                        unselect={unselect}
+                                    />
+                                }
+                                keyExtractor={(item, index) => item.date}
+                                ListHeaderComponent={headerComponent}
+                                stickyHeaderIndices={[0]}
+                                stickyHeaderHiddenOnScroll={true}
+                            />
+                        </View>
 
-
-                        <FlatList
-                            refreshControl={
-                                <RefreshControl refreshing={refreshing} onRefresh={onRefresh}/>
-                            }
-                            onEndReached={() => onEndReached()}
-                            data={groupedPhotos}
-                            renderItem={({item}) =>
-                                <SectionItem
-                                    group={item}
-                                    selected={selected}
-                                    select={(item) => {
-                                        if (selected.length === 5) {
-                                            ToastAndroid.show("No more that 5 images", ToastAndroid.SHORT)
-                                            return
-                                        }
-
-                                        // if(selected.length === 0){
-                                        //     height.value = withTiming(40, {duration: 1000})
-                                        // }
-
-                                        setSelected(prevValue => {
-                                            return [
-                                                ...prevValue,
-                                                item
-                                            ]
-                                        })
-                                    }}
-                                    unselect={(item) => {
-                                        // if(selected.length === 1){
-                                        //     height.value = withTiming(0, {duration: 1000})
-                                        // }
-
-                                        setSelected(prevValue =>
-                                            prevValue.filter(i => i.node.id !== item.node.id))
-                                    }}
-                                />
-                            }
-                            keyExtractor={(item, index) => item.date}
-                        />
-
-                        <View
-                            style={{backgroundColor: colors.background}}
-                            className={"h-[65px] items-center justify-between flex-row px-5"}>
+                        <Animated.View
+                            style={[{backgroundColor: 'transparent'}, animatedButton]}
+                            className={"items-center justify-center flex-row px-5"}>
                             <Button
                                 onPress={() =>
                                     navigateToCreate()
                                 }
                                 title="Next"
                                 buttonStyle={{
+                                    paddingHorizontal: 80,
                                     backgroundColor: colors.main,
-                                    padding: 10,
-                                    borderRadius: 10,
+                                    padding: 5,
+                                    borderRadius: 5,
                                 }}
                                 titleStyle={{
-                                    fontSize: 20,
+                                    fontFamily: 'AveriaSansLibre_Regular',
+                                    fontSize: 25,
                                     color: colors.background
                                 }}
                                 containerStyle={{
@@ -352,7 +433,9 @@ const Post = () => {
                                     marginLeft: 5
                                 }}
                             />
-                        </View>
+
+                        </Animated.View>
+
                     </View>
             }
         </>
