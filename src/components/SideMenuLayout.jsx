@@ -1,6 +1,6 @@
 import React, {memo, useContext, useEffect, useState} from 'react';
 import {
-    Animated,
+
     Text,
     Image,
     TouchableNativeFeedback,
@@ -12,7 +12,7 @@ import {getUser, getUserData} from "../api/userAPI";
 import {FontAwesomeIcon} from "@fortawesome/react-native-fontawesome";
 import {
     faArrowRightFromBracket,
-    faChevronRight, faGear,
+    faChevronRight, faGear, faMoon,
     faSun,
     faUserGear,
     faX
@@ -20,6 +20,17 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {useIsFocused, useNavigation} from "@react-navigation/native";
 import ThemeContext from "../context/ThemeProvider";
+import Animated, {
+    interpolateColor,
+    runOnJS,
+    runOnUI,
+    useAnimatedStyle,
+    useSharedValue,
+    withRepeat, withSequence,
+    withSpring,
+    withTiming
+} from "react-native-reanimated";
+import {colors as initialColors} from './../consts/colors'
 
 
 const SideMenuLayout = ({onClose, logOut}) => {
@@ -35,11 +46,64 @@ const SideMenuLayout = ({onClose, logOut}) => {
     const [isNetworkError, setIsNetworkError] = useState(false);
     const isFocused = useIsFocused()
     const {theme, colors, toggleTheme} = useContext(ThemeContext)
+    const rotation = useSharedValue(theme === 'dark' ? 0 : 180)
+    const distance = useSharedValue(120)
+    const progress = useSharedValue(theme === 'dark' ? 1 : 0)
+
+    const animatedStyles = useAnimatedStyle(() => ({
+        transform: [{rotate: rotation.value + 'deg'}, {translateY: 0}],
+    }));
+
+    const animatedDistance = useAnimatedStyle(() => ({
+        height: distance.value
+    }))
+
+    const animatedColor = useAnimatedStyle(() => ({
+        backgroundColor: interpolateColor(
+            progress.value,
+            [0, 1],
+            [initialColors.light.secondary, initialColors.dark.secondary]
+        ),
+    }))
 
 
-    function changeTheme(){
-        if (theme === 'dark') toggleTheme('light')
-        else if (theme === 'light') toggleTheme('dark')
+    function changeTheme(type) {
+        if (type === 'dark') {
+            distance.value =withSequence(
+                withTiming(150, {duration: 500}),
+                withTiming(120, {duration: 500})
+            )
+
+            rotation.value = withSpring(0, {
+                duration: 1000,
+                dampingRatio: 1.5,
+                stiffness: 100
+            }, () => {
+                progress.value = withTiming(1, {duration: 500}, () => {
+                    runOnJS(toggleTheme)('dark')
+                })
+            })
+
+
+
+        } else if (type === 'light') {
+
+            distance.value =withSequence(
+                withTiming(150, {duration: 500}),
+                withTiming(120, {duration: 500})
+            )
+            rotation.value = withSpring(180, {
+                duration: 1000,
+                dampingRatio: 1.5,
+                stiffness: 100
+            }, () => {
+                progress.value = withTiming(0, {duration: 500}, () => {
+                    runOnJS(toggleTheme)('light')
+                })
+            })
+
+
+        }
     }
 
 
@@ -87,7 +151,7 @@ const SideMenuLayout = ({onClose, logOut}) => {
     return (
         <View>
             <TouchableWithoutFeedback>
-                <View className={`h-full w-full`} style={{backgroundColor: colors.secondary}}>
+                <Animated.View className={`h-full w-full`} style={[{}, animatedColor]}>
                     <View className='flex-row justify-end'>
                         <TouchableOpacity onPress={onClose}>
                             <View className='pt-3 pr-3'>
@@ -167,7 +231,7 @@ const SideMenuLayout = ({onClose, logOut}) => {
                                             style={{color: colors.main_contrast}}
                                             className={`ml-4 font-averia_r text-2xl`}>Settings</Text>
                                     </View>
-                                    <FontAwesomeIcon size={20} icon={faChevronRight}  color={colors.main_contrast}/>
+                                    <FontAwesomeIcon size={20} icon={faChevronRight} color={colors.main_contrast}/>
                                 </View>
                             </TouchableNativeFeedback>
                         </View>
@@ -187,7 +251,7 @@ const SideMenuLayout = ({onClose, logOut}) => {
                                                 className={`ml-4 font-averia_r text-2xl`}
                                             >Log out</Text>
                                         </View>
-                                        <FontAwesomeIcon size={20} icon={faChevronRight}  color={colors.main_contrast}/>
+                                        <FontAwesomeIcon size={20} icon={faChevronRight} color={colors.main_contrast}/>
                                     </View>
                                 </TouchableNativeFeedback>
                                 :
@@ -204,21 +268,36 @@ const SideMenuLayout = ({onClose, logOut}) => {
                                                 className={`ml-4 font-averia_r text-2xl`}
                                             >Log In / Sign Up</Text>
                                         </View>
-                                        <FontAwesomeIcon size={20} icon={faChevronRight}  color={colors.main_contrast}/>
+                                        <FontAwesomeIcon size={20} icon={faChevronRight} color={colors.main_contrast}/>
                                     </View>
                                 </TouchableNativeFeedback>
                         }
 
-                        <View className='flex-row justify-center'>
-                            <TouchableOpacity onPress={() => changeTheme()}>
+                    </View>
+
+                    <View style={{transform: [{translateY: 140}]}}>
+                        <Animated.View className='flex-col w-full justify-center items-center'
+                                       style={[{
+                                           transformOrigin: 'center'
+                                       }, animatedStyles]}>
+                            <TouchableOpacity onPress={() => {
+                                changeTheme('light')
+                            }}>
                                 <View>
-                                    <FontAwesomeIcon icon={faSun} size={40}  color={colors.main_contrast}/>
+                                    <FontAwesomeIcon icon={faSun} size={40} color={colors.main_contrast}/>
                                 </View>
                             </TouchableOpacity>
-                        </View>
-
+                            <Animated.View style={[{}, animatedDistance]}/>
+                            <TouchableOpacity onPress={() => changeTheme('dark')}>
+                                <View style={{transform: [{rotate: '180deg'}]}}>
+                                    <FontAwesomeIcon icon={faMoon} size={40} color={colors.main_contrast}/>
+                                </View>
+                            </TouchableOpacity>
+                        </Animated.View>
                     </View>
-                </View>
+
+                </Animated.View>
+
 
             </TouchableWithoutFeedback>
         </View>
