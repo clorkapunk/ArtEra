@@ -10,7 +10,8 @@ import {
     View
 } from "react-native";
 import {FontAwesomeIcon} from "@fortawesome/react-native-fontawesome";
-import {faArrowLeft, faComment, faHeart as faHeartFull, faHeart, faPaperPlane} from "@fortawesome/free-solid-svg-icons";
+import {faComment, faHeart, faPaperPlane} from "@fortawesome/free-regular-svg-icons";
+import {faHeart as faHeartFull, faArrowLeft} from "@fortawesome/free-solid-svg-icons";
 import {getCommentsByPost, getReactionsByPost, sendCommentToPost, sendLikeToPost} from "../api/ContentAPI";
 import {getUser, getUserData} from "../api/userAPI";
 import {SafeAreaView} from "react-native-safe-area-context";
@@ -22,10 +23,19 @@ import SkeletonView from "../components/SkeletonView";
 import {s} from "react-native-wind";
 import ThemeContext from "../context/ThemeProvider";
 import ErrorScreens from "../components/ErrorScreens";
+import Animated, {
+    Easing,
+    ReduceMotion,
+    useAnimatedStyle,
+    useSharedValue,
+    withSequence,
+    withTiming
+} from "react-native-reanimated";
 
 const CommentSheetFooter = ({postId, update}) => {
     const [input, setInput] = useState("");
     const {colors} = useContext(ThemeContext)
+
 
 
     function sendComment(postId, text) {
@@ -81,7 +91,7 @@ const CommentSheetFooter = ({postId, update}) => {
                 }}
                 inputStyle={{
                     color: colors.main,
-                    fontFamily: 'AveriaSerifLibre_Regular',
+                    fontFamily: 'AveriaSansLibre_Regular',
                     ...s`text-base`
                 }}
 
@@ -223,6 +233,11 @@ const PostScreen = ({route}) => {
     const [isUserLoaded, setIsUserLoaded] = useState(true)
     const [refreshing, setRefreshing] = useState(false)
     const [swiperAspectRatio, setSwiperAspectRatio] = useState(0.75)
+    const likeScale = useSharedValue(1)
+
+    const animatedLike = useAnimatedStyle(() => ({
+        transform: [{scale: likeScale.value}]
+    }))
 
     async function minAspectRatio(images) {
         setIsImageReady(false)
@@ -240,6 +255,19 @@ const PostScreen = ({route}) => {
     }
 
     function setLike() {
+        likeScale.value = withSequence(
+            withTiming(1.5, {
+                duration: 200,
+                easing: Easing.inOut(Easing.back(3)),
+                reduceMotion: ReduceMotion.System,
+            }),
+            withTiming(1, {
+                duration: 700,
+                easing: Easing.inOut(Easing.back(3)),
+                reduceMotion: ReduceMotion.System,
+            }),
+        )
+
         getUser()
             .then(user => {
                 sendLikeToPost(item.id, user.id)
@@ -484,11 +512,14 @@ const PostScreen = ({route}) => {
                                         onPress={() => setLike()}
                                     >
                                         <View className='px-3 py-2 flex-row items-center justify-end'>
-                                            <FontAwesomeIcon
-                                                size={25}
-                                                icon={reactions.isLiked ? faHeartFull : faHeart}
-                                                color={reactions.isLiked ? colors.primary : colors.main}
-                                            />
+                                            <Animated.View style={[animatedLike]}>
+                                                <FontAwesomeIcon
+                                                    size={25}
+                                                    icon={reactions.isLiked ? faHeartFull : faHeart}
+                                                    color={reactions.isLiked ? colors.primary : colors.main}
+                                                />
+                                            </Animated.View>
+
                                             <Text
                                                 style={{color: colors.main}}
                                                 className={`text-xl font-averia_b ml-2`}
@@ -531,7 +562,9 @@ const PostScreen = ({route}) => {
                                         (
                                             commentsData.length === 0 ?
                                                 <View className='m-3'>
-                                                    <Text className='text-center'>No comments</Text>
+                                                    <Text
+                                                        style={{color: colors.main}}
+                                                        className='text-center text-lg font-averia_r'>No comments</Text>
                                                 </View>
                                                 :
                                                 <FlatList

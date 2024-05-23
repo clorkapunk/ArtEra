@@ -19,6 +19,14 @@ import SkeletonView from "./SkeletonView";
 import Swiper from 'react-native-swiper'
 import ImageSize from 'react-native-image-size'
 import ThemeContext from "../context/ThemeProvider";
+import Animated, {
+    Easing,
+    ReduceMotion,
+    useAnimatedStyle,
+    useSharedValue,
+    withSequence,
+    withTiming
+} from "react-native-reanimated";
 
 const ListItem = ({item, openCommentSheet, commentSheetState}) => {
     const navigation = useNavigation()
@@ -40,6 +48,11 @@ const ListItem = ({item, openCommentSheet, commentSheetState}) => {
     const [isUserLoaded, setIsUserLoaded] = useState(false)
     const [isImageReady, setIsImageReady] = useState(false)
     const [swiperAspectRatio, setSwiperAspectRatio] = useState(0.75)
+    const likeScale = useSharedValue(1)
+
+    const animatedLike = useAnimatedStyle(() => ({
+        transform: [{scale: likeScale.value}]
+    }))
 
     async function minAspectRatio(images) {
         setIsImageReady(false)
@@ -48,7 +61,7 @@ const ListItem = ({item, openCommentSheet, commentSheetState}) => {
         for (let i = 0; i < images.length; i++) {
             let {width, height} = await ImageSize.getSize(images[i].image)
             if ((width / height) < swiper) swiper = (width / height) < 0.75 ? 0.75 :
-                ((width + width * 0.055 ) / height)
+                ((width + width * 0.055) / height)
         }
         setSwiperAspectRatio(swiper)
         setTimeout(() => {
@@ -80,6 +93,20 @@ const ListItem = ({item, openCommentSheet, commentSheetState}) => {
     }
 
     function setLike() {
+
+        likeScale.value = withSequence(
+            withTiming(1.5, {
+                duration: 200,
+                easing: Easing.inOut(Easing.back(3)),
+                reduceMotion: ReduceMotion.System,
+            }),
+            withTiming(1, {
+                duration: 700,
+                easing: Easing.inOut(Easing.back(3)),
+                reduceMotion: ReduceMotion.System,
+            }),
+        )
+
         getUser()
             .then(user => {
                 sendLikeToPost(item.id, user.id)
@@ -262,11 +289,13 @@ const ListItem = ({item, openCommentSheet, commentSheetState}) => {
                     onPress={() => setLike()}
                 >
                     <View className='px-3 py-2 flex-row items-center justify-end'>
-                        <FontAwesomeIcon
-                            size={25}
-                            icon={reactions.isLiked ? faHeartFull : faHeart}
-                            color={reactions.isLiked ? colors.primary : colors.main}
-                        />
+                        <Animated.View style={[{}, animatedLike]}>
+                            <FontAwesomeIcon
+                                size={25}
+                                icon={reactions.isLiked ? faHeartFull : faHeart}
+                                color={reactions.isLiked ? colors.primary : colors.main}
+                            />
+                        </Animated.View>
                         <Text
                             style={{color: colors.main}}
                             className={`text-xl font-averia_b ml-2`}
@@ -317,7 +346,7 @@ const ListItem = ({item, openCommentSheet, commentSheetState}) => {
                     inputContainerStyle={{...s`border-b`, borderColor: colors.main}}
                     placeholderTextColor={colors.placeholder}
                     inputStyle={{
-                        fontFamily: 'AveriaSerifLibre_Regular',
+                        fontFamily: 'AveriaSansLibre_Regular',
                         color: colors.main,
                         ...s`text-lg py-0`
                     }}
