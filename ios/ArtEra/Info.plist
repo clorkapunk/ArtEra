@@ -55,6 +55,12 @@
 		<string>AveriaSerifLibre_Light.ttf</string>
 		<string>AveriaSerifLibre_LightItalic.ttf</string>
 		<string>AveriaSerifLibre_Regular.ttf</string>
+		<string>AveriaSansLibre_Bold.ttf</string>
+		<string>AveriaSansLibre_BoldItalic.ttf</string>
+		<string>AveriaSansLibre_Italic.ttf</string>
+		<string>AveriaSansLibre_Light.ttf</string>
+		<string>AveriaSansLibre_LightItalic.ttf</string>
+		<string>AveriaSansLibre_Regular.ttf</string>
 	</array>
 </dict>
 </plist>
