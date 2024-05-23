@@ -4,7 +4,15 @@ import Home from "./Home";
 import {View, Text} from "react-native";
 import {FontAwesomeIcon} from "@fortawesome/react-native-fontawesome";
 import Header from "../../components/Header";
-import {faHome, faMessage, faSearch, faSquarePlus, faSquareXmark, faUser} from "@fortawesome/free-solid-svg-icons";
+import {
+    faHome,
+    faImage,
+    faMessage,
+    faSearch,
+    faSquarePlus,
+    faSquareXmark,
+    faUser
+} from "@fortawesome/free-solid-svg-icons";
 import Search from "./Search";
 import Profile from "./Profile";
 import {PortalProvider} from "@gorhom/portal";
@@ -33,7 +41,7 @@ const TabIcon = ({icon, color, textColor, name, focused, size = 20, style}) => {
             {
                 focused &&
                 <Text style={{color: textColor,
-                    fontFamily: 'AveriaSerifLibre_Bold'}}>
+                    fontFamily: 'AveriaSansLibre_Bold'}}>
                     {name}
                 </Text>
             }
@@ -155,7 +163,7 @@ const TabsLayout = () => {
                                 tabBarHideOnKeyboard: true,
                                 tabBarIcon: ({color, focused}) => (
                                     <TabIcon
-                                        icon={faMessage}
+                                        icon={faImage}
                                         color={color}
                                         textColor={colors.main_contrast}
                                         name="Generate"

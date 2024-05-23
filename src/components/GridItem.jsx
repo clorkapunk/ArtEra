@@ -7,7 +7,7 @@ import {faTrash, faX} from "@fortawesome/free-solid-svg-icons";
 import ThemeContext from "../context/ThemeProvider";
 import {deletePost} from "../api/ContentAPI";
 
-const GridItem = ({item, update}) => {
+const GridItem = ({item, type, update}) => {
     const navigation = useNavigation()
     const [aspectRatio, setAspectRatio] = useState(1)
     const route = useRoute();
@@ -32,6 +32,7 @@ const GridItem = ({item, update}) => {
 
     function onLongPress() {
         if(route.name !== 'profile') return
+        if(type === 'favorites') return
         if (menuOffset.value === 0) menuOffset.value = withTiming(-menuHeight, {duration: 1000})
         else menuOffset.value = withTiming(0, {duration: 1000})
     }
@@ -56,21 +57,21 @@ const GridItem = ({item, update}) => {
             </TouchableOpacity>
 
 
-            <Animated.View style={[{backgroundColor: colors.primary, height: menuHeight}, animatedStyles]}
-                           className='p-3 mx-0.5 absolute flex-row items-center justify-center'>
+            <Animated.View style={[{backgroundColor: colors.secondary, height: menuHeight}, animatedStyles]}
+                           className=' mx-0.5 absolute flex-row items-center justify-center'>
                 <View className='w-full flex-row justify-between'>
                     <View>
                         <TouchableOpacity onPress={() => {
                             menuOffset.value = withTiming(-menuHeight, {duration: 1000})
                         }}>
-                            <View>
-                                <FontAwesomeIcon icon={faX} color={colors.main}/>
+                            <View className='p-3'>
+                                <FontAwesomeIcon icon={faX} color={colors.main_contrast}/>
                             </View>
                         </TouchableOpacity>
                     </View>
                     <View>
                         <TouchableOpacity onPress={() => onDelete()}>
-                            <View>
+                            <View className='p-3'>
                                 <FontAwesomeIcon icon={faTrash} color={colors.errorRed}/>
                             </View>
                         </TouchableOpacity>

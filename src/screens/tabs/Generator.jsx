@@ -148,6 +148,7 @@ const Generator = () => {
                 screen: 'post-create', params: {
                     images: [{
                         node: {
+                            id: 801,
                             image: {
                                 uri: imageUri
                             }
@@ -202,7 +203,7 @@ const Generator = () => {
                                     <Image
                                         resizeMode={'cover'}
                                         style={{flex: 1, width: '100%', aspectRatio: 1,
-                                            backgroundColor: colors.background}}
+                                            backgroundColor: 'white'}}
                                         source={imageUri !== null ? {uri: imageUri} : statusImage}
                                     />
                             }
@@ -237,11 +238,12 @@ const Generator = () => {
                                 inputContainerStyle={{...s`border-b`, borderColor: colors.main}}
                                 placeholderTextColor={colors.placeholder}
                                 inputStyle={{
-                                    fontFamily: 'AveriaSerifLibre_Regular',
+                                    fontFamily: 'AveriaSansLibre_Regular',
                                     color: colors.main,
                                     ...s`text-2xl py-0`
                                 }}
                                 errorStyle={{
+                                    fontFamily: 'AveriaSansLibre_Regular',
                                     color: colors.errorRed
                                 }}
                                 iconContainerStyle={{}}
@@ -249,7 +251,8 @@ const Generator = () => {
                             />
                             <View className='mt-5'>
                                 <Text
-                                    className={'text-2xl font-averia_b ml-2 text-generator-slider-text'}
+                                    style={{color: colors.main}}
+                                    className={'text-2xl font-averia_b ml-2'}
                                 >Number of steps: {form.steps}</Text>
                                 <Slider
                                     value={form.steps}
@@ -277,7 +280,7 @@ const Generator = () => {
                                 <Button
                                     title={"Generate image"}
                                     titleStyle={{
-                                        fontFamily: 'AveriaSerifLibre_Regular',
+                                        fontFamily: 'AveriaSansLibre_Regular',
                                         color: colors.background,
                                         ...s`text-xl`
                                     }}
@@ -294,7 +297,7 @@ const Generator = () => {
                                     title={"Create post"}
                                     onPress={() => navigateToCreate()}
                                     titleStyle={{
-                                        fontFamily: 'AveriaSerifLibre_Regular',
+                                        fontFamily: 'AveriaSansLibre_Regular',
                                         color: colors.background,
                                         ...s`text-xl`
                                     }}

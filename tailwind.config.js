@@ -11,12 +11,12 @@ module.exports = {
                 ...colors
             },
             fontFamily: {
-                averia_b: ["AveriaSerifLibre_Bold"],
-                averia_bi: ["AveriaSerifLibre_BoldItalic"],
-                averia_i: ["AveriaSerifLibre_Italic"],
-                averia_l: ["AveriaSerifLibre_Light"],
-                averia_li: ["AveriaSerifLibre_LightItalic"],
-                averia_r: ["AveriaSerifLibre_Regular"],
+                averia_b: ["AveriaSansLibre_Bold"],
+                averia_bi: ["AveriaSansLibre_BoldItalic"],
+                averia_i: ["AveriaSansLibre_Italic"],
+                averia_l: ["AveriaSansLibre_Light"],
+                averia_li: ["AveriaSansLibre_LightItalic"],
+                averia_r: ["AveriaSansLibre_Regular"],
             },
 
 

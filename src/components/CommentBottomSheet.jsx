@@ -99,7 +99,7 @@ const CommentSheetFooter = memo(({animatedFooterPosition, postId, updateComments
                 }}
                 inputStyle={{
                     color: colors.main,
-                    fontFamily: 'AveriaSerifLibre_Regular',
+                    fontFamily: 'AveriaSansLibre_Regular',
                     ...s`text-base`
             }}
 
@@ -114,7 +114,7 @@ const CommentSheetFooter = memo(({animatedFooterPosition, postId, updateComments
 const CommentSheetHeader = memo(() => {
     const {colors} = useContext(ThemeContext)
     return (
-        <View className="rounded-t-lg bg-red-300">
+        <View className="rounded-t-lg">
             <View className='my-2'>
                 <Text
                     style={{color: colors.main}}

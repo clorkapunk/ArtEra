@@ -146,7 +146,7 @@ const sampleListItem = (item) => {
                     inputContainerStyle={{...s`border-b`, borderColor: colors.main}}
                     placeholderTextColor={colors.placeholder}
                     inputStyle={{
-                        fontFamily: 'AveriaSerifLibre_Regular',
+                        fontFamily: 'AveriaSansLibre_Regular',
                         color: colors.main,
                         ...s`text-lg py-0`
                     }}

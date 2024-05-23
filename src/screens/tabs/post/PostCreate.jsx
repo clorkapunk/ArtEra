@@ -261,11 +261,12 @@ const PostCreate = ({route}) => {
                         inputContainerStyle={{...s`border-b`, borderColor: colors.main}}
                         placeholderTextColor={colors.placeholder}
                         inputStyle={{
-                            fontFamily: 'AveriaSerifLibre_Regular',
+                            fontFamily: 'AveriaSansLibre_Regular',
                             color: colors.main,
                             ...s`text-2xl py-0`
                         }}
                         errorStyle={{
+                            fontFamily: 'AveriaSansLibre_Regular',
                             color: colors.errorRed
                         }}
                         iconContainerStyle={{}}
@@ -280,11 +281,12 @@ const PostCreate = ({route}) => {
                         inputContainerStyle={{...s`border-b`, borderColor: colors.main}}
                         placeholderTextColor={colors.placeholder}
                         inputStyle={{
-                            fontFamily: 'AveriaSerifLibre_Regular',
+                            fontFamily: 'AveriaSansLibre_Regular',
                             color: colors.main,
                             ...s`text-2xl py-0`
                         }}
                         errorStyle={{
+                            fontFamily: 'AveriaSansLibre_Regular',
                             color: colors.errorRed
                         }}
                         iconContainerStyle={{}}
@@ -304,7 +306,7 @@ const PostCreate = ({route}) => {
                                 borderRadius: 10,
                                }}
                             titleStyle={{
-                                fontFamily: 'AveriaSerifLibre_Regular',
+                                fontFamily: 'AveriaSansLibre_Regular',
                                 fontSize: 20,
                                 color: colors.background,
                             }}
@@ -325,7 +327,7 @@ const PostCreate = ({route}) => {
 
                             }}
                             titleStyle={{
-                                fontFamily: 'AveriaSerifLibre_Regular',
+                                fontFamily: 'AveriaSansLibre_Regular',
                                 fontSize: 20,
                                 color: colors.background,
                             }}

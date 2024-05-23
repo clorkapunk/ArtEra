@@ -318,7 +318,7 @@ const ProfileUser = ({route}) => {
                                                 <Button
                                                     onPress={() => navigation.navigate('search')}
                                                     titleStyle={[s`text-xl`, {
-                                                        fontFamily: 'AveriaSerifLibre_BoldItalic',
+                                                        fontFamily: 'AveriaSansLibre_BoldItalic',
                                                         color: colors.primary
                                                     }]}
                                                     title={'Explore'}

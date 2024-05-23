@@ -83,6 +83,7 @@ const SignUp = () => {
 
     if (form.username === "") {
       errorsTemp["username"] = "Invalid nick name";
+        isValid = false
     } else {
       errorsTemp["username"] = "";
     }
@@ -99,9 +100,10 @@ const SignUp = () => {
     }
 
     if (form.password !== form.passwordRepeat) {
-      errorsTemp["passwordError"] = "Password mismatch!";
+      errorsTemp["passwordRepeat"] = "Password mismatch!";
+        isValid = false
     } else {
-      errorsTemp["passwordError"] = "";
+      errorsTemp["passwordRepeat"] = "";
     }
 
     setErrors(errorsTemp);
@@ -133,11 +135,12 @@ const SignUp = () => {
                 inputContainerStyle={{...s`border-b`, borderColor: colors.main}}
                 placeholderTextColor={colors.placeholder}
                 inputStyle={{
-                  fontFamily: 'AveriaSerifLibre_Regular',
+                  fontFamily: 'AveriaSansLibre_Regular',
                   color: colors.main,
                   ...s`text-2xl py-0`
                 }}
                 errorStyle={{
+                    fontFamily: 'AveriaSansLibre_Regular',
                   color: colors.errorRed
                 }}
                 iconContainerStyle={{}}
@@ -155,11 +158,12 @@ const SignUp = () => {
                 inputContainerStyle={{...s`border-b`, borderColor: colors.main}}
                 placeholderTextColor={colors.placeholder}
                 inputStyle={{
-                  fontFamily: 'AveriaSerifLibre_Regular',
+                  fontFamily: 'AveriaSansLibre_Regular',
                   color: colors.main,
                   ...s`text-2xl py-0`
                 }}
                 errorStyle={{
+                    fontFamily: 'AveriaSansLibre_Regular',
                   color: colors.errorRed
                 }}
                 iconContainerStyle={{}}
@@ -175,11 +179,12 @@ const SignUp = () => {
                 inputContainerStyle={{...s`border-b`, borderColor: colors.main}}
                 placeholderTextColor={colors.placeholder}
                 inputStyle={{
-                  fontFamily: 'AveriaSerifLibre_Regular',
+                  fontFamily: 'AveriaSansLibre_Regular',
                   color: colors.main,
                   ...s`text-2xl py-0`
                 }}
                 errorStyle={{
+                    fontFamily: 'AveriaSansLibre_Regular',
                   color: colors.errorRed
                 }}
                 iconContainerStyle={{}}
@@ -197,11 +202,12 @@ const SignUp = () => {
                 inputContainerStyle={{...s`border-b`, borderColor: colors.main}}
                 placeholderTextColor={colors.placeholder}
                 inputStyle={{
-                  fontFamily: 'AveriaSerifLibre_Regular',
+                  fontFamily: 'AveriaSansLibre_Regular',
                   color: colors.main,
                   ...s`text-2xl py-0`
                 }}
                 errorStyle={{
+                    fontFamily: 'AveriaSansLibre_Regular',
                   color: colors.errorRed
                 }}
                 iconContainerStyle={{}}
@@ -224,7 +230,7 @@ const SignUp = () => {
                 borderRadius: 5,
               }}
               titleStyle={{
-                fontFamily: 'AveriaSerifLibre_Regular',
+                fontFamily: 'AveriaSansLibre_Regular',
                 fontSize: 20,
                 color: colors.main
               }}
