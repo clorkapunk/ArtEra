@@ -43,6 +43,7 @@ const Profile = () => {
     const [refreshing, setRefreshing] = useState(false)
     const [isNetworkError, setIsNetworkError] = useState(false);
     const navigation = useNavigation()
+    const [onEndReachedCalled, setOnEndReachedCalled] = useState(false)
 
     function updateProfileInfo() {
         getUser()
@@ -172,7 +173,7 @@ const Profile = () => {
             return
         }
 
-        if(refreshing) return;
+        if (onEndReachedCalled === true) return;
 
         setRefreshing(true)
         setIsNetworkError(false)
@@ -209,8 +210,10 @@ const Profile = () => {
                                 results: data
                             })
                             setIsContentLoaded(true)
+                            setOnEndReachedCalled(false)
                         })
                         .catch(e => {
+                            setOnEndReachedCalled(false)
                             setIsNetworkError(true)
                             setIsContentLoaded(true)
                         })
@@ -219,10 +222,12 @@ const Profile = () => {
                         .then(data => {
                             setData(data)
                             setIsContentLoaded(true)
+                            setOnEndReachedCalled(false)
                         })
                         .catch(e => {
                             setIsNetworkError(true)
                             setIsContentLoaded(true)
+                            setOnEndReachedCalled(false)
                         })
                 }
             })
@@ -284,6 +289,7 @@ const Profile = () => {
                     <ScrollView
                         onScroll={({nativeEvent}) => {
                             if (isCloseToBottom(nativeEvent) && tab === 'arts') {
+                                setOnEndReachedCalled(true)
                                 onEndReached()
                             }
                         }}

@@ -1,8 +1,8 @@
 import axios from "axios";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 // const REACT_APP_API_URL = 'http://10.0.2.2:8000/'
-const REACT_APP_API_URL = 'http://192.168.50.171:8000/' // home lan
-// const REACT_APP_API_URL = 'http://192.168.50.104:8000/' // wi-fi
+// const REACT_APP_API_URL = 'http://192.168.50.171:8000/' // home lan
+const REACT_APP_API_URL = 'http://192.168.170.35:8000/' // wi-fi
 // const REACT_APP_API_URL = 'http://192.168.205.35:8000/'
 // const REACT_APP_API_URL = 'http://192.168.205.126:8000/' // Vlad
 

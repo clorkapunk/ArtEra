@@ -1,4 +1,4 @@
-import React, {memo, useEffect, useRef, useState} from "react";
+import React, {memo, useContext, useEffect, useRef, useState} from "react";
 import {
     ActivityIndicator,
     InteractionManager,
@@ -15,6 +15,8 @@ import SplashScreen from "react-native-splash-screen";
 import ErrorScreens from "../../components/ErrorScreens";
 import {s} from "react-native-wind";
 import SkeletonView from "../../components/SkeletonView";
+import ThemeContext from "../../context/ThemeProvider";
+import Animated, {useAnimatedStyle, useSharedValue, withTiming} from "react-native-reanimated";
 
 
 const ListItemPlaceholder = memo(() => {
@@ -93,6 +95,12 @@ const Home = () => {
         status: false
     })
     const commentSheetRef = useRef()
+    const {colors} = useContext(ThemeContext)
+    const loadingOffset = useSharedValue(50)
+
+    const animatedLoading = useAnimatedStyle(() => ({
+        transform: [{translateY: loadingOffset.value}]
+    }))
 
 
     useEffect(() => {
@@ -144,9 +152,10 @@ const Home = () => {
             return
         }
 
-        if(endReachedLoading) return;
+        if (endReachedLoading) return;
 
-        setEndReachedLoading(true)
+        loadingOffset.value = withTiming(0, {duration: 200})
+
         getPosts(data.next)
             .then(data => {
                 setData(prevState => {
@@ -158,14 +167,16 @@ const Home = () => {
                     }
                 })
                 setEndReachedLoading(false)
+                loadingOffset.value = withTiming(50, {duration: 200})
             })
             .catch((e) => {
                 setEndReachedLoading(false)
+                loadingOffset.value = withTiming(50, {duration: 200})
             });
     }
 
 
-    const _renderitem = ({item}) =>{
+    const _renderitem = ({item}) => {
 
         return (
             <ListItem
@@ -213,11 +224,12 @@ const Home = () => {
                     <>
                         <View
 
-                            style={{flex: 1, justifyContent: "flex-end"}}
+                            style={{flex: 1, justifyContent: "flex-end", position: 'relative'}}
                         >
                             <FlatList
                                 disableVirtualization={true}
                                 // initialNumToRender={5}
+                                onEndReachedThreshold={0.2}
                                 refreshControl={
                                     <RefreshControl
                                         enabled={true}
@@ -225,11 +237,40 @@ const Home = () => {
                                         onRefresh={onRefresh}
                                     />
                                 }
-                                onEndReached={() => onEndReached()}
+                                onEndReached={() => {
+                                    setEndReachedLoading(true)
+                                    onEndReached()
+                                }}
                                 data={data.results}
                                 renderItem={_renderitem}
                                 keyExtractor={(item) => item.id}
                             />
+
+                            {
+                                endReachedLoading &&
+                                <Animated.View className='flex-row justify-center w-full items-center absolute'
+                                               style={[animatedLoading, {
+                                                   backgroundColor: 'transparent',
+                                                   bottom: 0
+                                               }]}>
+                                    <ActivityIndicator
+                                        className='rounded-full'
+                                        style={{
+                                            aspectRatio: 1,
+                                            height: 'auto',
+                                            backgroundColor: colors.secondary,
+                                            borderWidth: 1,
+                                            borderColor: colors.primary,
+                                            padding: 5
+                                        }}
+                                        size={35}
+                                        color={colors.primary}
+                                    />
+                                </Animated.View>
+                            }
+
+
+
                         </View>
 
                         <CommentBottomSheet

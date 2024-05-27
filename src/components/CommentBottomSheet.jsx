@@ -22,6 +22,7 @@ import {SafeAreaView, useSafeAreaInsets} from "react-native-safe-area-context";
 import ThemeContext from "../context/ThemeProvider";
 import SkeletonView from "./SkeletonView";
 import {s} from "react-native-wind";
+import {useNavigation} from "@react-navigation/native";
 
 
 const CommentSheetBackdrop = memo(({animatedIndex, animatedPosition, style}) => {
@@ -138,6 +139,7 @@ const Comment = ({item}) => {
         avatar: 'https://m.media-amazon.com/images/S/pv-target-images/16627900db04b76fae3b64266ca161511422059cd24062fb5d900971003a0b70.jpg',
         user_background: ''
     })
+    const navigation = useNavigation()
 
     function parseDate(dateStr) {
         const date = new Date(dateStr);
@@ -184,8 +186,13 @@ const Comment = ({item}) => {
     return (
         <TouchableNativeFeedback
             background={TouchableNativeFeedback.Ripple("white", false)}
-            onPress={() => alert("good")}>
-            <View className="flex-row px-3 pt-4 pb-1" style={{flex: 1}}>
+            onPress={() => {
+                if (!isUserLoaded) return
+                navigation.navigate('profile-user', {
+                    user: user
+                })
+            }}>
+            <View className="flex-row px-3 pt-4 pb-2" style={{flex: 1}}>
                 <View style={{flex: 1}} className="mr-3 mt-1">
                     {
                         !isUserLoaded ?
@@ -317,11 +324,6 @@ const CommentBottomSheet = forwardRef(({onClose}, ref) => {
                         paddingBottom: 0,
                         borderBottomWidth: 0,
                     }}
-
-                    onChange={(index) => setSheetIndex(index)}
-                    handleComponent={() =>
-                        <CommentSheetHeader/>
-                    }
                     footerComponent={
                         ({animatedFooterPosition}) => {
                             return (
@@ -333,6 +335,11 @@ const CommentBottomSheet = forwardRef(({onClose}, ref) => {
                         }
 
                     }
+                    onChange={(index) => setSheetIndex(index)}
+                    handleComponent={() =>
+                        <CommentSheetHeader/>
+                    }
+
                     backdropComponent={(props) => <CommentSheetBackdrop {...props} />}
 
                 >
@@ -344,14 +351,16 @@ const CommentBottomSheet = forwardRef(({onClose}, ref) => {
                                         size={50}/>
                                 </View>
                                 :
-                                <BottomSheetFlatList
-                                    refreshing={false}
-                                    onRefresh={() => onRefresh()}
-                                    style={{marginBottom: 50}}
-                                    data={commentSheetData.comments}
-                                    keyExtractor={(item, index) => index}
-                                    renderItem={({item}) => <Comment item={item}/>}
-                                />
+                                <View className='flex-1' style={{marginBottom: 50+}}>
+                                    <BottomSheetFlatList
+                                        refreshing={false}
+                                        onRefresh={() => onRefresh()}
+                                        data={commentSheetData.comments}
+                                        keyExtractor={(item, index) => item.id}
+                                        renderItem={({item}) => <Comment item={item}/>}
+                                    />
+                                </View>
+
                         }
 
                     </View>

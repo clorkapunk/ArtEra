@@ -165,7 +165,7 @@ const Comment = ({item}) => {
                     user: user
                 })
             }}>
-            <View className="flex-row px-3 pt-4 pb-1" style={{flex: 1}}>
+            <View className="flex-row px-3 pt-4 pb-2" style={{flex: 1}}>
                 <View style={{flex: 1}} className="mr-3 mt-1">
                     {
                         !isUserLoaded ?

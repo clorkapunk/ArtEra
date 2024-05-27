@@ -6,7 +6,7 @@ import {
     TouchableNativeFeedback,
     TouchableWithoutFeedback,
     View,
-    TouchableOpacity, Appearance
+    TouchableOpacity, Appearance, ToastAndroid
 } from "react-native";
 import {getUser, getUserData} from "../api/userAPI";
 import {FontAwesomeIcon} from "@fortawesome/react-native-fontawesome";
@@ -31,6 +31,7 @@ import Animated, {
     withTiming
 } from "react-native-reanimated";
 import {colors as initialColors} from './../consts/colors'
+import {sendLikeToPost} from "../api/ContentAPI";
 
 
 const SideMenuLayout = ({onClose, logOut}) => {
@@ -126,8 +127,21 @@ const SideMenuLayout = ({onClose, logOut}) => {
     }
 
     function onEditProfile() {
-        onClose()
-        navigation.navigate('profile-edit')
+
+        getUser()
+            .then(user => {
+                if(user === null){
+                    ToastAndroid.show("Log in to edit your profile", ToastAndroid.SHORT)
+                    return
+                }
+                onClose()
+                navigation.navigate('profile-edit')
+            })
+            .catch(e => {
+                ToastAndroid.show("Log in to edit your profile", ToastAndroid.SHORT)
+            })
+
+
     }
 
     useEffect(() => {
