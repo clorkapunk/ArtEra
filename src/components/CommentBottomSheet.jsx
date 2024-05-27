@@ -351,7 +351,7 @@ const CommentBottomSheet = forwardRef(({onClose}, ref) => {
                                         size={50}/>
                                 </View>
                                 :
-                                <View className='flex-1' style={{marginBottom: 50+}}>
+                                <View className='flex-1' style={{marginBottom: 50}}>
                                     <BottomSheetFlatList
                                         refreshing={false}
                                         onRefresh={() => onRefresh()}
